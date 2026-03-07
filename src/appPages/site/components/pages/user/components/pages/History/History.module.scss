@@ -1,0 +1,245 @@
+.History {
+  width: 100%;
+  max-width: 880px;
+  padding: 0 0 20px;
+
+  .title {
+    margin: 0;
+    color: #0c0c0c;
+    font-family: "Inter", sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .subtitle {
+    margin: 8px 0 0;
+    color: #717171;
+    font-family: "Inter", sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 24px;
+  }
+
+  .tabs {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+
+    .tab {
+      border: none;
+      border-bottom: 3px solid transparent;
+      background: transparent;
+      color: #717171;
+      font-family: "Inter", sans-serif;
+      font-size: 20px;
+      font-weight: 300;
+      line-height: 28px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 0 4px;
+      cursor: pointer;
+
+      .tabBadge {
+        min-width: 20px;
+        height: 20px;
+        border-radius: 10px;
+        color: #717171;
+        font-family: "Inter", sans-serif;
+        font-size: 16px;
+        font-weight: 300;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 4px;
+        background: #f9f9f9;
+      }
+
+      .tabBadgeFilled {
+        background: #a73539;
+        color: #fff;
+      }
+
+      &.active {
+        color: #a73539;
+        border-bottom-color: #a73539;
+      }
+    }
+  }
+
+  .content {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .orderCard {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .orderMeta {
+    border-radius: 4px;
+    background: #fffaf5;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: center;
+    gap: 20px;
+
+    .metaItem {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      text-align: left;
+
+      span {
+        color: #0c0c0c;
+        font-family: "Inter", sans-serif;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 1;
+      }
+
+      strong {
+        color: #0c0c0c;
+        font-family: "Inter", sans-serif;
+        font-size: 28px;
+        font-weight: 300;
+        line-height: 1;
+      }
+    }
+  }
+
+  .orderItems {
+    display: flex;
+    align-items: center;
+    gap: 23px;
+
+    .item,
+    .more {
+      width: 162px;
+      height: 112px;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #d9d9d9;
+      flex-shrink: 0;
+    }
+
+    .item {
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+    }
+
+    .more {
+      color: #444;
+      font-family: "Inter", sans-serif;
+      font-size: 32px;
+      font-weight: 500;
+      line-height: 112px;
+      text-align: center;
+    }
+  }
+
+  .emptyState {
+    margin-top: 24px;
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    p {
+      margin: 0;
+      color: #717171;
+      font-family: "Inter", sans-serif;
+      font-size: 18px;
+      font-weight: 300;
+      line-height: 1.4;
+      text-align: center;
+    }
+  }
+}
+
+@media (max-width: 1200px) {
+  .History {
+    .orderItems {
+      overflow-x: auto;
+      padding-bottom: 2px;
+
+      &::-webkit-scrollbar {
+        height: 0;
+        width: 0;
+      }
+    }
+  }
+}
+
+@media (max-width: 750px) {
+  .History {
+    .title {
+      font-size: 18px;
+    }
+
+    .subtitle {
+      margin-top: 6px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .tabs {
+      margin-top: 14px;
+      gap: 16px;
+
+      .tab {
+        font-size: 16px;
+        line-height: 1.4;
+      }
+    }
+
+    .content {
+      margin-top: 20px;
+      gap: 20px;
+    }
+
+    .orderMeta {
+      grid-template-columns: 1fr;
+      gap: 12px;
+
+      .metaItem {
+        gap: 8px;
+
+        span {
+          font-size: 14px;
+        }
+
+        strong {
+          font-size: 18px;
+        }
+      }
+    }
+
+    .orderItems {
+      gap: 8px;
+
+      .item,
+      .more {
+        width: 132px;
+        height: 92px;
+      }
+
+      .more {
+        font-size: 24px;
+        line-height: 92px;
+      }
+    }
+  }
+}

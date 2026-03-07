@@ -1,0 +1,169 @@
+.HeaderProfile {
+  width: 100%;
+
+  .content {
+    .nav {
+      width: 100%;
+
+      ul {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+
+        &:first-child {
+          display: flex;
+        }
+
+        &:last-child {
+          display: none;
+        }
+
+        li {
+          width: 100%;
+
+          a {
+            display: block;
+            width: 100%;
+          }
+
+          button {
+            width: 100%;
+            height: 56px;
+            border: none;
+            border-bottom: 1px solid #a73539;
+            border-radius: 0;
+            background: transparent;
+            color: rgba(12, 12, 12, 0.3);
+            font-family: "Inter", sans-serif;
+            font-size: 20px;
+            font-weight: 400;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+
+            img {
+              width: 20px;
+              height: 20px;
+            }
+          }
+
+          button.active {
+            background: #a73539;
+            color: #fff;
+            border-radius: 2px;
+            border-bottom-color: #a73539;
+          }
+        }
+      }
+    }
+  }
+
+  .logoutOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1500;
+    background: rgba(0, 0, 0, 0.44);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .logoutModal {
+    width: min(460px, 100%);
+    border-radius: 12px;
+    border: 1px solid #e5e5e5;
+    background: #fff;
+    padding: 56px 24px 24px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+
+    p {
+      margin: 0;
+      color: #3f3f48;
+      text-align: center;
+      font-family: "Inter", sans-serif;
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 1.4;
+    }
+  }
+
+  .closeModalButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: #efefef;
+    color: #7c7c87;
+    font-family: "Inter", sans-serif;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .confirmLogoutButton {
+    width: 100%;
+    height: 52px;
+    border: none;
+    border-radius: 8px;
+    background: #a73539;
+    color: #fff;
+    font-family: "Inter", sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1;
+  }
+}
+
+@media (max-width: 750px) {
+  .HeaderProfile {
+    .content {
+      .nav {
+        ul {
+          &:first-child {
+            display: none;
+          }
+
+          &:last-child {
+            display: flex;
+          }
+
+          li {
+            button {
+              font-size: 18px;
+              height: 52px;
+              padding: 0 10px;
+            }
+          }
+        }
+      }
+    }
+
+    .logoutModal {
+      padding: 48px 16px 16px;
+      gap: 14px;
+
+      p {
+        font-size: 16px;
+      }
+    }
+
+    .confirmLogoutButton {
+      height: 48px;
+      font-size: 16px;
+    }
+  }
+}

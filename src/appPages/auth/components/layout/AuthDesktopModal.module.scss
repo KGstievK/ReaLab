@@ -1,0 +1,66 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(18, 18, 18, 0.2);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal {
+  position: relative;
+}
+
+.closeButton {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid #d3d3d3;
+  background: #fff;
+  color: #1e1d21;
+  font-size: 22px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pageOverlay {
+}
+
+.pageModal {
+}
+
+.pageCloseButton {
+}
+
+@media (max-width: 768px) {
+  .overlay {
+    display: none;
+  }
+
+  .pageOverlay {
+    position: static;
+    inset: auto;
+    z-index: auto;
+    display: block;
+    background: transparent;
+    padding: 0;
+  }
+
+  .pageModal {
+    position: static;
+  }
+
+  .pageCloseButton {
+    display: none;
+  }
+}

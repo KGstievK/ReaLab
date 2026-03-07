@@ -1,0 +1,436 @@
+.SinglePageSection {
+  width: 100%;
+  padding: 30px 0 80px;
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 19px;
+    margin-bottom: 30px;
+
+    a,
+    span {
+      margin: 0;
+      color: #a73539;
+      font-family: "Inter", sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1;
+      text-transform: none;
+      white-space: nowrap;
+    }
+  }
+
+  .content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 72px;
+    align-items: start;
+  }
+
+  .images {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 29px;
+  }
+
+  .mainImg {
+    width: 100%;
+
+    img {
+      width: 100%;
+      height: 687px;
+      object-fit: cover;
+      border-radius: 8px;
+      display: block;
+    }
+  }
+
+  .thumbnails {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 23px;
+  }
+
+  .thumbnail {
+    border: 2px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 112.8px;
+      object-fit: cover;
+      display: block;
+      border-radius: 4px;
+    }
+  }
+
+  .activeThumbnail {
+    border-color: #a73539;
+  }
+
+  .info {
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .headLine {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    h3 {
+      margin: 0;
+      color: #757575;
+      font-family: "Inter", sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.35;
+      text-transform: uppercase;
+    }
+  }
+
+  .mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+
+    h6 {
+      margin: 0;
+      color: #3e3e3e;
+      font-family: "Lato", "Inter", sans-serif;
+      font-size: 24px;
+      font-weight: 400;
+      line-height: 1.35;
+      letter-spacing: 0;
+    }
+  }
+
+  h1 {
+    margin: 0;
+    color: #a73539;
+    font-family: "Playfair Display", serif;
+    font-size: 36px;
+    font-weight: 500;
+    line-height: 1.3;
+    text-transform: uppercase;
+  }
+
+  .price {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    del {
+      color: #b4b4b4;
+      font-family: "Inter", sans-serif;
+      font-size: 24px;
+      font-weight: 500;
+      line-height: 1.35;
+      text-transform: lowercase;
+    }
+
+    h4 {
+      margin: 0;
+      color: #a73539;
+      font-family: "Inter", sans-serif;
+      font-size: 32px;
+      font-weight: 500;
+      line-height: 1.35;
+      text-transform: lowercase;
+    }
+  }
+
+  .colors,
+  .textile,
+  .quantity {
+    width: 100%;
+
+    h5,
+    h3 {
+      margin: 0 0 10px;
+      color: #a73539;
+      font-family: "Inter", sans-serif;
+      font-size: 20px;
+      font-weight: 400;
+      line-height: 1.35;
+    }
+  }
+
+  .textile {
+    h4 {
+      margin: 0;
+      color: #ba9b86;
+      font-family: "Inter", sans-serif;
+      font-size: 20px;
+      font-weight: 400;
+      line-height: 1.35;
+    }
+  }
+
+  .description {
+    p {
+      margin: 0;
+      max-width: 510px;
+      color: #b4b4b4;
+      font-family: "Inter", sans-serif;
+      font-size: 20px;
+      font-weight: 400;
+      line-height: 1.35;
+    }
+  }
+
+  .sizes {
+    width: 100%;
+  }
+
+  .error {
+    margin-top: 8px;
+    color: #cf1f2a;
+    font-size: 14px;
+    font-family: "Inter", sans-serif;
+    line-height: 1.2;
+  }
+
+  .groupOfBtn {
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    gap: 24px;
+  }
+
+  .counter {
+    border: 1px solid #a73539;
+    border-radius: 8px;
+    min-width: 168px;
+    height: 72px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    padding: 12px 8px;
+
+    button {
+      border: none;
+      background: transparent;
+      color: #a73539;
+      font-size: 32px;
+      line-height: 1;
+      width: 24px;
+      padding: 0;
+      cursor: pointer;
+
+      &:disabled,
+      &.disabledBtn {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+
+    span {
+      color: #a73539;
+      font-family: "Inter", sans-serif;
+      font-size: 24px;
+      font-weight: 500;
+      line-height: 1.35;
+    }
+  }
+
+  button.cart {
+    border: 1px solid #a73539;
+    border-radius: 8px;
+    background: #a73539;
+    color: #fff;
+    flex: 1 0 0;
+    height: 72px;
+    font-family: "Roboto", "Inter", sans-serif;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    img {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .recommendations {
+    margin-top: 150px;
+  }
+
+  .review {
+    margin-top: 40px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .SinglePageSection {
+    .content {
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+
+    .mainImg {
+      img {
+        height: 560px;
+      }
+    }
+
+    .info {
+      gap: 28px;
+    }
+
+    .groupOfBtn {
+      align-items: stretch;
+    }
+
+    .counter {
+      min-width: 190px;
+    }
+
+    .recommendations {
+      margin-top: 90px;
+    }
+  }
+}
+
+@media (max-width: 750px) {
+  .SinglePageSection {
+    padding: 12px 0 46px;
+
+    .header {
+      gap: 10px;
+      margin-bottom: 16px;
+
+      a,
+      span {
+        font-size: 11px;
+      }
+    }
+
+    .content {
+      gap: 20px;
+    }
+
+    .images {
+      gap: 10px;
+    }
+
+    .mainImg {
+      img {
+        height: 420px;
+      }
+    }
+
+    .thumbnails {
+      gap: 8px;
+
+      .thumbnail {
+        img {
+          height: 92px;
+        }
+      }
+    }
+
+    .info {
+      gap: 20px;
+    }
+
+    .headLine {
+      h3 {
+        font-size: 13px;
+      }
+    }
+
+    .mark {
+      h6 {
+        font-size: 18px;
+      }
+    }
+
+    h1 {
+      font-size: 30px;
+    }
+
+    .price {
+      del {
+        font-size: 18px;
+      }
+
+      h4 {
+        font-size: 28px;
+      }
+    }
+
+    .colors,
+    .textile,
+    .quantity {
+      h5,
+      h3 {
+        margin-bottom: 8px;
+        font-size: 18px;
+      }
+    }
+
+    .textile {
+      h4 {
+        font-size: 18px;
+      }
+    }
+
+    .description {
+      p {
+        font-size: 16px;
+      }
+    }
+
+    .groupOfBtn {
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .counter {
+      width: 100%;
+      min-width: 0;
+      height: 58px;
+      gap: 20px;
+
+      button {
+        font-size: 26px;
+      }
+
+      span {
+        font-size: 22px;
+      }
+    }
+
+    button.cart {
+      width: 100%;
+      height: 58px;
+      font-size: 18px;
+    }
+
+    .recommendations {
+      margin-top: 64px;
+    }
+
+    .review {
+      margin-top: 24px;
+    }
+  }
+}
+

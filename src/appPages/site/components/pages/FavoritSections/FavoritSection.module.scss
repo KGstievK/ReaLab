@@ -1,0 +1,299 @@
+.FavoritSection {
+  width: 100%;
+  max-width: 960px;
+  padding: 8px 0 20px;
+
+  h2 {
+    margin: 0;
+    color: #1e1d21;
+    font-family: "Inter", sans-serif;
+    font-size: 48px;
+    font-weight: 600;
+    line-height: 52px;
+  }
+
+  > p {
+    margin: 8px 0 0;
+    color: #9b9b9b;
+    font-family: "Inter", sans-serif;
+    font-size: 36px;
+    font-weight: 400;
+    line-height: 24px;
+  }
+
+  .grid {
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    align-items: start;
+  }
+
+  .card {
+    min-width: 0;
+    cursor: pointer;
+  }
+
+  .imageWrap {
+    position: relative;
+    width: 100%;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #d9d9d9;
+  }
+
+  .cardTop {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    span {
+      color: #ffffff;
+      font-family: "Inter", sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1;
+    }
+  }
+
+  .favoriteButton {
+    border: none;
+    background: transparent;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mainImage {
+    width: 100%;
+    height: 430px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .cartButton {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .cardInfo {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .category {
+    margin: 0;
+    color: #757575;
+    font-family: "Lato", sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 18px;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    margin: 0;
+    color: #3e3e3e;
+    font-family: "Playfair Display", serif;
+    font-size: 48px;
+    font-weight: 400;
+    line-height: 1.05;
+  }
+
+  .colorRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .colorDot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 1px solid #d1d1d1;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  .priceRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    span {
+      color: #121212;
+      font-family: "Inter", sans-serif;
+      font-size: 38px;
+      font-weight: 500;
+      line-height: 30px;
+    }
+
+    del {
+      color: #6c7275;
+      font-family: "Inter", sans-serif;
+      font-size: 24px;
+      font-weight: 400;
+      line-height: 26px;
+    }
+  }
+
+  .emptyState {
+    margin-top: 28px;
+    min-height: 280px;
+    border: 1px dashed #d1c7c8;
+    border-radius: 8px;
+    background: #f8f5f3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    .emptyIcon {
+      color: #b23941;
+      font-size: 56px;
+    }
+
+    p {
+      margin: 0;
+      color: #636363;
+      font-family: "Inter", sans-serif;
+      font-size: 30px;
+      font-weight: 400;
+      line-height: 24px;
+    }
+  }
+}
+
+@media (max-width: 1000px) {
+  .FavoritSection {
+    .grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+}
+
+@media (max-width: 750px) {
+  .FavoritSection {
+    max-width: 100%;
+    padding: 0 0 10px;
+
+    h2 {
+      font-size: 40px;
+      line-height: 30px;
+    }
+
+    > p {
+      margin-top: 10px;
+      font-size: 18px;
+      line-height: 22px;
+    }
+
+    .grid {
+      margin-top: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px 10px;
+    }
+
+    .mainImage {
+      height: 200px;
+    }
+
+    .cardTop {
+      top: 8px;
+      left: 8px;
+      right: 8px;
+    }
+
+    .rating {
+      span {
+        font-size: 11px;
+      }
+    }
+
+    .favoriteButton {
+      img {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .cartButton {
+      width: 26px;
+      height: 26px;
+      right: 8px;
+      bottom: 8px;
+    }
+
+    .cardInfo {
+      margin-top: 8px;
+      gap: 6px;
+    }
+
+    .category {
+      font-size: 11px;
+      line-height: 14px;
+      text-transform: none;
+    }
+
+    h3 {
+      font-size: 30px;
+      line-height: 22px;
+    }
+
+    .colorRow {
+      gap: 8px;
+    }
+
+    .colorDot {
+      width: 10px;
+      height: 10px;
+    }
+
+    .priceRow {
+      span {
+        font-size: 14px;
+        line-height: 18px;
+      }
+
+      del {
+        font-size: 12px;
+        line-height: 16px;
+      }
+    }
+
+    .emptyState {
+      margin-top: 18px;
+      min-height: 220px;
+
+      p {
+        font-size: 18px;
+        line-height: 22px;
+      }
+    }
+  }
+}

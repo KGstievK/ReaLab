@@ -1,0 +1,167 @@
+.Footer {
+  background: #202020;
+  color: #fff;
+  padding: 48px 0;
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+
+  .footerTop {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 42px;
+  }
+
+  .footerContacts {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    .footerLogo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+
+      img {
+        width: 80px;
+        height: auto;
+      }
+    }
+
+    .footerUl {
+      width: 290px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      li {
+        display: grid;
+        grid-template-columns: 67px minmax(0, 1fr);
+        gap: 4px;
+        align-items: start;
+
+        span,
+        a {
+          color: #fff;
+          font-family: "Inter", sans-serif;
+          font-size: 12px;
+          font-weight: 400;
+          line-height: 1.35;
+        }
+
+        a {
+          text-decoration: none;
+          word-break: break-word;
+        }
+      }
+    }
+  }
+
+  .navigation {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 42px;
+  }
+
+  .footerNav,
+  .footerHelp {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    h2 {
+      margin: 0;
+      color: #fff;
+      font-family: "Inter", sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    ul {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      li,
+      a {
+        color: #fff;
+        font-family: "Inter", sans-serif;
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 1.35;
+        text-decoration: none;
+      }
+    }
+  }
+
+  .Corporation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+
+    p {
+      margin: 0;
+      color: #fff;
+      font-family: "Inter", sans-serif;
+      font-size: 12px;
+      font-weight: 300;
+      line-height: 1.35;
+      text-align: center;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .Footer {
+    .footerTop {
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .navigation {
+      width: 100%;
+      justify-content: flex-start;
+      gap: 24px;
+    }
+  }
+}
+
+@media (max-width: 750px) {
+  .Footer {
+    padding: 28px 0 72px;
+
+    .content {
+      gap: 20px;
+    }
+
+    .footerContacts {
+      .footerUl {
+        width: 100%;
+
+        li {
+          grid-template-columns: 62px minmax(0, 1fr);
+        }
+      }
+    }
+
+    .navigation {
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .footerNav,
+    .footerHelp {
+      gap: 8px;
+    }
+  }
+}

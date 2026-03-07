@@ -1,0 +1,57 @@
+.CatalogSection {
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    padding-bottom: 8px;
+
+    a,
+    span {
+      color: #a73539;
+      font-size: clamp(12px, 2vw, 15px);
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    img {
+      display: none;
+    }
+  }
+
+  .title {
+    display: none;
+    color: #a73539;
+    font-size: 44px;
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+
+  .content {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 30px;
+  }
+}
+
+@media (max-width: 750px) {
+  .CatalogSection {
+    .header {
+      padding-bottom: 12px;
+      img {
+        display: none;
+      }
+    }
+
+    .title {
+      display: block;
+      font-size: 44px;
+      margin-bottom: 10px;
+    }
+  }
+}

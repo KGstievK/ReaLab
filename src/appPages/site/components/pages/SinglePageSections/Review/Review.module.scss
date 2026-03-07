@@ -1,0 +1,520 @@
+.reviewSection {
+  width: 100%;
+  padding: 0;
+
+  .content {
+    h2 {
+      margin: 0 0 40px;
+      color: #a73539;
+      font-family: "Playfair Display", serif;
+      font-size: 48px;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+  }
+
+  .reviewGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  .reviewFormBlock {
+    h3 {
+      margin: 0 0 12px;
+      color: #a73539;
+      font-family: "Inter", sans-serif;
+      font-size: 20px;
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    > p {
+      margin: 0 0 24px;
+      color: #a73539;
+      font-family: "Inter", sans-serif;
+      font-size: 18px;
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+  }
+
+  .ratingRow {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .ratingItem {
+    width: 89px;
+    border: none;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: #20283f;
+    padding: 0;
+    cursor: pointer;
+
+    span {
+      font-family: "Inter", sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1;
+      white-space: nowrap;
+    }
+  }
+
+  .activeStar,
+  .passiveStar {
+    font-size: 25px;
+  }
+
+  .activeStar {
+    color: #f3b21f;
+  }
+
+  .passiveStar {
+    color: #dadada;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 60px;
+    border: 1px solid #ba9b86;
+    border-radius: 5px;
+    background: transparent;
+    resize: vertical;
+    padding: 9px 10px;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    color: #a73539;
+    line-height: 1.35;
+
+    &::placeholder {
+      color: #a73539;
+      opacity: 0.5;
+    }
+  }
+
+  .previewPhoto {
+    width: 179px;
+    max-width: 100%;
+    position: relative;
+
+    img {
+      width: 100%;
+      height: 113px;
+      object-fit: cover;
+      border-radius: 4px;
+      display: block;
+    }
+
+    button {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 26px;
+      height: 26px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(120, 120, 128, 0.42);
+      color: rgba(60, 60, 67, 0.6);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+  }
+
+  .attachRow {
+    width: 100%;
+    border-radius: 5px;
+    background: #f8f1ec;
+    padding: 10px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .attachInfo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .attachIcon {
+    width: 66px;
+    height: 66px;
+    border-radius: 8px;
+    border: 1px solid #e2d9d1;
+    background: #f2ece7;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #8f8f8f;
+    font-size: 30px;
+    flex-shrink: 0;
+    opacity: 0.5;
+  }
+
+  .attachText {
+    min-width: 0;
+
+    h4 {
+      margin: 0 0 6px;
+      color: #20283f;
+      font-family: "Inter", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    p {
+      margin: 0;
+      color: #20283f;
+      font-family: "Inter", sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1;
+      max-width: 247px;
+    }
+  }
+
+  .chooseButton {
+    min-width: 94px;
+    height: 32px;
+    border-radius: 5px;
+    border: 1px solid #a73539;
+    background: #a73539;
+    color: #fff;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0 16px;
+  }
+
+  .submitButton {
+    width: 100%;
+    height: 62px;
+    border-radius: 8px;
+    border: 1px solid #a73539;
+    background: #a73539;
+    color: #fff;
+    font-family: "Inter", sans-serif;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .loginBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    p {
+      margin: 0;
+      color: #a73539;
+      font-family: "Inter", sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.35;
+    }
+
+    a {
+      width: 100%;
+      height: 48px;
+      border-radius: 8px;
+      background: #a73539;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Inter", sans-serif;
+      font-size: 18px;
+      font-weight: 500;
+      text-decoration: none;
+    }
+  }
+
+  .reviewComments {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .commentCard {
+    border-radius: 8px;
+    border: 1px solid #ededed;
+    background: rgba(231, 218, 207, 0.3);
+    padding: 16px;
+  }
+
+  .commentTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .author {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #d2b6a3;
+    color: #fff;
+    font-family: "Inter", sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .authorInfo {
+    h4 {
+      margin: 0 0 4px;
+      color: #0c0c0c;
+      font-family: "Inter", sans-serif;
+      font-size: 20px;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+
+    p {
+      margin: 0;
+      color: #9e9e9e;
+      font-family: "Inter", sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1;
+    }
+  }
+
+  .score {
+    min-width: 54px;
+    height: 32px;
+    border-radius: 8px;
+    background: #a73539;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-family: "Inter", sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    padding: 0 8px;
+
+    svg {
+      font-size: 14px;
+      color: #f9d54a;
+    }
+  }
+
+  .commentText {
+    margin: 0;
+    color: #0c0c0c;
+    font-family: "Inter", sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 24px;
+  }
+
+  .commentPhotos {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+
+    img {
+      width: 179px;
+      height: 113px;
+      border-radius: 4px;
+      object-fit: cover;
+      display: block;
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .reviewSection {
+    .reviewGrid {
+      grid-template-columns: 1fr;
+    }
+
+    .ratingRow {
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .ratingItem {
+      width: 20%;
+    }
+
+    .commentPhotos {
+      img {
+        width: 150px;
+        height: 100px;
+      }
+    }
+  }
+}
+
+@media (max-width: 750px) {
+  .reviewSection {
+    .content {
+      h2 {
+        margin-bottom: 20px;
+        font-size: 34px;
+      }
+    }
+
+    .reviewFormBlock {
+      h3 {
+        font-size: 18px;
+      }
+
+      > p {
+        margin-bottom: 16px;
+        font-size: 15px;
+      }
+    }
+
+    .ratingRow {
+      gap: 4px;
+    }
+
+    .ratingItem {
+      width: 20%;
+      gap: 8px;
+
+      span {
+        font-size: 10px;
+      }
+    }
+
+    .activeStar,
+    .passiveStar {
+      font-size: 20px;
+    }
+
+    textarea {
+      min-height: 54px;
+      padding: 10px;
+      font-size: 13px;
+    }
+
+    .previewPhoto {
+      width: 150px;
+
+      img {
+        height: 98px;
+      }
+    }
+
+    .attachRow {
+      padding: 8px;
+      gap: 8px;
+    }
+
+    .attachIcon {
+      width: 44px;
+      height: 44px;
+      font-size: 22px;
+    }
+
+    .attachText {
+      h4 {
+        font-size: 12px;
+        margin-bottom: 3px;
+      }
+
+      p {
+        font-size: 10px;
+      }
+    }
+
+    .chooseButton {
+      min-width: 78px;
+      height: 30px;
+      font-size: 12px;
+      padding: 0 10px;
+    }
+
+    .submitButton {
+      height: 56px;
+      font-size: 18px;
+    }
+
+    .commentCard {
+      padding: 12px;
+    }
+
+    .author {
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      font-size: 18px;
+    }
+
+    .authorInfo {
+      h4 {
+        margin-bottom: 3px;
+        font-size: 16px;
+      }
+
+      p {
+        font-size: 10px;
+      }
+    }
+
+    .score {
+      min-width: 46px;
+      height: 28px;
+      font-size: 11px;
+
+      svg {
+        font-size: 12px;
+      }
+    }
+
+    .commentText {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .commentPhotos {
+      img {
+        width: 120px;
+        height: 80px;
+      }
+    }
+  }
+}
+

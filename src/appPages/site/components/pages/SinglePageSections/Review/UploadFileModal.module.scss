@@ -1,0 +1,179 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1600;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal {
+  width: 100%;
+  max-width: 640px;
+  border-radius: 16px;
+  background: #f3f3f3;
+  border: 1px solid #dedede;
+  padding: 22px 26px 24px;
+  position: relative;
+
+  h2 {
+    margin: 0 0 16px;
+    color: #2f2f2f;
+    font-size: 45px;
+    font-weight: 600;
+    line-height: 1.1;
+    font-family: "Inter", sans-serif;
+  }
+}
+
+.close {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: #e5e5e5;
+  color: #767676;
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.dropZone {
+  width: 100%;
+  border: 2px dashed #c8575f;
+  border-radius: 12px;
+  background: transparent;
+  padding: 16px;
+  min-height: 176px;
+  margin-bottom: 14px;
+}
+
+.dropContent {
+  width: 100%;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  svg {
+    color: #b5383f;
+    font-size: 32px;
+  }
+
+  p {
+    margin: 0;
+    color: #4c4c4c;
+    font-size: 22px;
+    font-family: "Inter", sans-serif;
+    text-align: center;
+  }
+}
+
+.previewWrap {
+  width: 100%;
+  min-height: 140px;
+}
+
+.previewCanvas {
+  width: 100%;
+  height: 180px;
+  border-radius: 8px;
+  background: #ddd;
+  display: block;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+
+  label {
+    color: #333;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    display: grid;
+    gap: 4px;
+  }
+
+  input {
+    padding: 0;
+    border: none;
+    background: transparent;
+    width: 100%;
+  }
+}
+
+.error {
+  margin: 0 0 10px;
+  color: #cf1f2a;
+  font-size: 13px;
+  font-family: "Inter", sans-serif;
+}
+
+.submit {
+  width: 100%;
+  min-height: 56px;
+  border-radius: 12px;
+  border: 1px solid #b23941;
+  background: #b23941;
+  color: #fff;
+  font-size: 42px;
+  font-weight: 600;
+  line-height: 1;
+  font-family: "Inter", sans-serif;
+}
+
+@media (max-width: 750px) {
+  .modal {
+    padding: 18px 14px 16px;
+
+    h2 {
+      margin-bottom: 12px;
+      font-size: 30px;
+    }
+  }
+
+  .close {
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+    top: 14px;
+    right: 14px;
+  }
+
+  .dropZone {
+    min-height: 150px;
+    padding: 12px;
+  }
+
+  .dropContent {
+    min-height: 110px;
+
+    p {
+      font-size: 17px;
+    }
+  }
+
+  .previewCanvas {
+    height: 150px;
+  }
+
+  .submit {
+    min-height: 48px;
+    font-size: 30px;
+  }
+}

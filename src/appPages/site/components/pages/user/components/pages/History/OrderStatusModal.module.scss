@@ -1,0 +1,140 @@
+// components/OrderStatusModal.module.scss
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modalContent {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+  }
+  
+  .modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  
+    h3 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+  
+    button {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 5px;
+    }
+  }
+  
+  .statusTimeline {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    position: relative;
+  
+    &:before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 40px;
+      right: 40px;
+      height: 2px;
+      background: #E5E5E5;
+      z-index: 1;
+    }
+  }
+  
+  .timelineItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    flex: 1;
+  
+    .icon {
+      width: 24px;
+      height: 24px;
+      background: #E5E5E5;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+  
+    p {
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+    }
+  
+    &.active {
+      .icon {
+        background: var(--main-color);
+      }
+  
+      p {
+        color: var(--main-color);
+        font-weight: 500;
+      }
+    }
+  }
+  
+  .orderInfo {
+    p {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+  }
+  
+  .orderDetails {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 20px;
+  
+    div {
+      span {
+        color: var(--silver);
+        font-size: 14px;
+        display: block;
+        margin-bottom: 4px;
+      }
+  
+      p {
+        font-weight: 500;
+        font-size: 16px;
+      }
+    }
+  }
+  
+  .orderItems {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+  
+    .item {
+      img {
+        border-radius: 4px;
+        object-fit: cover;
+      }
+    }
+  }

@@ -1,0 +1,102 @@
+.modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+
+  .modalContent {
+    text-align: center;
+    background: #ffffff;
+    padding: clamp(16px, 4vw, 14px);
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    max-width: 700px;
+    width: clamp(300px, 60%, 40%);
+
+    height: auto;
+
+    margin: auto;
+    position: relative;
+
+    .close {
+      font-size: 30px;
+      position: absolute;
+      top: 20px;
+      right: 30px;
+    }
+    
+    .icon1 {
+      height: clamp(80px, 10vw, 70%);
+
+      color: #6d0d21;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      margin-bottom: clamp(10px, 4vw, 15px);
+      padding-top: 50px;
+
+      h1 {
+        font-size: clamp(1rem, 12vw, 10rem);
+      }
+
+      p {
+        text-align: center;
+        font-size: clamp(1rem, 2vw, 1.5rem);
+        margin-top: 20px;
+      }
+
+      h2 {
+        font-size: clamp(1rem, 3vw, 2rem);
+        margin-top: 40px;
+      }
+    }
+
+    .window_modal {
+      padding-block: 20px;
+      .box {
+        padding-block: 50px;
+        display: flex;
+        justify-content: space-between;
+        .block {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+          img {
+            width: 100%;
+            height: 100%;
+          }
+          h4 {
+            font-family: Avenir Next;
+            font-size: 15px;
+            font-weight: 400;
+            line-height: 20.49px;
+          }
+        }
+      }
+      a {
+        width: 400px;
+        margin-bottom: 0;
+        button {
+          padding: 10px 20px;
+          width: 98%;
+          max-width: 400px;
+          color: white;
+          margin-bottom: 0px;
+          font-weight: bold;
+          font-size: clamp(14px, 3vw, 18px);
+        }
+      }
+    }
+  }
+}
+
+

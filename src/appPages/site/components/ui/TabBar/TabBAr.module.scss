@@ -1,0 +1,84 @@
+.TabBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  background: #fff;
+  border-top: 1px solid #e0e0e0;
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+  transform: translateY(115%);
+  opacity: 0;
+  transition: transform 0.28s ease, opacity 0.28s ease;
+  pointer-events: none;
+  display: none;
+}
+
+.show {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.hide {
+  transform: translateY(115%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+}
+
+.block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  a {
+    width: 72px;
+    min-height: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #616161;
+    text-align: center;
+    border-radius: 18px;
+    gap: 2px;
+  }
+
+  .active {
+    color: #a73539;
+    background: rgba(167, 53, 57, 0.12);
+    width: 64px;
+    height: 28px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  svg {
+    align-self: center;
+    font-size: 23px;
+  }
+
+  h4 {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 15px;
+    letter-spacing: 0.2px;
+  }
+}
+
+@media (max-width: 750px) {
+  .TabBar {
+    display: block;
+  }
+}

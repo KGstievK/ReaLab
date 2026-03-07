@@ -1,0 +1,12 @@
+.LayoutPage {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 100vh;
+
+	@media (max-width: 768px) {
+		align-items: flex-start;
+		justify-content: center;
+		min-height: 100dvh;
+	}
+}

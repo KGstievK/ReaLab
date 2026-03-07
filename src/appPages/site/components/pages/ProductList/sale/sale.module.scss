@@ -1,0 +1,163 @@
+#Cards {
+  padding-bottom: 50px;
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 10px;
+
+    a {
+      color: #a73539;
+      font-size: clamp(12px, 2vw, 15px);
+      font-weight: 500;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    img {
+      display: none;
+    }
+  }
+
+  .title {
+    font-size: 48px;
+    font-weight: 500;
+    line-height: 62.4px;
+    color: #a73539;
+    margin-bottom: 20px;
+  }
+  .content {
+    display: flex;
+    align-items: start;
+    justify-content: start;
+    flex-wrap: wrap;
+    gap: 20px;
+    .card {
+      max-width: 300px;
+      width: 100%;
+      background: #fff;
+      .blockImg {
+        position: relative;
+        width: 100%;
+        .mainImg {
+          width: 100%;
+          object-fit: cover;
+          border-radius: 5px;
+          height: 380px !important;
+        }
+        .like {
+          position: absolute;
+          z-index: 12;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+          padding: 15px;
+          .star {
+            display: flex;
+            align-items: center;
+            img {
+              width: 20px;
+              object-fit: cover;
+            }
+            h6 {
+              color: #fff;
+              font-size: 18px;
+              font-weight: 400;
+            }
+          }
+          .heart {
+            cursor: pointer;
+            img {
+              width: 25px;
+              height: 25px;
+            }
+          }
+        }
+        .cart {
+          display: flex;
+          align-items: center;
+          background: #fff;
+          padding: 5px;
+          border-radius: 50%;
+          position: absolute;
+          z-index: 12;
+          bottom: 20px;
+          right: 15px;
+          cursor: pointer;
+          img {
+            width: 25px;
+          }
+        }
+      }
+
+      .blockText {
+        display: flex;
+        align-items: start;
+        justify-content: start;
+        flex-direction: column;
+        gap: 10px;
+
+        .productCategory {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+
+          h4 {
+            font-family: "Lato";
+            font-size: 20px;
+            font-weight: 400;
+            color: #757575;
+          }
+        }
+
+        h2 {
+          color: #3e3e3e;
+          font-family: "Playfair Display";
+          font-size: 30px;
+          font-weight: 400;
+        }
+        .price {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 15px;
+          width: 100%;
+
+          span {
+            font-size: 20px;
+            font-weight: 500;
+            color: #121212;
+          }
+          del {
+            color: #6c7275;
+            font-size: 18px;
+            font-weight: 400;
+          }
+          .cart {
+            background: #a73539;
+            padding: 8px;
+            width: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            button {
+              background: none;
+              border: none;
+              color: white;
+              font-size: 15px;
+              font-weight: 500;
+            }
+            img {
+              width: 15px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
