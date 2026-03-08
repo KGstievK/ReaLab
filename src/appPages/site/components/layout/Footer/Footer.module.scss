@@ -1,80 +1,79 @@
-.Footer {
+﻿.footer {
   background: #202020;
   color: #fff;
-  padding: 48px 0;
+  padding: 44px 0 32px;
 
   .content {
     display: flex;
     flex-direction: column;
-    gap: 36px;
+    gap: 34px;
   }
 
-  .footerTop {
+  .top {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 42px;
+    gap: 56px;
   }
 
-  .footerContacts {
+  .contactsBlock {
     display: flex;
     flex-direction: column;
     gap: 14px;
+  }
 
-    .footerLogo {
-      display: inline-flex;
-      align-items: center;
-      justify-content: flex-start;
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
 
-      img {
-        width: 80px;
-        height: auto;
-      }
+    img {
+      width: 80px;
+      height: auto;
     }
+  }
 
-    .footerUl {
-      width: 290px;
-      display: flex;
-      flex-direction: column;
+  .contacts {
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    li {
+      display: grid;
+      grid-template-columns: 67px minmax(0, 1fr);
+      align-items: flex-start;
       gap: 4px;
 
-      li {
-        display: grid;
-        grid-template-columns: 67px minmax(0, 1fr);
-        gap: 4px;
-        align-items: flex-start;
+      span,
+      a {
+        color: #fff;
+        font-family: "Inter", sans-serif;
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 1.4;
+      }
 
-        span,
-        a {
-          color: #fff;
-          font-family: "Inter", sans-serif;
-          font-size: 12px;
-          font-weight: 400;
-          line-height: 1.35;
-        }
-
-        a {
-          text-decoration: none;
-          word-break: break-word;
-        }
+      a {
+        text-decoration: none;
+        word-break: break-word;
       }
     }
   }
 
-  .navigation {
+  .navColumns {
     display: flex;
     align-items: flex-start;
     justify-content: flex-end;
-    gap: 42px;
+    gap: 54px;
   }
 
-  .footerNav,
-  .footerHelp {
+  .column {
     display: flex;
     flex-direction: column;
     gap: 12px;
 
-    h2 {
+    h3 {
       margin: 0;
       color: #fff;
       font-family: "Inter", sans-serif;
@@ -102,7 +101,7 @@
     }
   }
 
-  .Corporation {
+  .bottom {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -119,17 +118,20 @@
       text-align: center;
     }
   }
+
+  .mobileLogo {
+    display: none;
+  }
 }
 
 @media (max-width: 900px) {
-  .Footer {
-    .footerTop {
+  .footer {
+    .top {
       flex-direction: column;
       gap: 24px;
     }
 
-    .navigation {
-      width: 100%;
+    .navColumns {
       justify-content: flex-start;
       gap: 24px;
     }
@@ -137,31 +139,31 @@
 }
 
 @media (max-width: 750px) {
-  .Footer {
-    padding: 28px 0 72px;
+  .footer {
+    padding: 28px 0 86px;
 
-    .content {
-      gap: 20px;
+    .top {
+      display: none;
     }
 
-    .footerContacts {
-      .footerUl {
-        width: 100%;
+    .mobileLogo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
 
-        li {
-          grid-template-columns: 62px minmax(0, 1fr);
-        }
+      img {
+        width: 86px;
+        height: auto;
       }
     }
 
-    .navigation {
-      flex-direction: column;
-      gap: 18px;
-    }
+    .bottom {
+      gap: 2px;
 
-    .footerNav,
-    .footerHelp {
-      gap: 8px;
+      p {
+        font-size: 12px;
+      }
     }
   }
 }

@@ -10,7 +10,8 @@ import Link from "next/link";
 import Image from "next/image";
 import logo from "@/assets/icons/logo.svg";
 import { useRouter, useSearchParams } from "next/navigation";
-import { saveAuthTokens } from "@/utils/authStorage";
+import { clearAuthTokens, saveAuthTokens } from "@/utils/authStorage";
+import { executePendingAuthIntent } from "@/utils/authIntent";
 import { useDispatch } from "react-redux";
 import { api } from "@/redux/api";
 
@@ -36,6 +37,7 @@ const SignUpPage: FC = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const nextPath = searchParams.get("next");
   const fromPath = searchParams.get("from");
+  const intentType = searchParams.get("intent");
   const hardMode = searchParams.get("hard") === "1";
   const redirectPath =
     nextPath && nextPath.startsWith("/") && !nextPath.startsWith("/auth")
@@ -53,6 +55,10 @@ const SignUpPage: FC = () => {
       params.set("from", safeFromPath);
     }
 
+    if (intentType) {
+      params.set("intent", intentType);
+    }
+
     if (hardMode) {
       params.set("hard", "1");
     }
@@ -65,6 +71,19 @@ const SignUpPage: FC = () => {
     setRememberMe(e.target.checked);
   };
 
+  const closeAuthAndRedirect = (path: string) => {
+    router.replace(path);
+    router.refresh();
+
+    if (typeof window !== "undefined") {
+      window.setTimeout(() => {
+        if (window.location.pathname.startsWith("/auth")) {
+          window.location.replace(path);
+        }
+      }, 120);
+    }
+  };
+
   const onSubmit: SubmitHandler<SignUpProps> = async (userData) => {
     try {
       const response = await postRegisterMutation({
@@ -74,14 +93,17 @@ const SignUpPage: FC = () => {
         confirm_password: userData.confirm_password,
       }).unwrap();
 
-      if (response.access) {
+      if (response.access && rememberMe) {
         dispatch(api.util.resetApiState());
-        saveAuthTokens(response, rememberMe);
-        router.replace(redirectPath);
+        saveAuthTokens(response, true);
+        const intentPath =
+          intentType === "favorite_add" ? await executePendingAuthIntent() : null;
+        closeAuthAndRedirect(intentPath || redirectPath);
         return;
       }
 
-      router.push(authFlowPath("/auth/sign-in"));
+      clearAuthTokens();
+      router.replace(authFlowPath("/auth/sign-in"));
     } catch (error) {
       console.error("Registration failed:", error);
     }

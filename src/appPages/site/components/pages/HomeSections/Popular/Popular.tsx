@@ -1,26 +1,24 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
-import scss from "./Popular.module.scss";
 import Link from "next/link";
-import "swiper/scss";
-import "swiper/scss/pagination";
-import "swiper/scss/navigation";
-import star from "@/assets/icons/Star.svg";
-import arrow from "@/assets/icons/arrow.svg";
-import heart from "@/assets/icons/HeartStraight.svg";
-import heartRed from "@/assets/icons/red-heart-icon.svg";
+import { usePathname, useRouter } from "next/navigation";
+import { StaticImport } from "next/dist/shared/lib/get-img-props";
+import { useGetMeQuery } from "../../../../../../redux/api/auth";
 import {
   useDeleteFavoriteMutation,
   useGetAllClothesQuery,
   useGetToFavoriteQuery,
   usePostToFavoriteMutation,
 } from "../../../../../../redux/api/category";
-import { useRouter } from "next/navigation";
+import { queueFavoriteIntent } from "../../../../../../utils/authIntent";
+import bagIcon from "@/assets/icons/bag-happyBlack.svg";
+import arrow from "@/assets/icons/arrow.svg";
+import heart from "@/assets/icons/HeartStraight.svg";
+import heartRed from "@/assets/icons/red-heart-icon.svg";
+import star from "@/assets/icons/Star.svg";
 import ColorsClothes from "../../../ui/colors/Colors";
-import { StaticImport } from "next/dist/shared/lib/get-img-props";
-import { Key, useEffect, useState } from "react";
-import { useGetMeQuery } from "../../../../../../redux/api/auth";
+import scss from "./Popular.module.scss";
 
 interface ClothesItem {
   id: number;
@@ -38,57 +36,63 @@ interface ClothesItem {
   }>;
 }
 
+const POPULAR_PROMO_MARKERS = ["популяр", "popular", "рїрѕрї"]; 
+
+const hasPromo = (item: ClothesItem, markers: string[]) =>
+  item.promo_category.some((category) => {
+    const value = category.promo_category.toLowerCase().trim();
+    return markers.some((marker) => value.includes(marker));
+  });
+
 const Popular = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const { data } = useGetAllClothesQuery();
-  const [isMobile, setIsMobile] = useState(false);
   const { data: me } = useGetMeQuery();
   const currentUserId = me?.[0]?.id;
 
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 768px)");
-    const handleChange = (event: MediaQueryListEvent) => {
-      setIsMobile(event.matches);
-    };
-
-    setIsMobile(mediaQuery.matches);
-    mediaQuery.addEventListener("change", handleChange);
-
-    return () => {
-      mediaQuery.removeEventListener("change", handleChange);
-    };
-  }, []);
-
-  const popularItems = data?.filter((item) =>
-    item.promo_category.some(
-      (category: { promo_category: string }) =>
-        category.promo_category.toLowerCase() === "популярные",
-    ),
-  );
-
   const [postToFavorite] = usePostToFavoriteMutation();
   const [deleteFavorite] = useDeleteFavoriteMutation();
-  const { data: favoriteItems } = useGetToFavoriteQuery();
+  const { data: favoriteItems } = useGetToFavoriteQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
+
+  const popularItems =
+    data
+      ?.filter((item) => hasPromo(item as ClothesItem, POPULAR_PROMO_MARKERS))
+      .slice(0, 4) ?? [];
 
   const handleFavoriteClick = async (
-    e: React.MouseEvent,
+    event: React.MouseEvent,
     item: ClothesItem,
   ) => {
-    e.stopPropagation();
+    event.stopPropagation();
+
     const isFavorite = favoriteItems?.some((fav) => fav.clothes.id === item.id);
 
     try {
       if (isFavorite) {
-        const favoriteItem = favoriteItems?.find(
-          (fav) => fav.clothes.id === item.id,
-        );
+        const favoriteItem = favoriteItems?.find((fav) => fav.clothes.id === item.id);
         if (favoriteItem) {
           await deleteFavorite(favoriteItem.id).unwrap();
         }
       } else {
         if (!currentUserId) {
+          const safePathname = pathname || "/";
+          const hrefWithIntent = queueFavoriteIntent({
+            returnTo: safePathname,
+            clothes_id: item.id,
+            clothes: {
+              promo_category: item.promo_category,
+              clothes_name: item.clothes_name,
+              price: item.price,
+              size: item.size?.[0] || "",
+            },
+          });
+          router.push(hrefWithIntent);
           return;
         }
+
         await postToFavorite({
           clothes: {
             promo_category: item.promo_category,
@@ -105,114 +109,101 @@ const Popular = () => {
     }
   };
 
-  if (!popularItems || popularItems.length === 0) {
+  if (popularItems.length === 0) {
     return null;
   }
 
   return (
     <section className={scss.Popular}>
       <div className="container">
-        <div className={scss.content}>
-          <div className={scss.navigate_title}>
-            <h1 className="title">Популярные товары</h1>
-            <Link href="/popular">
-              <button>
-                Посмотреть все <Image src={arrow} alt="arrow" />
-              </button>
-            </Link>
-          </div>
-          <ul>
-            <li>туника</li>
-            <li>платье</li>
-            <li>платок</li>
-          </ul>
-          <div className={scss.cards}>
-            {popularItems?.slice(0, isMobile ? 2 : 4).map((item) => (
-              <div
-                key={item.id}
-                className={scss.card}
-                onClick={() => router.push(`/${item.id}`)}
-              >
-                <div className={scss.blockImg}>
-                  <div className={scss.like}>
-                    <div className={scss.star}>
-                      <Image
-                        width={500}
-                        height={300}
-                        layout="intrinsic"
-                        alt="photo"
-                        src={star}
-                      />
-                      <h6>{item.average_rating}</h6>
-                    </div>
-                    <div
-                      className={scss.heart}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        void handleFavoriteClick(e, item);
-                      }}
-                    >
-                      <Image
-                        width={24}
-                        height={24}
-                        src={
-                          favoriteItems?.some(
-                            (fav) => fav.clothes.id === item.id,
-                          )
-                            ? heartRed
-                            : heart
-                        }
-                        alt="heart"
-                      />
-                    </div>
+        <div className={scss.headerRow}>
+          <h2>Популярные товары</h2>
+          <Link href="/popular" className={scss.desktopMore}>
+            Посмотреть все <Image src={arrow} alt="arrow" />
+          </Link>
+        </div>
+
+        <ul className={scss.tags}>
+          <li>абайка</li>
+          <li>юбка</li>
+          <li>платье</li>
+        </ul>
+
+        <div className={scss.cards}>
+          {popularItems.map((item) => (
+            <article
+              key={item.id}
+              className={scss.card}
+              onClick={() => router.push(`/${item.id}`)}
+            >
+              <div className={scss.blockImg}>
+                <div className={scss.like}>
+                  <div className={scss.star}>
+                    <Image src={star} alt="rating" />
+                    <span>{item.average_rating}</span>
                   </div>
-                  {item.clothes_img
-                    .slice(0, 1)
-                    .map(
-                      (
-                        image: { photo: string | StaticImport },
-                        index: Key | null | undefined,
-                      ) => (
-                        <Image
-                          key={index}
-                          width={5000}
-                          height={3000}
-                          layout="intrinsic"
-                          src={image.photo}
-                          alt="photo"
-                          className={scss.mainImg}
-                        />
-                      ),
-                    )}
+
+                  <button
+                    type="button"
+                    className={scss.heart}
+                    onClick={(event) => {
+                      void handleFavoriteClick(event, item as ClothesItem);
+                    }}
+                  >
+                    <Image
+                      width={20}
+                      height={20}
+                      src={favoriteItems?.some((fav) => fav.clothes.id === item.id) ? heartRed : heart}
+                      alt="favorite"
+                    />
+                  </button>
                 </div>
-                <div className={scss.blockText}>
-                  <div className={scss.productCategory}>
-                    <h4>Product Category</h4>
-                    <div className={scss.colors}>
-                      <ColorsClothes
-                        clothesImg={item.clothes_img.slice(0, 3)}
-                      />
-                    </div>
+
+                {item.clothes_img.slice(0, 1).map((image, index) => (
+                  <Image
+                    key={index}
+                    width={1200}
+                    height={1600}
+                    src={image.photo as string | StaticImport}
+                    alt={item.clothes_name}
+                    className={scss.mainImg}
+                  />
+                ))}
+
+                <button
+                  type="button"
+                  className={scss.cartBtn}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    router.push(`/${item.id}`);
+                  }}
+                >
+                  <Image src={bagIcon} alt="go" />
+                </button>
+              </div>
+
+              <div className={scss.blockText}>
+                <div className={scss.productCategory}>
+                  <h4>PRODUCT CATEGORY</h4>
+                  <div className={scss.colors}>
+                    <ColorsClothes clothesImg={item.clothes_img.slice(0, 3)} />
                   </div>
-                  <h2>{item.clothes_name}</h2>
-                  <div className={scss.price}>
-                    <span>
-                      {Math.round(item.discount_price).toString()} cом
-                    </span>
-                    <del>{Math.round(item.price)} cом</del>
-                  </div>
+                </div>
+
+                <h3>{item.clothes_name}</h3>
+
+                <div className={scss.price}>
+                  <span>{Math.round(item.discount_price)}сом</span>
+                  <del>{Math.round(item.price)}сом</del>
                 </div>
               </div>
-            ))}
-          </div>
-          <div className={scss.navigate_mobile}>
-            <Link href="/popular">
-              <button>
-                Посмотреть все <Image src={arrow} alt="arrow" />
-              </button>
-            </Link>
-          </div>
+            </article>
+          ))}
         </div>
+
+        <Link href="/popular" className={scss.mobileMore}>
+          Посмотреть все <Image src={arrow} alt="arrow" />
+        </Link>
       </div>
     </section>
   );

@@ -1,193 +1,170 @@
-.Catalog {
-  margin-top: 130px;
-  @media (max-width: 400px) {
-    margin-top: 30px;
+﻿.catalog {
+  margin-top: 128px;
+
+  .headerRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+
+    h2 {
+      margin: 0;
+      color: #a73539;
+      font-family: "Playfair Display", serif;
+      font-size: clamp(34px, 3.5vw, 52px);
+      font-weight: 500;
+      line-height: 1.2;
+    }
   }
-  .content {
-    .navigate_title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      a {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        @media (max-width: 400px) {
-          display: none;
-        }
-        button {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          color: var(--background);
-          font-family: "iter", sans-serif;
-          font-size: 18px;
-          line-height: 18px;
-          padding: 16px 37px;
-        }
+
+  .desktopButton,
+  .mobileButton {
+    min-width: 206px;
+    height: 44px;
+    border-radius: 8px;
+    background: #a73539;
+    color: #fff;
+    font-family: "Outfit", "Inter", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 20px;
+    text-decoration: none;
+  }
+
+  .mobileButton {
+    display: none;
+  }
+
+  .grid {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr);
+    gap: 10px;
+    min-height: 560px;
+  }
+
+  .leftColumn {
+    display: grid;
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .tile {
+    position: relative;
+    border: none;
+    border-radius: 4px;
+    overflow: hidden;
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
+    min-height: 275px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.24);
+      z-index: 1;
+    }
+
+    span {
+      position: relative;
+      z-index: 2;
+      color: #fff;
+      font-family: "Playfair Display", serif;
+      font-size: clamp(34px, 3vw, 46px);
+      font-weight: 500;
+      line-height: 1;
+      padding: 0 28px;
+    }
+
+    &:hover {
+      span {
+        text-decoration: underline;
       }
     }
-    .navigate_mobile {
-      margin-top: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      a {
-        width: 100%;
+  }
+
+  .tileImage {
+    object-fit: cover;
+  }
+
+  .tunic {
+    min-height: 560px;
+    justify-content: center;
+
+    span {
+      padding: 0;
+      text-align: center;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .catalog {
+    .grid {
+      grid-template-columns: 1fr;
+      min-height: 0;
+      gap: 12px;
+    }
+
+    .leftColumn {
+      gap: 12px;
+    }
+
+    .tile,
+    .tunic {
+      min-height: 255px;
+      justify-content: flex-start;
+
+      span {
+        text-align: left;
+        padding: 0 16px;
+      }
+    }
+  }
+}
+
+@media (max-width: 750px) {
+  .catalog {
+    margin-top: 34px;
+
+    .headerRow {
+      .desktopButton {
         display: none;
-        align-items: center;
-        justify-content: flex-end;
-        @media (max-width: 400px) {
-          display: flex;
-        }
-        button {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          color: var(--background);
-          font-family: "iter", sans-serif;
-          font-size: 18px;
-          line-height: 18px;
-          padding: 16px 37px;
-        }
+      }
+
+      h2 {
+        font-size: 42px;
       }
     }
-    .catalogBlocks {
-      margin-top: 40px;
-      display: grid;
-      grid-template-columns: 59% 39%;
-      align-items: center;
-      justify-content: space-between;
-      @media (max-width: 400px) {
-        grid-template-columns: 100%;
-        height: auto;
-        gap: 22px;
+
+    .grid {
+      margin-top: 14px;
+    }
+
+    .tile,
+    .tunic {
+      min-height: 192px;
+      border-radius: 6px;
+
+      span {
+        font-size: 40px;
       }
-      h1 {
-        font-family: "Playfair Display";
-        font-size: clamp(32px, 3vw, 58px);
-        font-weight: 500;
-        color: var(--background);
-        line-height: clamp(41px, 4vw, 62px);
-        z-index: 1;
-      }
-      .catalogLeft {
-        width: 100%;
-        height: 770px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-items: space-between;
-        gap: 22px;
-        @media (max-width: 400px) {
-          grid-template-columns: 100%;
-          height: auto;
-          gap: 22px;
-        }
-        .Dresses {
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: flex-start;
-          width: 100%;
-          height: 50%;
-          background: url("../../../../../../assets/images/Catalog1.png")
-            no-repeat center / cover;
-          border-radius: 4px;
-          padding: 0 clamp(14px, 2vw, 30px);
-          transition: 0.3s;
-          cursor: pointer;
-          @media (max-width: 400px) {
-            height: 244px;
-            width: 100%;
-          }
-          &::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #00000033;
-            border-radius: 4px;
-          }
-          &:hover {
-            h1 {
-              text-decoration: underline;
-            }
-          }
-        }
-        .Hijabs {
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: flex-start;
-          width: 100%;
-          height: 50%;
-          background: url("../../../../../../assets/images/Catalog2.png")
-            no-repeat top / cover;
-          border-radius: 4px;
-          padding: 0 clamp(14px, 2vw, 30px);
-          transition: 0.3s;
-          cursor: pointer;
-          @media (max-width: 400px) {
-            height: 244px;
-            width: 100%;
-          }
-          &::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #00000033;
-            border-radius: 4px;
-          }
-          &:hover {
-            h1 {
-              text-decoration: underline;
-            }
-          }
-        }
-      }
-      .catalogRight {
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
-        background: url("../../../../../../assets/images/Catalog3.png")
-          no-repeat top / cover;
-        border-radius: 4px;
-        transition: 0.3s;
-        cursor: pointer;
-        @media (max-width: 400px) {
-          height: 244px;
-          width: 100%;
-          justify-content: flex-start;
-          padding: 14px;
-        }
-        &::before {
-          content: "";
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: #00000033;
-          z-index: 0;
-          border-radius: 4px;
-        }
-        &:hover {
-          h1 {
-            text-decoration: underline;
-          }
-        }
-      }
+    }
+
+    .mobileButton {
+      margin-top: 14px;
+      width: 100%;
+      display: inline-flex;
+      justify-content: center;
     }
   }
 }

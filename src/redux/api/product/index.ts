@@ -37,18 +37,21 @@ const api = index.injectEndpoints({
         url: `/cart/`,
         method: "GET",
       }),
+      providesTags: ["product"],
     }),
     getBasket: build.query<PRODUCT.getBasketRes, PRODUCT.getBasketReq>({
       query: () => ({
         url: `/cart_item/check/`,
         method: "GET",
       }),
+      providesTags: ["product"],
     }),
     getCartItem: build.query<PRODUCT.getCartItemRes, PRODUCT.getCartItemReq>({
       query: (id) => ({
         url: `/cart_item/${id}/`,
         method: "GET",
       }),
+      providesTags: ["product"],
     }),
     addToBasket: build.mutation<PRODUCT.addToBasketRes, PRODUCT.addToBasketReq>(
       {

@@ -1,58 +1,61 @@
-import Link from "next/link";
-import scss from "./Catalog.module.scss";
+﻿"use client";
+
 import Image from "next/image";
-import arrow from "@/assets/icons/arrow.svg";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useGetSaleContentQuery } from "../../../../../../redux/api/category";
+import arrow from "@/assets/icons/arrow.svg";
+import dressImage from "@/assets/images/Catalog1.png";
+import hijabImage from "@/assets/images/Catalog2.png";
+import tunicImage from "@/assets/images/Catalog3.png";
+import scss from "./Catalog.module.scss";
 
 const Catalog = () => {
   const router = useRouter();
-  const { data } = useGetSaleContentQuery();
 
   return (
-    <section className={scss.Catalog}>
+    <section className={scss.catalog}>
       <div className="container">
-        {data?.map((item, idx) => (
-          <div key={idx} className={scss.content}>
-            <div className={scss.navigate_title}>
-              <h1 className="title">Каталог</h1>
-              <Link href="/catalog">
-                <button>
-                  Посмотреть все <Image src={arrow} alt="arrow" />
-                </button>
-              </Link>
-            </div>
-            <div className={scss.catalogBlocks}>
-              <div className={scss.catalogLeft}>
-                <div
-                  className={scss.Dresses}
-                  onClick={() => router.push("/catalog")}
-                >
-                  <h1>Платья</h1>
-                </div>
-                <div
-                  className={scss.Hijabs}
-                  onClick={() => router.push("/catalog")}
-                >
-                  <h1>Хиджабы</h1>
-                </div>
-              </div>
-              <div
-                className={scss.catalogRight}
-                onClick={() => router.push("/catalog")}
-              >
-                <h1>Рубашки</h1>
-              </div>
-            </div>
-            <div className={scss.navigate_mobile}>
-              <Link href="/catalog">
-                <button>
-                  Каталог <Image src={arrow} alt="arrow" />
-                </button>
-              </Link>
-            </div>
+        <div className={scss.headerRow}>
+          <h2>Каталог</h2>
+          <Link href="/catalog" className={scss.desktopButton}>
+            Каталог <Image src={arrow} alt="arrow" />
+          </Link>
+        </div>
+
+        <div className={scss.grid}>
+          <div className={scss.leftColumn}>
+            <button
+              type="button"
+              className={`${scss.tile} ${scss.dress}`}
+              onClick={() => router.push("/catalog")}
+            >
+              <Image src={dressImage} alt="Платья" fill className={scss.tileImage} />
+              <span>ПЛАТЬЯ</span>
+            </button>
+
+            <button
+              type="button"
+              className={`${scss.tile} ${scss.hijab}`}
+              onClick={() => router.push("/catalog")}
+            >
+              <Image src={hijabImage} alt="Хиджабы" fill className={scss.tileImage} />
+              <span>ХИДЖАБЫ</span>
+            </button>
           </div>
-        ))}
+
+          <button
+            type="button"
+            className={`${scss.tile} ${scss.tunic}`}
+            onClick={() => router.push("/catalog")}
+          >
+            <Image src={tunicImage} alt="Туники" fill className={scss.tileImage} />
+            <span>ТУНИКИ</span>
+          </button>
+        </div>
+
+        <Link href="/catalog" className={scss.mobileButton}>
+          Каталог <Image src={arrow} alt="arrow" />
+        </Link>
       </div>
     </section>
   );

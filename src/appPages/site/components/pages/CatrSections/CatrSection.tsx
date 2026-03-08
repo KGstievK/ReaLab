@@ -50,7 +50,9 @@ const toNumber = (value: unknown) => {
 const formatSom = (value: number) => `${value.toLocaleString("ru-RU")}c`;
 
 const CatrSection = () => {
-  const { data: cart, refetch, isLoading } = useGetCartQuery();
+  const { data: cart, refetch, isLoading } = useGetCartQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
   const [basketData, setBasketData] = useState<CartItem[]>([]);
   const [updateMutation] = useUpdateBasketMutation();
   const [deleteMutation] = useDeleteBasketMutation();

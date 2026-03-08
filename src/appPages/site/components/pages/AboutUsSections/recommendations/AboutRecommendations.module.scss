@@ -1,6 +1,6 @@
-.recommendations {
-  margin-top: 72px;
-  padding: 70px 0 86px;
+﻿.recommendations {
+  margin-top: 92px;
+  padding: 74px 0 90px;
   background: #e6e1e0;
 
   .content {
@@ -41,7 +41,7 @@
       background: #a73539;
       color: #fff;
       font-family: "Inter", sans-serif;
-      font-size: 22px;
+      font-size: 14px;
       font-weight: 500;
       line-height: 1;
       display: inline-flex;
@@ -57,8 +57,9 @@
     }
 
     .desktopAction {
-      min-height: 56px;
-      padding: 0 34px;
+      min-height: 44px;
+      min-width: 206px;
+      padding: 0 20px;
     }
 
     .mobileAction {
@@ -72,7 +73,7 @@
     .cards {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 22px;
+      gap: 24px;
     }
 
     .card {
@@ -90,32 +91,37 @@
 
     .mainImage {
       width: 100%;
-      height: 430px;
+      height: 389px;
       object-fit: cover;
       display: block;
     }
 
     .cardTop {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      right: 10px;
+      top: 9px;
+      left: 0;
+      right: 8px;
       z-index: 2;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
     }
 
     .rating {
+      min-height: 32px;
+      border-radius: 0 4px 4px 0;
+      background: rgba(20, 20, 20, 0.35);
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      padding: 4px 8px;
 
       span {
         color: #fff;
-        font-family: "Inter", sans-serif;
-        font-size: 18px;
-        font-weight: 500;
+        font-family: "Outfit", "Inter", sans-serif;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1;
       }
     }
 
@@ -123,13 +129,36 @@
       border: none;
       background: transparent;
       padding: 0;
+      width: 30px;
+      height: 30px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      cursor: pointer;
+    }
+
+    .cartButton {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      width: 30px;
+      height: 30px;
+      border: none;
+      border-radius: 999px;
+      background: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+
+      img {
+        width: 16px;
+        height: 16px;
+      }
     }
 
     .cardInfo {
-      margin-top: 12px;
+      margin-top: 9px;
     }
 
     .cardMeta {
@@ -142,8 +171,9 @@
         margin: 0;
         color: #757575;
         font-family: "Lato", sans-serif;
-        font-size: 15px;
+        font-size: 10px;
         font-weight: 400;
+        text-transform: uppercase;
       }
     }
 
@@ -154,6 +184,7 @@
       font-size: 40px;
       font-weight: 400;
       line-height: 1.05;
+      text-transform: uppercase;
     }
 
     .priceBlock {
@@ -164,15 +195,33 @@
       span {
         color: #121212;
         font-family: "Inter", sans-serif;
-        font-size: 25px;
+        font-size: 14px;
         font-weight: 500;
       }
 
       del {
         color: #6c7275;
         font-family: "Inter", sans-serif;
-        font-size: 20px;
+        font-size: 14px;
         font-weight: 400;
+      }
+    }
+  }
+}
+
+@media (max-width: 1200px) {
+  .recommendations {
+    .content {
+      .cards {
+        gap: 14px;
+      }
+
+      .mainImage {
+        height: 330px;
+      }
+
+      h3 {
+        font-size: 28px;
       }
     }
   }
@@ -194,7 +243,7 @@
 
       .mobileTitle {
         display: inline;
-        font-size: 40px;
+        font-size: 42px;
       }
 
       .desktopAction {
@@ -224,6 +273,10 @@
         overflow-x: auto;
         scroll-snap-type: x mandatory;
         padding-bottom: 4px;
+
+        &::-webkit-scrollbar {
+          display: none;
+        }
       }
 
       .card {
@@ -238,13 +291,16 @@
 
       .cardTop {
         top: 7px;
-        left: 7px;
+        left: 0;
         right: 7px;
       }
 
       .rating {
+        min-height: 24px;
+        padding: 4px 7px;
+
         span {
-          font-size: 12px;
+          font-size: 11px;
         }
       }
 
@@ -252,6 +308,16 @@
         img {
           width: 16px;
           height: 16px;
+        }
+      }
+
+      .cartButton {
+        width: 24px;
+        height: 24px;
+
+        img {
+          width: 14px;
+          height: 14px;
         }
       }
 
@@ -271,12 +337,9 @@
       }
 
       .priceBlock {
-        span {
-          font-size: 20px;
-        }
-
+        span,
         del {
-          font-size: 14px;
+          font-size: 12px;
         }
       }
 
@@ -285,7 +348,7 @@
         min-height: 48px;
         margin-top: 14px;
         display: inline-flex;
-        font-size: 20px;
+        font-size: 14px;
       }
     }
   }

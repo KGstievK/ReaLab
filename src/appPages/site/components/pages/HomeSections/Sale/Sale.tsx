@@ -1,28 +1,45 @@
-import Image from "next/image";
-import scss from "./Sale.module.scss";
+﻿"use client";
+
+import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 import arrow from "@/assets/icons/arrowBlack.svg";
+import saleFallback from "@/assets/images/Sale.png";
 import { useGetSaleContentQuery } from "../../../../../../redux/api/category";
+import scss from "./Sale.module.scss";
+
+const DEFAULT_TITLE = "Скидки до 50%!";
+const DEFAULT_TEXT =
+  "Не упустите шанс! Выберите стильные модели по выгодным ценам. Акция действует ограниченное время.";
 
 const Sale = () => {
   const { data } = useGetSaleContentQuery();
+  const saleItem = data?.[0];
+
+  const title = saleItem?.title || DEFAULT_TITLE;
+  const text = saleItem?.text || DEFAULT_TEXT;
+  const imageSrc = (saleItem?.img || saleFallback) as string | StaticImageData;
+
   return (
-    <section className={scss.Sale}>
-      {data?.map((item, idx) => (
-        <div key={idx} className={scss.content}>
-          <div className={scss.SaleLeft}>
-            <img src={item.img} alt="Sale" />
-          </div>
-          <div className={scss.SaleRight}>
-            <h1 className="title">{item.title}</h1>
-            <p>{item.text}</p>
-            <Link href="/sale">
-              Подробнее
-              <Image src={arrow} alt="arrow" />
-            </Link>
-          </div>
+    <section className={scss.sale}>
+      <div className={scss.content}>
+        <div className={scss.media}>
+          <Image
+            src={imageSrc}
+            alt={title}
+            fill
+            sizes="(max-width: 750px) 100vw, 50vw"
+            className={scss.mediaImage}
+          />
         </div>
-      ))}
+
+        <div className={scss.copy}>
+          <h2>{title}</h2>
+          <p>{text}</p>
+          <Link href="/sale" className={scss.moreLink}>
+            Подробнее <Image src={arrow} alt="arrow" />
+          </Link>
+        </div>
+      </div>
     </section>
   );
 };

@@ -1,97 +1,120 @@
-.Sale {
-  margin-top: 130px;
-  width: 100%;
-  @media (max-width: 400px) {
-    margin-top: 30px;
-  }
-  .content {
-    display: grid;
-    grid-template-columns: 50% 50%;
-    height: auto;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-    @media (max-width: 400px) {
-      grid-template-columns: 100%;
-      flex-direction: column;
-    }
-    .SaleLeft {
-      width: 100%;
-      height: 650px;
+﻿.sale {
+  margin-top: 128px;
 
-      @media (max-width: 400px) {
-        height: 400px;
+  .content {
+    width: 100%;
+    min-height: 732px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .media {
+    position: relative;
+    min-height: 732px;
+  }
+
+  .mediaImage {
+    object-fit: cover;
+  }
+
+  .copy {
+    position: relative;
+    padding: 72px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 18px;
+    background: url("../../../../../../assets/images/background.jpg") no-repeat
+      center / cover;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(245, 242, 241, 0.78);
+      z-index: 0;
+    }
+
+    h2,
+    p,
+    .moreLink {
+      position: relative;
+      z-index: 1;
+      font-size: clamp(16px, 1.3vw, 32px);
+    }
+
+    h2 {
+      margin: 0;
+      color: #a73539;
+      font-family: "Playfair Display", serif;
+      font-size: clamp(36px, 3.3vw, 58px);
+      font-style: italic;
+      font-weight: 500;
+      line-height: 1.1;
+    }
+
+    p {
+      margin: 0;
+      max-width: 470px;
+      color: #1f1f1f;
+      font-family: "Inter", sans-serif;
+      font-size: clamp(16px, 1.3vw, 32px);
+      font-weight: 400;
+      line-height: 1.62;
+    }
+  }
+
+  .moreLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #101010;
+    font-family: "Outfit", "Inter", sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+  }
+}
+
+@media (max-width: 1024px) {
+  .sale {
+    .copy {
+      padding: 48px 36px;
+    }
+  }
+}
+
+@media (max-width: 750px) {
+  .sale {
+    margin-top: 34px;
+
+    .content {
+      min-height: 0;
+      grid-template-columns: 1fr;
+    }
+
+    .media {
+      min-height: 292px;
+    }
+
+    .copy {
+      align-items: center;
+      text-align: center;
+      padding: 26px 20px 28px;
+      gap: 12px;
+
+      h2 {
+        font-size: 44px;
       }
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+
+      p {
+        font-size: 16px;
+        line-height: 1.65;
       }
     }
-    .SaleRight {
-      position: relative;
-      background: url("../../../../../../assets/images/background.jpg")
-        no-repeat center / cover;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: flex-start;
+
+    .moreLink {
+      font-size: 20px;
       justify-content: center;
-      flex-direction: column;
-      padding-left: 72px;
-      gap: 16px;
-      @media (max-width: 400px) {
-        align-items: center;
-        justify-content: center;
-        padding: 10px;
-      }
-      &::before {
-        content: "";
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        background: #e9e5e4bc;
-        z-index: 0;
-      }
-      h1 {
-        font-style: italic;
-        z-index: 1;
-        @media (max-width: 400px) {
-          text-align: center;
-        }
-      }
-      p {
-        max-width: 432px;
-        width: 100%;
-        font-family: "inter", sans-serif;
-        font-size: clamp(16px, 3vw, 20px);
-        line-height: 32px;
-        font-weight: 400;
-        z-index: 1;
-        @media (max-width: 400px) {
-          max-width: 320px;
-          text-align: center;
-        }
-      }
-      a {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        gap: 10px;
-        max-width: 432px;
-        width: 100%;
-        font-family: "inter", sans-serif;
-        font-size: clamp(16px, 3vw, 20px);
-        line-height: 32px;
-        font-weight: 400;
-        z-index: 1;
-        @media (max-width: 400px) {
-          width: 110px;
-          text-align: center;
-        }
-      }
     }
   }
 }

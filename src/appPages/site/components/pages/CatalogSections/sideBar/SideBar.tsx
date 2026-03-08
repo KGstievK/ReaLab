@@ -1,27 +1,29 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { FC, useEffect, useMemo, useState } from "react";
 import arrow from "@/assets/icons/Vector (Stroke).svg";
 import filterImg from "@/assets/icons/Filter.svg";
+import { useGetAllCategoryQuery } from "../../../../../../redux/api/category";
 import Cards from "../cards/Cards";
 import scss from "./sideBar.module.scss";
 
 type SectionKeys = "type" | "price" | "size" | "color";
 
-const CATEGORY_OPTIONS = [
-  { label: "Платье", count: "99+" },
-  { label: "Абайка", count: "37" },
-  { label: "Юбка", count: "62" },
-  { label: "Платок", count: "45" },
-  { label: "Блузка", count: "28" },
+const CATEGORY_OPTIONS_FALLBACK = [
+  { label: "Платье", count: "0" },
+  { label: "Абайка", count: "0" },
+  { label: "Юбка", count: "0" },
+  { label: "Платок", count: "0" },
 ];
 
 const SIZE_OPTIONS = ["XXS", "XS", "S", "M", "L", "XL", "XXL"];
 
-const COLOR_OPTIONS = ["Черный", "Белый", "Айвори", "Зеленый", "Красный", "Коричневый"];
+const COLOR_OPTIONS = ["Чёрный", "Белый", "Айвори", "Зелёный", "Красный", "Коричневый"];
 
 const SideBar: FC = () => {
+  const { data: categoryData } = useGetAllCategoryQuery();
+
   const [category, setCategory] = useState("");
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [selectedColor, setSelectedColor] = useState<string>("");
@@ -29,6 +31,7 @@ const SideBar: FC = () => {
     min: "",
     max: "",
   });
+
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [openSections, setOpenSections] = useState<Record<SectionKeys, boolean>>({
     type: true,
@@ -36,6 +39,30 @@ const SideBar: FC = () => {
     size: true,
     color: true,
   });
+
+  const categoryOptions = useMemo(() => {
+    if (!categoryData || categoryData.length === 0) {
+      return CATEGORY_OPTIONS_FALLBACK;
+    }
+
+    return categoryData.map((item) => ({
+      label: item.category_name,
+      count: String(item.clothes_category?.length ?? 0),
+    }));
+  }, [categoryData]);
+
+  useEffect(() => {
+    if (!category) {
+      return;
+    }
+
+    const hasCurrentCategory = categoryOptions.some((item) => item.label === category);
+    if (!hasCurrentCategory) {
+      setCategory("");
+    }
+  }, [category, categoryOptions]);
+
+  const maxSliderValue = 20000;
 
   useEffect(() => {
     if (!isMobileFilterOpen) {
@@ -70,9 +97,7 @@ const SideBar: FC = () => {
     const listener = (event: MediaQueryListEvent) => handleChange(event);
     mediaQuery.addEventListener("change", listener);
 
-    return () => {
-      mediaQuery.removeEventListener("change", listener);
-    };
+    return () => mediaQuery.removeEventListener("change", listener);
   }, []);
 
   const toggleSection = (section: SectionKeys) => {
@@ -96,7 +121,7 @@ const SideBar: FC = () => {
 
   const handlePriceInputChange = (
     event: React.ChangeEvent<HTMLInputElement>,
-    type: "min" | "max"
+    type: "min" | "max",
   ) => {
     const rawValue = event.target.value.replace(/\D/g, "");
 
@@ -133,7 +158,6 @@ const SideBar: FC = () => {
     setPriceRange({ min: "", max: "" });
   };
 
-  const maxSliderValue = 20000;
   const minSliderValue = useMemo(() => {
     const parsedMin = Number(priceRange.min);
     if (Number.isFinite(parsedMin) && parsedMin > 0) {
@@ -157,7 +181,7 @@ const SideBar: FC = () => {
       left: `${minPercent}%`,
       width: `${Math.max(maxPercent - minPercent, 0)}%`,
     };
-  }, [maxPriceValue, maxSliderValue, minSliderValue]);
+  }, [maxPriceValue, minSliderValue]);
 
   const handleMinRangeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const nextMin = Math.min(Number(event.target.value), maxPriceValue);
@@ -175,20 +199,16 @@ const SideBar: FC = () => {
     }));
   };
 
-  const filterBody = (
+  const renderFilterBody = () => (
     <>
       <div className={scss.filterSection}>
-        <button
-          type="button"
-          className={scss.filterHeader}
-          onClick={() => toggleSection("type")}
-        >
+        <button type="button" className={scss.filterHeader} onClick={() => toggleSection("type")}>
           <h4>ВИД</h4>
           <Image src={arrow} alt="toggle" />
         </button>
         {openSections.type && (
           <div className={scss.filterContent}>
-            {CATEGORY_OPTIONS.map((item) => (
+            {categoryOptions.map((item) => (
               <label key={item.label} className={scss.checkboxContainer}>
                 <input
                   type="checkbox"
@@ -196,8 +216,8 @@ const SideBar: FC = () => {
                   onChange={() => handleCategoryChange(item.label)}
                 />
                 <span className={scss.customCheckbox} />
-                <span className={scss.optionLabel}><p>{item.label}</p></span>
-                <span className={scss.optionCount}><p>{item.count}</p></span>
+                <span className={scss.optionLabel}>{item.label}</span>
+                <span className={scss.optionCount}>{item.count}</span>
               </label>
             ))}
           </div>
@@ -205,11 +225,7 @@ const SideBar: FC = () => {
       </div>
 
       <div className={scss.filterSection}>
-        <button
-          type="button"
-          className={scss.filterHeader}
-          onClick={() => toggleSection("price")}
-        >
+        <button type="button" className={scss.filterHeader} onClick={() => toggleSection("price")}>
           <h4>ЦЕНА</h4>
           <Image src={arrow} alt="toggle" />
         </button>
@@ -256,25 +272,21 @@ const SideBar: FC = () => {
       </div>
 
       <div className={scss.filterSection}>
-        <button
-          type="button"
-          className={scss.filterHeader}
-          onClick={() => toggleSection("size")}
-        >
+        <button type="button" className={scss.filterHeader} onClick={() => toggleSection("size")}>
           <h4>РАЗМЕР</h4>
           <Image src={arrow} alt="toggle" />
         </button>
         {openSections.size && (
           <div className={scss.filterContent}>
-            {SIZE_OPTIONS.map((size) => (
-              <label key={size} className={scss.checkboxContainer}>
+            {SIZE_OPTIONS.map((sizeItem) => (
+              <label key={sizeItem} className={scss.checkboxContainer}>
                 <input
                   type="checkbox"
-                  checked={selectedSize === size}
-                  onChange={() => handleSizeChange(size)}
+                  checked={selectedSize === sizeItem}
+                  onChange={() => handleSizeChange(sizeItem)}
                 />
                 <span className={scss.customCheckbox} />
-                <span className={scss.optionLabel}>{size}</span>
+                <span className={scss.optionLabel}>{sizeItem}</span>
               </label>
             ))}
           </div>
@@ -287,25 +299,21 @@ const SideBar: FC = () => {
       </div>
 
       <div className={scss.filterSection}>
-        <button
-          type="button"
-          className={scss.filterHeader}
-          onClick={() => toggleSection("color")}
-        >
+        <button type="button" className={scss.filterHeader} onClick={() => toggleSection("color")}>
           <h4>ЦВЕТ</h4>
           <Image src={arrow} alt="toggle" />
         </button>
         {openSections.color && (
           <div className={scss.filterContent}>
-            {COLOR_OPTIONS.map((color) => (
-              <label key={color} className={scss.checkboxContainer}>
+            {COLOR_OPTIONS.map((colorItem) => (
+              <label key={colorItem} className={scss.checkboxContainer}>
                 <input
                   type="checkbox"
-                  checked={selectedColor === color}
-                  onChange={() => handleColorChange(color)}
+                  checked={selectedColor === colorItem}
+                  onChange={() => handleColorChange(colorItem)}
                 />
                 <span className={scss.customCheckbox} />
-                <span className={scss.optionLabel}>{color}</span>
+                <span className={scss.optionLabel}>{colorItem}</span>
               </label>
             ))}
           </div>
@@ -333,7 +341,7 @@ const SideBar: FC = () => {
         </button>
 
         <div className={scss.desktopFilter}>
-          <div className={scss.filterContainer}>{filterBody}</div>
+          <div className={scss.filterContainer}>{renderFilterBody()}</div>
         </div>
       </div>
 
@@ -341,7 +349,10 @@ const SideBar: FC = () => {
         value={category}
         size={selectedSize}
         color={selectedColor}
-        priceRange={[parseInt(priceRange.min, 10) || 0, parseInt(priceRange.max, 10) || Infinity]}
+        priceRange={[
+          parseInt(priceRange.min, 10) || 0,
+          parseInt(priceRange.max, 10) || Number.MAX_SAFE_INTEGER,
+        ]}
       />
 
       <div
@@ -368,7 +379,7 @@ const SideBar: FC = () => {
           </div>
 
           <div className={`${scss.filterContainer} ${scss.mobileFilterContainer}`}>
-            {filterBody}
+            {renderFilterBody()}
           </div>
         </div>
       </div>

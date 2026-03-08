@@ -1,14 +1,15 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import scss from "./AboutRecommendations.module.scss";
 import arrow from "@/assets/icons/arrow.svg";
 import star from "@/assets/icons/Star.svg";
 import heart from "@/assets/icons/HeartStraight.svg";
 import heartRed from "@/assets/icons/red-heart-icon.svg";
+import bagIcon from "@/assets/icons/bag-happyBlack.svg";
 import ColorsClothes from "../../../ui/colors/Colors";
 import {
   useDeleteFavoriteMutation,
@@ -17,6 +18,7 @@ import {
   usePostToFavoriteMutation,
 } from "../../../../../../redux/api/category";
 import { useGetMeQuery } from "../../../../../../redux/api/auth";
+import { queueFavoriteIntent } from "../../../../../../utils/authIntent";
 
 interface ClothesItem {
   id: number;
@@ -36,9 +38,12 @@ interface ClothesItem {
 
 const AboutRecommendations = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: clothes = [] } = useGetAllClothesQuery();
   const { data: me } = useGetMeQuery();
-  const { data: favoriteItems } = useGetToFavoriteQuery();
+  const { data: favoriteItems } = useGetToFavoriteQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
   const [postToFavorite] = usePostToFavoriteMutation();
   const [deleteFavorite] = useDeleteFavoriteMutation();
   const [isMobile, setIsMobile] = useState(false);
@@ -49,6 +54,7 @@ const AboutRecommendations = () => {
     const mediaQuery = window.matchMedia("(max-width: 750px)");
     const handleChange = (event: MediaQueryListEvent) =>
       setIsMobile(event.matches);
+
     setIsMobile(mediaQuery.matches);
     mediaQuery.addEventListener("change", handleChange);
 
@@ -150,6 +156,18 @@ const AboutRecommendations = () => {
         }
       } else {
         if (!currentUserId) {
+          const safePathname = pathname || "/about";
+          const hrefWithIntent = queueFavoriteIntent({
+            returnTo: safePathname,
+            clothes_id: item.id,
+            clothes: {
+              promo_category: item.promo_category,
+              clothes_name: item.clothes_name,
+              price: item.price,
+              size: item.size?.[0] || "",
+            },
+          });
+          router.push(hrefWithIntent);
           return;
         }
 
@@ -205,7 +223,7 @@ const AboutRecommendations = () => {
                   <div className={scss.cardTop}>
                     <div className={scss.rating}>
                       <Image src={star} alt="star" width={14} height={14} />
-                      <span>{item.average_rating || 4.95}</span>
+                      <span>{(item.average_rating || 4.95).toFixed(2)}</span>
                     </div>
 
                     <button
@@ -215,9 +233,7 @@ const AboutRecommendations = () => {
                     >
                       <Image
                         src={
-                          favoriteItems?.some(
-                            (fav) => fav.clothes.id === item.id,
-                          )
+                          favoriteItems?.some((fav) => fav.clothes.id === item.id)
                             ? heartRed
                             : heart
                         }
@@ -237,6 +253,18 @@ const AboutRecommendations = () => {
                       className={scss.mainImage}
                     />
                   )}
+
+                  <button
+                    type="button"
+                    className={scss.cartButton}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      router.push(`/${item.id}`);
+                    }}
+                    aria-label="Открыть товар"
+                  >
+                    <Image src={bagIcon} alt="cart" width={18} height={18} />
+                  </button>
                 </div>
 
                 <div className={scss.cardInfo}>

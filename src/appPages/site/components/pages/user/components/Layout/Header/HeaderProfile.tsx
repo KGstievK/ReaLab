@@ -1,4 +1,4 @@
-import { FC, MouseEvent, useEffect, useMemo, useState } from "react";
+import { FC, MouseEvent, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,6 +13,28 @@ import scss from "./HeaderProfile.module.scss";
 type TabItem = {
   label: string;
   path: string | null;
+};
+
+const LAST_PUBLIC_PATH_KEY = "jumana:last_public_path";
+
+const isSafePublicPath = (path?: string | null): path is string => {
+  if (!path || !path.startsWith("/")) {
+    return false;
+  }
+
+  const normalized = path.toLowerCase();
+  const isProfilePath =
+    normalized.startsWith("/profile") || normalized.startsWith("/profil");
+  const isFavoritePath =
+    normalized === "/favorite" || normalized.endsWith("/favorite");
+
+  return (
+    !normalized.startsWith("/auth") &&
+    !normalized.startsWith("/admin") &&
+    !normalized.startsWith("/cart") &&
+    !isProfilePath &&
+    !isFavoritePath
+  );
 };
 
 const desktopTabs: TabItem[] = [
@@ -64,11 +86,6 @@ const HeaderProfile: FC = () => {
     return pathname === path;
   };
 
-  const currentPath = useMemo(
-    () => (pathname && pathname.startsWith("/") ? pathname : "/profile"),
-    [pathname],
-  );
-
   useEffect(() => {
     if (!isLogoutModalOpen) {
       return;
@@ -99,11 +116,28 @@ const HeaderProfile: FC = () => {
     } finally {
       dispatch(api.util.resetApiState());
       clearAuthTokens();
-      const signInQuery = new URLSearchParams({
-        next: currentPath,
-        from: "/",
-      }).toString();
-      router.replace(`/auth/sign-in?${signInQuery}`);
+
+      const storedPath =
+        typeof window !== "undefined"
+          ? sessionStorage.getItem(LAST_PUBLIC_PATH_KEY)
+          : null;
+      const redirectPath = isSafePublicPath(storedPath) ? storedPath : "/";
+
+      router.replace(redirectPath);
+      router.refresh();
+
+      if (typeof window !== "undefined") {
+        window.setTimeout(() => {
+          if (
+            window.location.pathname.startsWith("/profile") ||
+            window.location.pathname.startsWith("/auth")
+          ) {
+            window.location.replace(redirectPath);
+          }
+        }, 120);
+      }
+
+      setIsLogoutSubmitting(false);
     }
   };
 

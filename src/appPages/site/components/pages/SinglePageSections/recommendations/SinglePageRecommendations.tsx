@@ -2,7 +2,7 @@
 
 import { FC, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import scss from "./SinglePageRecommendations.module.scss";
 import star from "@/assets/icons/Star.svg";
 import heart from "@/assets/icons/HeartStraight.svg";
@@ -16,6 +16,7 @@ import {
   usePostToFavoriteMutation,
 } from "../../../../../../redux/api/category";
 import { useGetMeQuery } from "../../../../../../redux/api/auth";
+import { queueFavoriteIntent } from "../../../../../../utils/authIntent";
 
 interface PromoCategoryItem {
   promo_category: string;
@@ -47,9 +48,13 @@ const SinglePageRecommendations: FC<RecommendationProps> = ({
   currentColors,
 }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: allClothes = [] } = useGetAllClothesQuery();
-  const { data: favoriteItems } = useGetToFavoriteQuery();
+  const { data: favoriteItems } = useGetToFavoriteQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
   const { data: me } = useGetMeQuery();
+  
   const [postToFavorite] = usePostToFavoriteMutation();
   const [deleteFavorite] = useDeleteFavoriteMutation();
   const [isMobile, setIsMobile] = useState(false);
@@ -160,6 +165,18 @@ const SinglePageRecommendations: FC<RecommendationProps> = ({
         }
       } else {
         if (!currentUserId) {
+          const safePathname = pathname || `/${currentProductId}`;
+          const hrefWithIntent = queueFavoriteIntent({
+            returnTo: safePathname,
+            clothes_id: item.id,
+            clothes: {
+              promo_category: item.promo_category,
+              clothes_name: item.clothes_name,
+              price: item.price,
+              size: item.size?.[0] || "",
+            },
+          });
+          router.push(hrefWithIntent);
           return;
         }
 

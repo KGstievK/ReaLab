@@ -2,7 +2,7 @@
   position: sticky;
   top: 0;
   z-index: 999;
-  height: 72px;
+  height: 66px;
   background: #fff;
   border-bottom: 1px solid rgba(175, 143, 119, 0.4);
   display: flex;
@@ -35,15 +35,15 @@
       ul {
         display: flex;
         align-items: center;
-        gap: 40px;
+        gap: 34px;
 
         li {
           a {
             color: #333;
             font-family: "Inter", sans-serif;
-            font-size: 18px;
+            font-size: 14px;
             font-weight: 500;
-            line-height: 20px;
+            line-height: 16px;
             white-space: nowrap;
           }
 
@@ -59,7 +59,7 @@
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      gap: 24px;
+      gap: 18px;
       flex-shrink: 0;
 
       a,
@@ -85,7 +85,7 @@
 
           li {
             a {
-              font-size: 16px;
+              font-size: 13px;
             }
           }
         }

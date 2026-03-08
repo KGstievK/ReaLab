@@ -82,7 +82,9 @@ const getColor = (rawColor: string) => {
 
 const Favorite = () => {
   const router = useRouter();
-  const { data } = useGetToFavoriteQuery();
+  const { data } = useGetToFavoriteQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
   const [deleteFavorite] = useDeleteFavoriteMutation();
 
   const favorites: FavoriteItem[] = Array.isArray(data)

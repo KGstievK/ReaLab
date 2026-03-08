@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import star from "@/assets/images/star.png";
 import bagSvg from "@/assets/icons/bag-happy.svg";
 import scss from "./SinglePageSection.module.scss";
@@ -14,6 +14,8 @@ import {
   useUpdateBasketMutation,
 } from "../../../../../redux/api/product";
 import { useGetClothesByIdQuery } from "../../../../../redux/api/category";
+import { getStoredAccessToken } from "../../../../../utils/authStorage";
+import { buildSignInHref } from "../../../../../utils/authIntent";
 import ColorsClothes from "../../ui/colors/Colors";
 import Sizes from "./sizes/Sizes";
 import Review from "./Review/Review";
@@ -57,6 +59,7 @@ const SinglePageSection: FC = () => {
   const [addBasketMutation] = useAddToBasketMutation();
   const [updateBasketMutation] = useUpdateBasketMutation();
   const router = useRouter();
+  const pathname = usePathname();
 
   const normalizedCart: CartData | undefined = Array.isArray(cart)
     ? cart[0]
@@ -98,6 +101,12 @@ const SinglePageSection: FC = () => {
 
   const onSubmit = async (formData: FormValues) => {
     if (!formData.color_id || !formData.size) {
+      return;
+    }
+
+    if (!getStoredAccessToken()) {
+      const safePath = pathname && pathname.startsWith("/") ? pathname : `/${id.single}`;
+      router.push(buildSignInHref(safePath, safePath));
       return;
     }
 

@@ -1,13 +1,11 @@
+﻿"use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { GoHome, GoHomeFill } from "react-icons/go";
-import {
-  HiOutlineViewGrid,
-  HiOutlineShoppingCart,
-  HiOutlineUser,
-} from "react-icons/hi";
-import { HiViewGrid, HiShoppingCart, HiUser } from "react-icons/hi";
+import { HiOutlineShoppingCart, HiOutlineUser, HiOutlineViewGrid } from "react-icons/hi";
+import { HiShoppingCart, HiUser, HiViewGrid } from "react-icons/hi";
 import { getStoredAccessToken } from "../../../../../utils/authStorage";
 import s from "./TabBAr.module.scss";
 
@@ -15,6 +13,7 @@ const Tabbar = () => {
   const pathname = usePathname();
   const isAuthenticated = Boolean(getStoredAccessToken());
   const safeFromPath = pathname && pathname.startsWith("/") ? pathname : "/";
+
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
@@ -30,18 +29,18 @@ const Tabbar = () => {
 
       ticking.current = true;
       window.requestAnimationFrame(() => {
-        const currentScrollY = window.scrollY;
-        const scrollDelta = currentScrollY - lastScrollY.current;
+        const currentY = window.scrollY;
+        const delta = currentY - lastScrollY.current;
 
-        if (currentScrollY <= 10) {
+        if (currentY <= 10) {
           setIsVisible(true);
-        } else if (scrollDelta > 6) {
+        } else if (delta > 6) {
           setIsVisible(false);
-        } else if (scrollDelta < -6) {
+        } else if (delta < -6) {
           setIsVisible(true);
         }
 
-        lastScrollY.current = currentScrollY;
+        lastScrollY.current = currentY;
         ticking.current = false;
       });
     };
@@ -55,50 +54,56 @@ const Tabbar = () => {
       name: "Главная",
       icon: <GoHome />,
       activeIcon: <GoHomeFill />,
-      link: "/",
+      href: "/",
+      activePath: "/",
     },
     {
       name: "Категории",
       icon: <HiOutlineViewGrid />,
       activeIcon: <HiViewGrid />,
-      link: "/catalog",
+      href: "/catalog",
+      activePath: "/catalog",
     },
     {
       name: "Корзина",
       icon: <HiOutlineShoppingCart />,
       activeIcon: <HiShoppingCart />,
-      link: isAuthenticated ? "/cart" : buildSignInHref("/cart"),
+      href: isAuthenticated ? "/cart" : buildSignInHref("/cart"),
+      activePath: "/cart",
     },
     {
       name: "Профиль",
       icon: <HiOutlineUser />,
       activeIcon: <HiUser />,
-      link: isAuthenticated ? "/profile" : buildSignInHref("/profile"),
+      href: isAuthenticated ? "/profile" : buildSignInHref("/profile"),
+      activePath: "/profile",
     },
   ];
+
+  const isTabActive = (path: string) => {
+    if (path === "/") {
+      return pathname === "/";
+    }
+
+    return pathname?.startsWith(path);
+  };
 
   return (
     <div className={`${s.TabBar} ${isVisible ? s.show : s.hide}`}>
       <div className="container">
         <div className={s.content}>
-          {tabs.map((tab) => (
-            <div className={s.block} key={tab.name}>
-              <Link href={tab.link}>
-                {pathname === tab.link ? (
-                  <span className={s.active}>{tab.activeIcon}</span>
-                ) : (
-                  <span>{tab.icon}</span>
-                )}
-                <h4
-                  style={{
-                    color: pathname === tab.link ? "#A40011" : "#616161",
-                  }}
-                >
-                  {tab.name}
-                </h4>
-              </Link>
-            </div>
-          ))}
+          {tabs.map((tab) => {
+            const active = isTabActive(tab.activePath);
+
+            return (
+              <div className={s.block} key={tab.name}>
+                <Link href={tab.href}>
+                  {active ? <span className={s.active}>{tab.activeIcon}</span> : <span>{tab.icon}</span>}
+                  <h4 style={{ color: active ? "#a73539" : "#616161" }}>{tab.name}</h4>
+                </Link>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

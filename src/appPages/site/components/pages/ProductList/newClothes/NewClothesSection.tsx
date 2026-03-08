@@ -12,9 +12,10 @@ import {
 } from "../../../../../../redux/api/category";
 import { useGetMeQuery } from "../../../../../../redux/api/auth";
 import ColorsClothes from "../../../ui/colors/Colors";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import backIcon from "@/assets/icons/backIcon.svg";
+import { queueFavoriteIntent } from "../../../../../../utils/authIntent";
 
 interface ClothesCategoryItem {
   clothes_category: Array<{
@@ -38,6 +39,7 @@ interface ClothesCategoryItem {
 
 const NewClothesSection = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: me } = useGetMeQuery();
   const currentUserId = me?.[0]?.id;
 
@@ -51,7 +53,9 @@ const NewClothesSection = () => {
   const [postToFavorite] = usePostToFavoriteMutation();
   const [deleteFavorite] = useDeleteFavoriteMutation();
 
-  const { data: favoriteItems } = useGetToFavoriteQuery();
+  const { data: favoriteItems } = useGetToFavoriteQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
 
   const handleFavoriteClick = async (
     e: React.MouseEvent,
@@ -71,6 +75,18 @@ const NewClothesSection = () => {
         }
       } else {
         if (!currentUserId) {
+          const safePathname = pathname || "/new";
+          const hrefWithIntent = queueFavoriteIntent({
+            returnTo: safePathname,
+            clothes_id: item.id,
+            clothes: {
+              promo_category: item.promo_category,
+              clothes_name: item.clothes_name,
+              price: item.price,
+              size: item.size?.[0] || "",
+            },
+          });
+          router.push(hrefWithIntent);
           return;
         }
         await postToFavorite({
