@@ -6,7 +6,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) 454px;
     gap: 36px;
-    align-items: start;
+    align-items: flex-start;
   }
 
   .leftColumn {

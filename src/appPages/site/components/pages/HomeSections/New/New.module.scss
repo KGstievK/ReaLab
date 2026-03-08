@@ -72,8 +72,8 @@
 
     .cards {
       display: flex;
-      align-items: start;
-      justify-content: start;
+      align-items: flex-start;
+      justify-content: flex-start;
       gap: 30px;
 
       .card {
@@ -100,7 +100,7 @@
             padding: 15px;
             .star {
               display: flex;
-              align-items: end;
+              align-items: flex-end;
               img {
                 width: 20px;
                 object-fit: cover;
@@ -141,7 +141,7 @@
           .price {
             display: flex;
             align-items: center;
-            justify-content: start;
+            justify-content: flex-start;
             gap: 15px;
 
             span {
@@ -166,7 +166,7 @@
     .content {
       .cards {
         display: flex;
-        align-items: start;
+        align-items: flex-start;
         justify-content: space-between;
         .card {
           margin-bottom: 10px;
@@ -181,7 +181,7 @@
               padding: 10px;
               .star {
                 display: flex;
-                align-items: end;
+                align-items: flex-end;
                 justify-content: center;
                 img {
                   width: 18px;
@@ -237,7 +237,7 @@
     .content {
       .cards {
         display: flex;
-        align-items: start;
+        align-items: flex-start;
         justify-content: space-between;
         gap: 5px;
         .card {
@@ -255,7 +255,7 @@
               padding: 10px;
               .star {
                 display: flex;
-                align-items: end;
+                align-items: flex-end;
                 justify-content: center;
                 img {
                   width: 18px;

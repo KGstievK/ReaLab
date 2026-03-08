@@ -48,7 +48,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) 470px;
     gap: 40px;
-    align-items: start;
+    align-items: flex-start;
   }
 
   .itemsColumn {
@@ -426,7 +426,7 @@
     .mobileRemoveButton {
       display: inline-flex;
       grid-area: remove;
-      align-self: start;
+      align-self: flex-start;
       justify-self: end;
       width: 24px;
       height: 24px;

@@ -35,7 +35,6 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/media/**",
       },
-      ...(apiMediaPattern ? [apiMediaPattern] : []),
     ],
   },
   async rewrites() {

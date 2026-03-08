@@ -3,7 +3,7 @@
   .header {
     display: flex;
     align-items: center;
-    justify-content: start;
+    justify-content: flex-start;
     gap: 10px;
 
     a {
@@ -28,8 +28,8 @@
   }
   .content {
     display: flex;
-    align-items: start;
-    justify-content: start;
+    align-items: flex-start;
+    justify-content: flex-start;
     flex-wrap: wrap;
     gap: 20px;
     .card {
@@ -93,8 +93,8 @@
 
       .blockText {
         display: flex;
-        align-items: start;
-        justify-content: start;
+        align-items: flex-start;
+        justify-content: flex-start;
         flex-direction: column;
         gap: 10px;
 

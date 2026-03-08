@@ -42,7 +42,7 @@
         display: grid;
         grid-template-columns: 67px minmax(0, 1fr);
         gap: 4px;
-        align-items: start;
+        align-items: flex-start;
 
         span,
         a {
