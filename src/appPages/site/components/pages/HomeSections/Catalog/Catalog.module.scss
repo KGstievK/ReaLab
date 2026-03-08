@@ -40,11 +40,12 @@
   }
 
   .grid {
+    width: 100%;
+    min-height: 770px;
     margin-top: 24px;
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr);
     gap: 10px;
-    min-height: 560px;
   }
 
   .leftColumn {
@@ -91,9 +92,18 @@
       }
     }
   }
-
+  .hijab {
+    .tileImage {
+      object-position: top;
+    }
+  }
   .tileImage {
     object-fit: cover;
+  }
+  .tunic {
+    .tileImage {
+      object-position: top;
+    }
   }
 
   .tunic {

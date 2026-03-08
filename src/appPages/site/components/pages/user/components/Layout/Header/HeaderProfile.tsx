@@ -194,7 +194,7 @@ const HeaderProfile: FC = () => {
             {mobileTabs.map((tab) => (
               <li key={`mobile-${tab.label}`}>
                 <Link
-                  href={tab.path || "/profile"}
+                  href={tab.path || "/  "}
                   onClick={tab.path ? undefined : handleOpenLogoutModal}
                 >
                   <button

@@ -10,6 +10,7 @@ import { getStoredAccessToken } from "../../../../../utils/authStorage";
 
 const Header = () => {
   const pathname = usePathname();
+  const isProfileRoute = pathname.startsWith("/profile");
 
   const links = [
     { link: "/", name: "\u0413\u043b\u0430\u0432\u043d\u0430\u044f" },
@@ -38,7 +39,7 @@ const Header = () => {
           </div>
 
           <div className={scss.Search}>
-            <Search />
+            {!isProfileRoute && <Search />}
           </div>
 
           <nav className={scss.nav}>
@@ -54,7 +55,7 @@ const Header = () => {
           </nav>
 
           <div className={scss.profile_cart}>
-            <Search />
+            {!isProfileRoute && <Search />}
             <Link href={profileHref} aria-label={"\u041f\u0440\u043e\u0444\u0438\u043b\u044c"}>
               <Image src={profile} alt="Profile" />
             </Link>

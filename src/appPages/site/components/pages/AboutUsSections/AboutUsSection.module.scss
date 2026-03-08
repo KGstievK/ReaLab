@@ -4,6 +4,8 @@
 
 .mobileBreadcrumbsBar {
   display: none;
+  position: relative;
+  z-index: 6;
 }
 
 .heroSection {
@@ -144,6 +146,11 @@
       font-size: 12px;
       font-weight: 500;
       line-height: 1;
+    }
+
+    a {
+      pointer-events: auto;
+      touch-action: manipulation;
     }
   }
 
