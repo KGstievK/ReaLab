@@ -11,7 +11,7 @@ import s from "./TabBAr.module.scss";
 
 const Tabbar = () => {
   const pathname = usePathname();
-  const isAuthenticated = Boolean(getStoredAccessToken());
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const safeFromPath = pathname && pathname.startsWith("/") ? pathname : "/";
 
   const [isVisible, setIsVisible] = useState(true);
@@ -20,6 +20,17 @@ const Tabbar = () => {
 
   const buildSignInHref = (nextPath: string) =>
     `/auth/sign-in?next=${encodeURIComponent(nextPath)}&from=${encodeURIComponent(safeFromPath)}`;
+
+  useEffect(() => {
+    const syncAuth = () => {
+      setIsAuthenticated(Boolean(getStoredAccessToken()));
+    };
+
+    syncAuth();
+    window.addEventListener("storage", syncAuth);
+
+    return () => window.removeEventListener("storage", syncAuth);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => {

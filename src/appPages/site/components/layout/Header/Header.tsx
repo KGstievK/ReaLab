@@ -1,4 +1,5 @@
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import scss from "./Header.module.scss";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,6 +12,7 @@ import { getStoredAccessToken } from "../../../../../utils/authStorage";
 const Header = () => {
   const pathname = usePathname();
   const isProfileRoute = pathname.startsWith("/profile");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const links = [
     { link: "/", name: "\u0413\u043b\u0430\u0432\u043d\u0430\u044f" },
@@ -20,13 +22,22 @@ const Header = () => {
     { link: "/contacts", name: "\u041a\u043e\u043d\u0442\u0430\u043a\u0442\u044b" },
   ];
 
-  const isAuthenticated = Boolean(getStoredAccessToken());
   const safeFromPath = pathname && pathname.startsWith("/") ? pathname : "/";
   const buildSignInHref = (nextPath: string) =>
     `/auth/sign-in?next=${encodeURIComponent(nextPath)}&from=${encodeURIComponent(safeFromPath)}`;
 
   const profileHref = isAuthenticated ? "/profile" : buildSignInHref("/profile");
   const cartHref = isAuthenticated ? "/cart" : buildSignInHref("/cart");
+
+  useEffect(() => {
+    const syncAuth = () => {
+      setIsAuthenticated(Boolean(getStoredAccessToken()));
+    };
+
+    syncAuth();
+    window.addEventListener("storage", syncAuth);
+    return () => window.removeEventListener("storage", syncAuth);
+  }, []);
 
   return (
     <header className={scss.Header}>

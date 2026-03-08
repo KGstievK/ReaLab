@@ -260,12 +260,12 @@
   #Cards {
     .content {
       .cards {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .blockImg,
       .mainImg {
-        height: 300px !important;
+        height: 220px !important;
       }
     }
   }
