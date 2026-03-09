@@ -40,7 +40,7 @@ interface CartResponse {
 }
 
 const DELIVERY_PRICE = 200;
-const DISCOUNT_PRICE = 600;
+const DISCOUNT_PRICE = 0;
 
 const toNumber = (value: unknown) => {
   const parsed = Number(value);

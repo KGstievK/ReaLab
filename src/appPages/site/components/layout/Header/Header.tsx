@@ -1,4 +1,4 @@
-import { usePathname } from "next/navigation";
+﻿import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import scss from "./Header.module.scss";
 import Link from "next/link";
@@ -15,11 +15,11 @@ const Header = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const links = [
-    { link: "/", name: "\u0413\u043b\u0430\u0432\u043d\u0430\u044f" },
-    { link: "/new", name: "\u041d\u043e\u0432\u0438\u043d\u043a\u0438" },
-    { link: "/catalog", name: "\u041a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438" },
-    { link: "/about", name: "\u041e \u043d\u0430\u0441" },
-    { link: "/contacts", name: "\u041a\u043e\u043d\u0442\u0430\u043a\u0442\u044b" },
+    { link: "/", name: "Главная" },
+    { link: "/new", name: "Новинки" },
+    { link: "/catalog", name: "Категории" },
+    { link: "/about", name: "О нас" },
+    { link: "/contacts", name: "Контакты" },
   ];
 
   const safeFromPath = pathname && pathname.startsWith("/") ? pathname : "/";
@@ -67,10 +67,10 @@ const Header = () => {
 
           <div className={scss.profile_cart}>
             {!isProfileRoute && <Search />}
-            <Link href={profileHref} aria-label={"\u041f\u0440\u043e\u0444\u0438\u043b\u044c"}>
+            <Link href={profileHref} aria-label={"Профиль"}>
               <Image src={profile} alt="Profile" />
             </Link>
-            <Link href={cartHref} aria-label={"\u041a\u043e\u0440\u0437\u0438\u043d\u0430"}>
+            <Link href={cartHref} aria-label={"Корзина"}>
               <Image src={cart} alt="Cart" />
             </Link>
           </div>
@@ -83,3 +83,4 @@ const Header = () => {
 };
 
 export default Header;
+

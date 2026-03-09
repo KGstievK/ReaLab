@@ -1,4 +1,4 @@
-import { FC, MouseEvent, useEffect, useState } from "react";
+﻿import { FC, MouseEvent, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -38,32 +38,32 @@ const isSafePublicPath = (path?: string | null): path is string => {
 };
 
 const desktopTabs: TabItem[] = [
-  { label: "\u041f\u0440\u043e\u0444\u0438\u043b\u044c", path: "/profile" },
+  { label: "Профиль", path: "/profile" },
   {
-    label: "\u041c\u043e\u0438 \u043f\u043e\u043a\u0443\u043f\u043a\u0438",
+    label: "Мои покупки",
     path: "/profile/history",
   },
   {
-    label: "\u0418\u0437\u0431\u0440\u0430\u043d\u043d\u044b\u0435",
+    label: "Избранные",
     path: "/profile/favorite",
   },
-  { label: "\u0412\u044b\u0439\u0442\u0438", path: null },
+  { label: "Выйти", path: null },
 ];
 
 const mobileTabs: TabItem[] = [
   {
-    label: "\u041f\u0440\u043e\u0444\u0438\u043b\u044c",
+    label: "Профиль",
     path: "/profile/my_office",
   },
   {
-    label: "\u041c\u043e\u0438 \u043f\u043e\u043a\u0443\u043f\u043a\u0438",
+    label: "Мои покупки",
     path: "/profile/history",
   },
   {
-    label: "\u0418\u0437\u0431\u0440\u0430\u043d\u043d\u044b\u0435",
+    label: "Избранные",
     path: "/profile/favorite",
   },
-  { label: "\u0412\u044b\u0439\u0442\u0438", path: null },
+  { label: "Выйти", path: null },
 ];
 
 const HeaderProfile: FC = () => {
@@ -227,14 +227,14 @@ const HeaderProfile: FC = () => {
               type="button"
               className={scss.closeModalButton}
               onClick={handleCloseLogoutModal}
-              aria-label={"\u0417\u0430\u043a\u0440\u044b\u0442\u044c"}
+              aria-label={"Закрыть"}
             >
-              ×
+              Г-
             </button>
 
             <p id="logout-modal-title">
               {
-                "\u0412\u044b \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0442\u0435\u043b\u044c\u043d\u043e \u0445\u043e\u0442\u0438\u0442\u0435 \u0432\u044b\u0439\u0442\u0438 \u0438\u0437 \u044d\u0442\u043e\u0439 \u0443\u0447\u0435\u0442\u043d\u043e\u0439 \u0437\u0430\u043f\u0438\u0441\u0438?"
+                "Вы действительно хотите выйти из этой учетной записи?"
               }
             </p>
 
@@ -243,7 +243,7 @@ const HeaderProfile: FC = () => {
               className={scss.confirmLogoutButton}
               onClick={() => void handleLogoutConfirm()}
             >
-              {"\u0412\u044b\u0439\u0442\u0438"}
+              {"Выйти"}
             </button>
           </div>
         </div>
@@ -253,3 +253,4 @@ const HeaderProfile: FC = () => {
 };
 
 export default HeaderProfile;
+

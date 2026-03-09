@@ -201,6 +201,7 @@
   }
 
   .card {
+    position: relative;
     h3 {
       margin-bottom: 12px;
       font-size: 20px;
@@ -225,12 +226,21 @@
     }
   }
 
+  .formulaHint {
+    margin: 12px 0 0;
+    color: #7a4a4c;
+    font-size: 13px;
+    line-height: 18px;
+  }
+
   .chart {
+    position: relative;
     height: 240px;
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
     gap: 10px;
+    overflow-y: hidden;
 
     .barItem {
       flex: 1;
@@ -289,6 +299,13 @@
     }
   }
 
+  .panelNote {
+    margin: 6px 0 0;
+    color: #7a7a7a;
+    font-size: 13px;
+    line-height: 18px;
+  }
+
   .tableWrap {
     overflow-x: auto;
 
@@ -345,6 +362,27 @@
     gap: 8px;
   }
 
+  .clickableRow {
+    cursor: pointer;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: #fcf7f7;
+    }
+  }
+
+  .secondaryAction {
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid #d7a7aa;
+    background: #fff;
+    color: #7a4a4c;
+    padding: 0 10px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 16px;
+  }
+
   .iconButton {
     width: 34px;
     height: 34px;
@@ -398,6 +436,101 @@
         line-height: 17px;
       }
     }
+  }
+
+  .discountSummary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+
+    article {
+      border: 1px solid #ead9da;
+      border-radius: 10px;
+      background: #faf8f8;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      span {
+        color: #7a7a7a;
+        font-size: 12px;
+        line-height: 16px;
+      }
+
+      strong {
+        color: #202020;
+        font-size: 22px;
+        font-weight: 600;
+        line-height: 26px;
+      }
+    }
+  }
+
+  .discountTable {
+    min-width: 1080px !important;
+  }
+
+  .discountProduct {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    strong {
+      font-size: 14px;
+      line-height: 18px;
+    }
+
+    span {
+      color: #7a7a7a;
+      font-size: 12px;
+      line-height: 16px;
+    }
+  }
+
+  .discountCell {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    input {
+      width: 140px;
+      height: 36px;
+      border: 1px solid #d7a7aa;
+      border-radius: 8px;
+      padding: 0 10px;
+      font-size: 14px;
+      line-height: 18px;
+    }
+  }
+
+  .discountPresets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .presetButton {
+    height: 28px;
+    border-radius: 999px;
+    border: 1px solid #d7a7aa;
+    background: #fff;
+    color: #7a4a4c;
+    padding: 0 10px;
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .marginValue {
+    font-weight: 600;
+  }
+
+  .positiveValue {
+    color: #2b6a37;
+  }
+
+  .negativeValue {
+    color: #b73538;
   }
 
   .activity {
@@ -467,6 +600,10 @@
     max-height: calc(100dvh - 32px);
   }
 
+  .orderModal {
+    width: min(920px, 100%);
+  }
+
   .modalHeader {
     padding: 14px 16px;
     border-bottom: 1px solid #f0e5e6;
@@ -481,6 +618,21 @@
       font-size: 20px;
       font-weight: 600;
       line-height: 24px;
+    }
+  }
+
+  .orderModalHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    p {
+      margin: 0;
+      color: #7a7a7a;
+      font-size: 12px;
+      line-height: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
   }
 
@@ -508,6 +660,233 @@
     gap: 12px;
     padding: 16px;
     overflow-y: auto;
+  }
+
+  .orderDetailsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .orderDetailCard {
+    border: 1px solid #f0e5e6;
+    border-radius: 12px;
+    background: #faf8f8;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    h4 {
+      margin: 0;
+      color: #202020;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 22px;
+    }
+  }
+
+  .orderMetaList {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin: 0;
+
+    div {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    dt {
+      color: #7a7a7a;
+      font-size: 12px;
+      line-height: 16px;
+      margin: 0;
+    }
+
+    dd {
+      margin: 0;
+      color: #202020;
+      font-size: 14px;
+      line-height: 18px;
+      font-weight: 500;
+    }
+  }
+
+  .orderMetaWide {
+    grid-column: 1 / -1;
+  }
+
+  .orderSectionHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    span {
+      color: #7a7a7a;
+      font-size: 13px;
+      line-height: 18px;
+    }
+  }
+
+  .statusFlow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .statusStep {
+    min-height: 40px;
+    border-radius: 999px;
+    border: 1px solid #d7a7aa;
+    background: #fff;
+    color: #8a6b6d;
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 18px;
+    transition: 0.2s ease;
+
+    &:disabled {
+      opacity: 1;
+      cursor: not-allowed;
+    }
+  }
+
+  .statusStepCompleted {
+    border-color: #d8c3c4;
+    background: #f4eded;
+    color: #7a4a4c;
+  }
+
+  .statusStepActive {
+    border-color: #a73539;
+    background: #a73539;
+    color: #fff;
+  }
+
+  .statusHint {
+    margin: 0;
+    color: #7a7a7a;
+    font-size: 13px;
+    line-height: 18px;
+  }
+
+  .orderItemsList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .orderItemRow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px;
+    border: 1px solid #ead9da;
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  .orderItemPreview {
+    width: 72px;
+    min-width: 72px;
+    height: 88px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #ead9da;
+    background: #f4efef;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  .orderItemPlaceholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    color: #8b7a7b;
+    font-size: 12px;
+    line-height: 16px;
+    text-align: center;
+  }
+
+  .orderItemInfo {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    strong {
+      color: #202020;
+      font-size: 15px;
+      line-height: 19px;
+    }
+
+    span {
+      color: #666;
+      font-size: 13px;
+      line-height: 17px;
+    }
+  }
+
+  .orderItemMeta {
+    min-width: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+
+    span {
+      color: #666;
+      font-size: 13px;
+      line-height: 17px;
+    }
+
+    strong {
+      color: #202020;
+      font-size: 15px;
+      line-height: 19px;
+    }
+  }
+
+  .orderTotals {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      color: #4d4d4d;
+      font-size: 14px;
+      line-height: 18px;
+    }
+  }
+
+  .orderTotalFinal {
+    padding-top: 8px;
+    border-top: 1px solid #ead9da;
+
+    span,
+    strong {
+      color: #202020;
+      font-size: 16px;
+      line-height: 20px;
+      font-weight: 600;
+    }
   }
 
   .fieldGrid {
@@ -685,6 +1064,10 @@
         grid-template-columns: 1fr;
       }
     }
+
+    .discountSummary {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 }
 
@@ -728,8 +1111,33 @@
       grid-template-columns: 1fr;
     }
 
+    .discountSummary {
+      grid-template-columns: 1fr;
+    }
+
     .fieldGrid {
       grid-template-columns: 1fr;
+    }
+
+    .orderDetailsGrid,
+    .orderMetaList {
+      grid-template-columns: 1fr;
+    }
+
+    .orderItemRow {
+      flex-direction: column;
+    }
+
+    .orderItemPreview {
+      width: 100%;
+      min-width: 0;
+      height: 180px;
+    }
+
+    .orderItemMeta {
+      min-width: 0;
+      width: 100%;
+      align-items: flex-start;
     }
 
     .previewGrid {

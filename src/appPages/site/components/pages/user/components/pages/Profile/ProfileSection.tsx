@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useEffect, useMemo, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -147,10 +147,10 @@ const ProfileSection: FC = () => {
   return (
     <section className={scss.ProfileSection}>
       <div className={scss.content}>
-        <h1>{"\u041b\u0438\u0447\u043d\u044b\u0435 \u0434\u0430\u043d\u043d\u044b\u0435"}</h1>
+        <h1>{"Личные данные"}</h1>
         <p className={scss.subtitle}>
           {
-            "\u041f\u043e\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u0441\u0432\u043e\u044e \u043b\u0438\u0447\u043d\u043e\u0441\u0442\u044c"
+            "Подтвердите свою личность"
           }
         </p>
 
@@ -158,7 +158,7 @@ const ProfileSection: FC = () => {
           <div className={scss.avatarBlock}>
             <div className={scss.avatarBox}>
               {avatarUrl ? (
-                <img src={avatarUrl} alt={"\u0410\u0432\u0430\u0442\u0430\u0440"} />
+                <img src={avatarUrl} alt={"Аватар"} />
               ) : (
                 <span>{initials}</span>
               )}
@@ -166,7 +166,7 @@ const ProfileSection: FC = () => {
               <button
                 type="button"
                 className={scss.removeAvatarButton}
-                aria-label={"\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0444\u043e\u0442\u043e"}
+                aria-label={"Удалить фото"}
                 onClick={() => setAvatarUrl(null)}
               >
                 <FiTrash2 />
@@ -180,20 +180,20 @@ const ProfileSection: FC = () => {
                 onClick={() => setIsAvatarModalOpen(true)}
               >
                 {avatarUrl
-                  ? "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c \u0444\u043e\u0442\u043e"
-                  : "\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u0444\u043e\u0442\u043e"}
+                  ? "Изменить фото"
+                  : "Загрузить фото"}
               </button>
 
               <p className={scss.avatarHint}>
                 {
-                  "\u0420\u0435\u043a\u043e\u043c\u0435\u043d\u0434\u0443\u0435\u043c \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c \u0444\u043e\u0440\u043c\u0430\u0442 300 x 300 \u0438 \u0440\u0430\u0437\u043c\u0435\u0440\u043e\u043c \u043d\u0435 \u0431\u043e\u043b\u0435\u0435 2 \u043c\u0431"
+                  "Рекомендуем использовать формат 300 x 300 и размером не более 2 мб"
                 }
               </p>
             </div>
           </div>
 
           <label className={scss.field}>
-            <span>{"\u0418\u043c\u044f \u0438 \u0424\u0430\u043c\u0438\u043b\u0438\u044f"}</span>
+            <span>{"Имя и Фамилия"}</span>
             <div className={scss.inputWrap}>
               <input
                 type="text"
@@ -205,7 +205,7 @@ const ProfileSection: FC = () => {
                 type="button"
                 className={scss.editButton}
                 aria-label={
-                  "\u0420\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0438\u043c\u044f \u0438 \u0444\u0430\u043c\u0438\u043b\u0438\u044e"
+                  "Редактировать имя и фамилию"
                 }
                 onClick={() => enableField("fullName")}
               >
@@ -215,7 +215,7 @@ const ProfileSection: FC = () => {
           </label>
 
           <label className={scss.field}>
-            <span>{"\u041d\u043e\u043c\u0435\u0440 \u0442\u0435\u043b\u0435\u0444\u043e\u043d\u0430"}</span>
+            <span>{"Номер телефона"}</span>
             <div className={scss.inputWrap}>
               <input
                 type="text"
@@ -227,7 +227,7 @@ const ProfileSection: FC = () => {
                 type="button"
                 className={scss.editButton}
                 aria-label={
-                  "\u0420\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u043d\u043e\u043c\u0435\u0440 \u0442\u0435\u043b\u0435\u0444\u043e\u043d\u0430"
+                  "Редактировать номер телефона"
                 }
                 onClick={() => enableField("phone")}
               >
@@ -237,7 +237,7 @@ const ProfileSection: FC = () => {
           </label>
 
           <label className={scss.field}>
-            <span>{"\u0410\u0434\u0440\u0435\u0441\u0441"}</span>
+            <span>{"Адресс"}</span>
             <div className={scss.inputWrap}>
               <input
                 type="text"
@@ -249,7 +249,7 @@ const ProfileSection: FC = () => {
                 type="button"
                 className={scss.editButton}
                 aria-label={
-                  "\u0420\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0430\u0434\u0440\u0435\u0441"
+                  "Редактировать адрес"
                 }
                 onClick={() => enableField("address")}
               >
@@ -270,7 +270,7 @@ const ProfileSection: FC = () => {
               <button
                 type="button"
                 className={scss.editButton}
-                aria-label={"\u0420\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c email"}
+                aria-label={"Редактировать email"}
                 onClick={() => enableField("email")}
               >
                 <FiEdit2 />
@@ -279,13 +279,13 @@ const ProfileSection: FC = () => {
           </label>
 
           <label className={scss.field}>
-            <span>{"\u041f\u0430\u0440\u043e\u043b\u044c"}</span>
+            <span>{"Пароль"}</span>
             <div className={scss.inputWrap}>
               <input type="password" value="*********" readOnly />
               <button
                 type="button"
                 className={scss.editButton}
-                aria-label={"\u0421\u043c\u0435\u043d\u0438\u0442\u044c \u043f\u0430\u0440\u043e\u043b\u044c"}
+                aria-label={"Сменить пароль"}
                 onClick={() => router.push("/auth/forgot")}
               >
                 <FiEdit2 />
@@ -299,8 +299,8 @@ const ProfileSection: FC = () => {
             disabled={!canSave}
           >
             {isSaving
-              ? "\u0421\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0438\u0435..."
-              : "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c"}
+              ? "Сохранение..."
+              : "Сохранить"}
           </button>
         </form>
       </div>
@@ -316,3 +316,4 @@ const ProfileSection: FC = () => {
 };
 
 export default ProfileSection;
+

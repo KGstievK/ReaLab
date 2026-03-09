@@ -70,6 +70,150 @@
     }
   }
 
+  .statusPanel {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .statusPanelHeader {
+    h3 {
+      margin: 0;
+      color: #0c0c0c;
+      font-family: "Inter", sans-serif;
+      font-size: 20px;
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    p {
+      margin: 8px 0 0;
+      color: #717171;
+      font-family: "Inter", sans-serif;
+      font-size: 16px;
+      font-weight: 300;
+      line-height: 24px;
+    }
+  }
+
+  .statusTimeline {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 30px;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: #d7d7d7;
+      z-index: 0;
+    }
+  }
+
+  .timelineItem {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+
+    p {
+      margin: 0;
+      color: #9d9d9d;
+      font-family: "Inter", sans-serif;
+      font-size: 16px;
+      font-weight: 300;
+      line-height: 20px;
+    }
+  }
+
+  .timelineIcon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid #cfcfcf;
+    background: #fff;
+    color: #b4b4b4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
+
+  .timelineItemCompleted {
+    .timelineIcon {
+      border-color: #a73539;
+      background: #a73539;
+      color: #fff;
+    }
+
+    p {
+      color: #a73539;
+    }
+  }
+
+  .timelineItemActive {
+    .timelineIcon {
+      border-color: #a73539;
+      background: #fff;
+      color: #a73539;
+    }
+
+    p {
+      color: #a73539;
+      font-weight: 500;
+    }
+  }
+
+  .statusMessage {
+    margin: 0;
+    color: #0c0c0c;
+    font-family: "Inter", sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 28px;
+  }
+
+  .statusMeta {
+    border-radius: 4px;
+    background: #fffaf5;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .statusMetaItem,
+  .metaItem {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    text-align: left;
+
+    span {
+      color: #0c0c0c;
+      font-family: "Inter", sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    strong {
+      color: #0c0c0c;
+      font-family: "Inter", sans-serif;
+      font-size: 28px;
+      font-weight: 300;
+      line-height: 1;
+    }
+  }
+
   .content {
     margin-top: 40px;
     display: flex;
@@ -88,32 +232,39 @@
     background: #fffaf5;
     padding: 16px;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
     align-items: center;
     gap: 20px;
+  }
 
-    .metaItem {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-      text-align: left;
+  .metaAction {
+    justify-self: end;
+  }
 
-      span {
-        color: #0c0c0c;
-        font-family: "Inter", sans-serif;
-        font-size: 16px;
-        font-weight: 500;
-        line-height: 1;
-      }
+  .statusAction {
+    border: none;
+    background: transparent;
+    color: #a73539;
+    font-family: "Inter", sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 0;
 
-      strong {
-        color: #0c0c0c;
-        font-family: "Inter", sans-serif;
-        font-size: 28px;
-        font-weight: 300;
-        line-height: 1;
-      }
+    &::after {
+      content: "›";
+      font-size: 24px;
+      line-height: 1;
     }
+  }
+
+  .statusActionActive {
+    color: #7f1e22;
+    font-weight: 500;
   }
 
   .orderItems {
@@ -205,26 +356,79 @@
       }
     }
 
-    .content {
-      margin-top: 20px;
+    .statusPanel {
+      margin-top: 24px;
       gap: 20px;
     }
 
+    .statusPanelHeader {
+      h3 {
+        font-size: 18px;
+      }
+
+      p {
+        font-size: 14px;
+        line-height: 1.4;
+      }
+    }
+
+    .statusTimeline {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 10px;
+
+      &::before {
+        display: none;
+      }
+    }
+
+    .timelineIcon {
+      width: 52px;
+      height: 52px;
+      font-size: 24px;
+    }
+
+    .timelineItem {
+      p {
+        font-size: 14px;
+        line-height: 18px;
+      }
+    }
+
+    .statusMessage {
+      font-size: 16px;
+      line-height: 24px;
+    }
+
+    .statusMeta,
     .orderMeta {
       grid-template-columns: 1fr;
       gap: 12px;
+    }
 
-      .metaItem {
-        gap: 8px;
+    .statusMetaItem,
+    .metaItem {
+      gap: 8px;
 
-        span {
-          font-size: 14px;
-        }
-
-        strong {
-          font-size: 18px;
-        }
+      span {
+        font-size: 14px;
       }
+
+      strong {
+        font-size: 18px;
+      }
+    }
+
+    .metaAction {
+      justify-self: start;
+    }
+
+    .statusAction {
+      font-size: 14px;
+    }
+
+    .content {
+      margin-top: 20px;
+      gap: 20px;
     }
 
     .orderItems {

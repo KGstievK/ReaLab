@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { ChangeEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import {
@@ -7,6 +7,7 @@ import {
   FiBox,
   FiEdit2,
   FiFileText,
+  FiPercent,
   FiPlus,
   FiShoppingBag,
   FiTrash2,
@@ -35,6 +36,7 @@ import scss from "./AdminPanel.module.scss";
 type AdminTab =
   | "dashboard"
   | "products"
+  | "discounts"
   | "orders"
   | "content"
   | "users"
@@ -49,6 +51,7 @@ type ProductFormState = {
   textile_name: string;
   active: boolean;
   base_price: string;
+  cost_price: string;
   discount_price: string;
   sizes: string;
   colors: string;
@@ -156,8 +159,9 @@ const createEmptyProductForm = (defaultCategoryId: number): ProductFormState => 
   textile_name: "",
   active: true,
   base_price: "",
+  cost_price: "",
   discount_price: "",
-  sizes: "S, M, L",
+  sizes: "XXS, XS, S, M, L, XL, XXL",
   colors: "",
   promo_categories: "",
 });
@@ -181,17 +185,34 @@ const productToForm = (product: AdminProduct): ProductFormState => {
     category_id: String(product.category_id),
     textile_name: product.textile_name || "",
     active: product.active,
-    base_price: toStringOrEmpty(firstVariant?.price ?? 0),
-    discount_price: toStringOrEmpty(firstVariant?.discount_price ?? null),
+    base_price: toStringOrEmpty(product.base_price ?? firstVariant?.price ?? 0),
+    cost_price: toStringOrEmpty(product.cost_price ?? firstVariant?.cost_price ?? 0),
+    discount_price: toStringOrEmpty(product.discount_price ?? firstVariant?.discount_price ?? null),
     sizes: variantSizes.join(", "),
     colors: variantColors.join(", "),
     promo_categories: (product.promo_categories || []).join(", "),
   };
 };
 
+const getEffectiveProductPrice = (product: AdminProduct): number =>
+  product.discount_price !== null && product.discount_price < product.base_price
+    ? product.discount_price
+    : product.base_price;
+
+const getDiscountPercent = (product: AdminProduct): number => {
+  if (!product.discount_price || product.discount_price >= product.base_price || product.base_price <= 0) {
+    return 0;
+  }
+
+  return Number(
+    (((product.base_price - product.discount_price) / product.base_price) * 100).toFixed(1),
+  );
+};
+
 const NAV_ITEMS: Array<{ key: AdminTab; label: string; icon: ReactNode }> = [
   { key: "dashboard", label: "Аналитика", icon: <FiBarChart2 /> },
   { key: "products", label: "Товары", icon: <FiShoppingBag /> },
+  { key: "discounts", label: "Скидки", icon: <FiPercent /> },
   { key: "orders", label: "Заказы", icon: <FiFileText /> },
   { key: "content", label: "Контент", icon: <FiBox /> },
   { key: "users", label: "Пользователи", icon: <FiUsers /> },
@@ -199,15 +220,46 @@ const NAV_ITEMS: Array<{ key: AdminTab; label: string; icon: ReactNode }> = [
 ];
 
 const STATUS_LABELS: Record<AdminOrderStatus, string> = {
-  placed: "Размещен",
-  processing: "В обработке",
-  packaging: "Сборка",
+  placed: "Заказ размещен",
+  processing: "Собирается",
+  packaging: "Собирается",
   shipping: "В пути",
   delivered: "Доставлен",
   cancelled: "Отменен",
   returned: "Возврат",
 };
 
+const ORDER_WORKFLOW: AdminOrderStatus[] = [
+  "placed",
+  "processing",
+  "shipping",
+  "delivered",
+];
+
+const normalizeWorkflowStatus = (status: AdminOrderStatus): AdminOrderStatus =>
+  status === "packaging" ? "processing" : status;
+
+const getNextOrderStatus = (status: AdminOrderStatus): AdminOrderStatus | null => {
+  const normalized = normalizeWorkflowStatus(status);
+  const currentIndex = ORDER_WORKFLOW.indexOf(normalized);
+  if (currentIndex < 0 || currentIndex >= ORDER_WORKFLOW.length - 1) {
+    return null;
+  }
+
+  return ORDER_WORKFLOW[currentIndex + 1];
+};
+
+const PAYMENT_STATUS_LABELS: Record<AdminPaymentStatus, string> = {
+  pending: "Ожидает оплаты",
+  paid: "Оплачен",
+  failed: "Ошибка оплаты",
+  refunded: "Возврат",
+};
+
+const DELIVERY_METHOD_LABELS: Record<AdminDeliveryMethod, string> = {
+  courier: "Курьер",
+  pickup: "Самовывоз",
+};
 const RANGE_OPTIONS: AdminDateRange[] = [
   "today",
   "week",
@@ -232,9 +284,11 @@ const MOCK_ORDERS: AdminOrder[] = [
     customer_id: 51,
     customer_name: "Айгерим Н.",
     customer_phone: "+996 555 00-00-00",
+    city: "Bishkek",
+    address: "ABC 12A, Bishkek, Kyrgyzstan",
     created_at: "2026-02-26T10:20:00.000Z",
     updated_at: "2026-02-27T13:10:00.000Z",
-    status: "processing",
+    status: "placed",
     payment_status: "paid",
     delivery_method: "courier",
     subtotal: 4800,
@@ -250,6 +304,7 @@ const MOCK_ORDERS: AdminOrder[] = [
         total_price: 2800,
         size: "M",
         color: "Черный",
+        image_url: "",
       },
     ],
   },
@@ -259,6 +314,8 @@ const MOCK_ORDERS: AdminOrder[] = [
     customer_id: 77,
     customer_name: "Сабина К.",
     customer_phone: "+996 700 11-22-33",
+    city: "Bishkek",
+    address: "Manas 44, Bishkek, Kyrgyzstan",
     created_at: "2026-02-25T08:15:00.000Z",
     updated_at: "2026-02-26T16:10:00.000Z",
     status: "shipping",
@@ -277,6 +334,7 @@ const MOCK_ORDERS: AdminOrder[] = [
         total_price: 6000,
         size: "One size",
         color: "Песочный",
+        image_url: "",
       },
     ],
   },
@@ -424,6 +482,9 @@ const MOCK_PRODUCTS: AdminPaginatedResponse<AdminProduct> = {
       average_rating: 4.8,
       sold_items: 48,
       total_stock: 27,
+      base_price: 4800,
+      discount_price: 4400,
+      cost_price: 2600,
       promo_categories: ["популярные", "тренд"],
       images: [],
       variants: [],
@@ -442,6 +503,9 @@ const MOCK_PRODUCTS: AdminPaginatedResponse<AdminProduct> = {
       average_rating: 4.7,
       sold_items: 41,
       total_stock: 12,
+      base_price: 2200,
+      discount_price: 1900,
+      cost_price: 1200,
       promo_categories: ["новинка"],
       images: [],
       variants: [],
@@ -460,6 +524,9 @@ const MOCK_PRODUCTS: AdminPaginatedResponse<AdminProduct> = {
       average_rating: 4.1,
       sold_items: 7,
       total_stock: 22,
+      base_price: 5600,
+      discount_price: null,
+      cost_price: 3400,
       promo_categories: [],
       images: [],
       variants: [],
@@ -591,12 +658,14 @@ const MOCK_FINANCE: AdminFinanceSummary = {
   period_start: "2026-02-01",
   period_end: "2026-02-28",
   currency: "KGS",
+  product_revenue: 150800,
   gross_revenue: 154000,
   net_revenue: 141900,
   discount_total: 9100,
   delivery_income: 3200,
   refund_total: 2600,
   expenses_total: 57800,
+  cost_of_goods_sold: 57800,
   profit: 84100,
   average_order_value: 1222,
   paid_orders: 116,
@@ -615,11 +684,14 @@ const AdminPanel = () => {
     useState<ProductModalMode>("create");
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<AdminProduct | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
   const [productForm, setProductForm] = useState<ProductFormState>(
     createEmptyProductForm(1),
   );
   const [productImageFiles, setProductImageFiles] = useState<File[]>([]);
   const [productImagePreviews, setProductImagePreviews] = useState<string[]>([]);
+  const [discountDrafts, setDiscountDrafts] = useState<Record<number, string>>({});
+  const [discountSavingId, setDiscountSavingId] = useState<number | null>(null);
   const [homeTitleForm, setHomeTitleForm] = useState<HomeTitleFormState>(
     createEmptyHomeTitleForm(),
   );
@@ -634,7 +706,7 @@ const AdminPanel = () => {
   );
   const productsQuery = useGetAdminProductsQuery(
     { page: 1, page_size: 50, search: search || undefined },
-    { skip: activeTab !== "products" },
+    { skip: activeTab !== "products" && activeTab !== "discounts" },
   );
   const contentProductsQuery = useGetAdminProductsQuery(
     { page: 1, page_size: 200 },
@@ -651,7 +723,7 @@ const AdminPanel = () => {
     skip: activeTab !== "content",
   });
   const categoriesQuery = useGetAdminCategoriesQuery(undefined, {
-    skip: activeTab !== "products",
+    skip: activeTab !== "products" && activeTab !== "discounts" && !isProductModalOpen,
   });
   const usersQuery = useGetAdminUsersQuery(
     { page: 1, page_size: 50, search: search || undefined },
@@ -670,7 +742,8 @@ const AdminPanel = () => {
     useDeleteAdminProductMutation();
   const [postAdminProductImagesMutation, { isLoading: isUploadingProductImages }] =
     usePostAdminProductImagesMutation();
-  const [patchAdminOrderStatusMutation] = usePatchAdminOrderStatusMutation();
+  const [patchAdminOrderStatusMutation, { isLoading: isUpdatingOrderStatus }] =
+    usePatchAdminOrderStatusMutation();
   const [patchAdminHomeTitleMutation, { isLoading: isSavingHomeTitle }] =
     usePatchAdminHomeTitleMutation();
 
@@ -692,12 +765,14 @@ const AdminPanel = () => {
     period_start: "",
     period_end: "",
     currency: "KGS",
+    product_revenue: 0,
     gross_revenue: 0,
     net_revenue: 0,
     discount_total: 0,
     delivery_income: 0,
     refund_total: 0,
     expenses_total: 0,
+    cost_of_goods_sold: 0,
     profit: 0,
     average_order_value: 0,
     paid_orders: 0,
@@ -751,10 +826,24 @@ const AdminPanel = () => {
     });
   }, [homeTitleQuery.data]);
 
+  useEffect(() => {
+    if (activeTab !== "discounts") {
+      return;
+    }
+
+    setDiscountDrafts(
+      Object.fromEntries(
+        products.results.map((product) => [product.id, toStringOrEmpty(product.discount_price)]),
+      ),
+    );
+  }, [activeTab, products.results]);
+
   const activeQueryError =
     (activeTab === "dashboard"
       ? dashboardQuery.error || financeQuery.error
       : activeTab === "products"
+        ? productsQuery.error
+        : activeTab === "discounts"
         ? productsQuery.error
         : activeTab === "orders"
           ? ordersQuery.error
@@ -781,6 +870,28 @@ const AdminPanel = () => {
       ),
     [products.results, search],
   );
+  const discountSummary = useMemo(() => {
+    const discountedProducts = filteredProducts.filter((product) => getDiscountPercent(product) > 0);
+    const riskyProducts = filteredProducts.filter(
+      (product) => getEffectiveProductPrice(product) <= product.cost_price,
+    );
+    const averageDiscount =
+      discountedProducts.length > 0
+        ? Number(
+            (
+              discountedProducts.reduce((sum, product) => sum + getDiscountPercent(product), 0) /
+              discountedProducts.length
+            ).toFixed(1),
+          )
+        : 0;
+
+    return {
+      total_products: filteredProducts.length,
+      discounted_products: discountedProducts.length,
+      risky_products: riskyProducts.length,
+      average_discount_percent: averageDiscount,
+    };
+  }, [filteredProducts]);
   const filteredOrders = useMemo(
     () =>
       orders.results.filter(
@@ -899,6 +1010,30 @@ const AdminPanel = () => {
     }));
   };
 
+  const openOrderDetailsModal = (order: AdminOrder) => {
+    setSelectedOrder(order);
+  };
+
+  const closeOrderDetailsModal = () => {
+    setSelectedOrder(null);
+  };
+
+  const handleDiscountDraftChange = (productId: number, value: string) => {
+    setDiscountDrafts((prev) => ({
+      ...prev,
+      [productId]: value,
+    }));
+  };
+
+  const applyDiscountPreset = (product: AdminProduct, percent: number) => {
+    const nextPrice = product.base_price * (1 - percent / 100);
+    handleDiscountDraftChange(product.id, String(Math.max(Number(nextPrice.toFixed(2)), 0)));
+  };
+
+  const resetDiscountDraft = (productId: number) => {
+    handleDiscountDraftChange(productId, "");
+  };
+
   const handleHomeTitleFieldChange = (
     field: keyof HomeTitleFormState,
     value: string,
@@ -970,6 +1105,7 @@ const AdminPanel = () => {
       ? Array.from(new Set(selectedProduct.variants.map((item) => item.color)))
       : [];
     const basePrice = Number(productForm.base_price);
+    const costPrice = Number(productForm.cost_price);
     const discountRaw = productForm.discount_price.trim();
     const discountPrice = discountRaw.length ? Number(discountRaw) : null;
     const shouldUpdateVariants =
@@ -988,6 +1124,16 @@ const AdminPanel = () => {
       return;
     }
 
+    if (!Number.isFinite(costPrice) || costPrice < 0) {
+      setMessage({ type: "error", text: "Cost price must be 0 or greater." });
+      return;
+    }
+
+    if (discountPrice !== null && (!Number.isFinite(discountPrice) || discountPrice <= 0)) {
+      setMessage({ type: "error", text: "Discount price must be greater than 0." });
+      return;
+    }
+
     if (shouldUpdateVariants && (!sizes.length || !colors.length)) {
       setMessage({
         type: "error",
@@ -1003,6 +1149,7 @@ const AdminPanel = () => {
       textile_name: productForm.textile_name.trim() || "Tafeta",
       active: productForm.active,
       base_price: basePrice,
+      cost_price: costPrice,
       discount_price: discountPrice,
       promo_categories: promoCategories,
     };
@@ -1062,6 +1209,51 @@ const AdminPanel = () => {
     }
   };
 
+  const handleDiscountSave = async (product: AdminProduct) => {
+    const rawValue = discountDrafts[product.id]?.trim() ?? "";
+    const discountPrice = rawValue.length ? Number(rawValue) : null;
+
+    if (discountPrice !== null && (!Number.isFinite(discountPrice) || discountPrice <= 0)) {
+      setMessage({ type: "error", text: "Discount price must be greater than 0." });
+      return;
+    }
+
+    if (discountPrice !== null && discountPrice >= product.base_price) {
+      setMessage({
+        type: "error",
+        text: `Discount price for "${product.name}" must be lower than base price.`,
+      });
+      return;
+    }
+
+    setMessage(null);
+    setDiscountSavingId(product.id);
+
+    try {
+      await patchAdminProductMutation({
+        id: product.id,
+        data: {
+          discount_price: discountPrice,
+        },
+      }).unwrap();
+
+      setMessage({
+        type: "success",
+        text:
+          discountPrice === null
+            ? `Discount removed for "${product.name}".`
+            : `Discount updated for "${product.name}".`,
+      });
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: getApiErrorMessage(error, "Failed to update discount."),
+      });
+    } finally {
+      setDiscountSavingId(null);
+    }
+  };
+
   const handleProductDelete = async () => {
     if (!selectedProduct) {
       return;
@@ -1083,19 +1275,27 @@ const AdminPanel = () => {
     }
   };
 
-  const handleOrderDelivered = async (id: number) => {
+  const handleOrderStatusChange = async (
+    id: number,
+    status: AdminOrderStatus,
+  ) => {
     setMessage(null);
     try {
-      await patchAdminOrderStatusMutation({ id, status: "delivered" }).unwrap();
-      setMessage({ type: "success", text: `Заказ #${id} обновлен.` });
+      const updatedOrder = await patchAdminOrderStatusMutation({ id, status }).unwrap();
+      if (selectedOrder?.id === id) {
+        setSelectedOrder(updatedOrder);
+      }
+      setMessage({
+        type: "success",
+        text: `Статус заказа ${updatedOrder.order_number} изменен: ${STATUS_LABELS[normalizeWorkflowStatus(updatedOrder.status)]}.`,
+      });
     } catch {
       setMessage({
         type: "error",
-        text: "Не удалось обновить заказ: endpoint подготовлен.",
+        text: "Не удалось обновить статус заказа.",
       });
     }
   };
-
   if (isAccessDenied) {
     return (
       <section className={scss.AdminPanel}>
@@ -1145,6 +1345,7 @@ const AdminPanel = () => {
             </div>
             <div className={scss.topActions}>
               {(activeTab === "products" ||
+                activeTab === "discounts" ||
                 activeTab === "orders" ||
                 activeTab === "users") && (
                 <input
@@ -1212,16 +1413,28 @@ const AdminPanel = () => {
                   <h3>Финансы</h3>
                   <ul>
                     <li>
-                      <span>Валовая выручка</span>
-                      <strong>
-                        {formatMoney(financeSummary.gross_revenue)}
-                      </strong>
+                      <span>Товарная выручка</span>
+                      <strong>{formatMoney(financeSummary.product_revenue)}</strong>
                     </li>
                     <li>
-                      <span>Расходы</span>
-                      <strong>
-                        {formatMoney(financeSummary.expenses_total)}
-                      </strong>
+                      <span>Доставка</span>
+                      <strong>{formatMoney(financeSummary.delivery_income)}</strong>
+                    </li>
+                    <li>
+                      <span>Скидки</span>
+                      <strong>{formatMoney(financeSummary.discount_total)}</strong>
+                    </li>
+                    <li>
+                      <span>Валовая выручка</span>
+                      <strong>{formatMoney(financeSummary.gross_revenue)}</strong>
+                    </li>
+                    <li>
+                      <span>Себестоимость</span>
+                      <strong>{formatMoney(financeSummary.cost_of_goods_sold)}</strong>
+                    </li>
+                    <li>
+                      <span>Возвраты</span>
+                      <strong>{formatMoney(financeSummary.refund_total)}</strong>
                     </li>
                     <li>
                       <span>Чистая выручка</span>
@@ -1232,9 +1445,11 @@ const AdminPanel = () => {
                       <strong>{formatMoney(financeSummary.profit)}</strong>
                     </li>
                   </ul>
+                  <p className={scss.formulaHint}>
+                    Прибыль = (товары + доставка - скидки) - себестоимость
+                  </p>
                 </article>
-              </div>
-            </div>
+              </div>            </div>
           )}
 
           {activeTab === "products" && (
@@ -1305,6 +1520,136 @@ const AdminPanel = () => {
             </div>
           )}
 
+          {activeTab === "discounts" && (
+            <div className={scss.panel}>
+              <div className={scss.panelHead}>
+                <div>
+                  <h2>Скидки</h2>
+                  <p className={scss.panelNote}>
+                    Управляйте скидками отдельно от остального каталога и сразу видьте маржу
+                    относительно себестоимости.
+                  </p>
+                </div>
+              </div>
+
+              <div className={scss.discountSummary}>
+                <article>
+                  <span>Всего товаров</span>
+                  <strong>{discountSummary.total_products}</strong>
+                </article>
+                <article>
+                  <span>Со скидкой</span>
+                  <strong>{discountSummary.discounted_products}</strong>
+                </article>
+                <article>
+                  <span>Средняя скидка</span>
+                  <strong>{discountSummary.average_discount_percent}%</strong>
+                </article>
+                <article>
+                  <span>Ниже себестоимости</span>
+                  <strong>{discountSummary.risky_products}</strong>
+                </article>
+              </div>
+
+              <div className={scss.tableWrap}>
+                <table className={scss.discountTable}>
+                  <thead>
+                    <tr>
+                      <th>Товар</th>
+                      <th>Категория</th>
+                      <th>Р‘Р°Р·Р°</th>
+                      <th>Себестоимость</th>
+                      <th>Текущая цена</th>
+                      <th>Скидка</th>
+                      <th>Маржа</th>
+                      <th>Управление</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredProducts.length ? (
+                      filteredProducts.map((item) => {
+                        const effectivePrice = getEffectiveProductPrice(item);
+                        const margin = Number((effectivePrice - item.cost_price).toFixed(2));
+
+                        return (
+                          <tr key={item.id}>
+                            <td>
+                              <div className={scss.discountProduct}>
+                                <strong>{item.name}</strong>
+                                <span>#{item.id}</span>
+                              </div>
+                            </td>
+                            <td>{item.category_name}</td>
+                            <td>{formatMoney(item.base_price)}</td>
+                            <td>{formatMoney(item.cost_price)}</td>
+                            <td>{formatMoney(effectivePrice)}</td>
+                            <td>
+                              <div className={scss.discountCell}>
+                                <input
+                                  type="number"
+                                  min={0}
+                                  value={discountDrafts[item.id] ?? ""}
+                                  onChange={(event) =>
+                                    handleDiscountDraftChange(item.id, event.target.value)
+                                  }
+                                  placeholder="Без скидки"
+                                />
+                                <div className={scss.discountPresets}>
+                                  {[5, 10, 15, 20, 30].map((percent) => (
+                                    <button
+                                      key={`${item.id}-${percent}`}
+                                      type="button"
+                                      className={scss.presetButton}
+                                      onClick={() => applyDiscountPreset(item, percent)}
+                                    >
+                                      -{percent}%
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <div
+                                className={`${scss.marginValue} ${
+                                  margin < 0 ? scss.negativeValue : scss.positiveValue
+                                }`}
+                              >
+                                {formatMoney(margin)}
+                              </div>
+                            </td>
+                            <td>
+                              <div className={scss.rowActions}>
+                                <button
+                                  type="button"
+                                  className={scss.secondaryAction}
+                                  onClick={() => resetDiscountDraft(item.id)}
+                                >
+                                  Сбросить
+                                </button>
+                                <button
+                                  type="button"
+                                  className={scss.action}
+                                  onClick={() => void handleDiscountSave(item)}
+                                  disabled={discountSavingId === item.id}
+                                >
+                                  {discountSavingId === item.id ? "Сохранение..." : "Сохранить"}
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan={8}>Товары не найдены.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {activeTab === "orders" && (
             <div className={scss.panel}>
               <h2>Заказы</h2>
@@ -1321,34 +1666,64 @@ const AdminPanel = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredOrders.map((item) => (
-                      <tr key={item.id}>
-                        <td>{item.order_number}</td>
-                        <td>{item.customer_name}</td>
-                        <td>{formatDate(item.created_at)}</td>
-                        <td>{STATUS_LABELS[item.status]}</td>
-                        <td>{formatMoney(item.total_amount)}</td>
-                        <td>
-                          {item.status !== "delivered" ? (
-                            <button
-                              type="button"
-                              className={scss.action}
-                              onClick={() => void handleOrderDelivered(item.id)}
-                            >
-                              Доставлен
-                            </button>
-                          ) : (
-                            "Готово"
-                          )}
-                        </td>
+                    {filteredOrders.length ? (
+                      filteredOrders.map((item) => (
+                        <tr
+                          key={item.id}
+                          className={scss.clickableRow}
+                          onClick={() => openOrderDetailsModal(item)}
+                        >
+                          <td>{item.order_number}</td>
+                          <td>{item.customer_name}</td>
+                          <td>{formatDate(item.created_at)}</td>
+                          <td>{STATUS_LABELS[item.status]}</td>
+                          <td>{formatMoney(item.total_amount)}</td>
+                          <td>
+                            <div className={scss.rowActions}>
+                              <button
+                                type="button"
+                                className={scss.secondaryAction}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  openOrderDetailsModal(item);
+                                }}
+                              >
+                                {"Подробнее"}
+                              </button>
+                              {(() => {
+                                const nextStatus = getNextOrderStatus(item.status);
+                                if (!nextStatus) {
+                                  return <span>{"Готово"}</span>;
+                                }
+
+                                return (
+                                  <button
+                                    type="button"
+                                    className={scss.action}
+                                    disabled={isUpdatingOrderStatus}
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      void handleOrderStatusChange(item.id, nextStatus);
+                                    }}
+                                  >
+                                    {STATUS_LABELS[nextStatus]}
+                                  </button>
+                                );
+                              })()}
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={6}>No orders found.</td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
           )}
-
           {activeTab === "content" && (
             <div className={scss.panel}>
               <h2>Контент</h2>
@@ -1495,7 +1870,7 @@ const AdminPanel = () => {
                     </div>
                     <p>{item.message}</p>
                     <small>
-                      {item.actor.name} · {item.actor.role}
+                      {item.actor.name} В· {item.actor.role}
                     </small>
                   </li>
                 ))}
@@ -1503,6 +1878,217 @@ const AdminPanel = () => {
             </div>
           )}
 
+          {selectedOrder && (
+            <div
+              className={scss.modalOverlay}
+              onClick={(event) => {
+                if (event.currentTarget === event.target) {
+                  closeOrderDetailsModal();
+                }
+              }}
+            >
+              <div className={`${scss.modal} ${scss.orderModal}`}>
+                <div className={scss.modalHeader}>
+                  <div className={scss.orderModalHeader}>
+                    <p>{"Детали заказа"}</p>
+                    <h3>{selectedOrder.order_number}</h3>
+                  </div>
+                  <button
+                    type="button"
+                    className={scss.closeButton}
+                    onClick={closeOrderDetailsModal}
+                    aria-label="Close order details"
+                  >
+                    <FiX />
+                  </button>
+                </div>
+
+                <div className={scss.modalBody}>
+                  <div className={scss.orderDetailsGrid}>
+                    <article className={scss.orderDetailCard}>
+                      <h4>{"Клиент"}</h4>
+                      <dl className={scss.orderMetaList}>
+                        <div>
+                          <dt>{"Имя"}</dt>
+                          <dd>{selectedOrder.customer_name}</dd>
+                        </div>
+                        <div>
+                          <dt>{"Телефон"}</dt>
+                          <dd>{selectedOrder.customer_phone}</dd>
+                        </div>
+                        <div>
+                          <dt>{"ID клиента"}</dt>
+                          <dd>#{selectedOrder.customer_id}</dd>
+                        </div>
+                      </dl>
+                    </article>
+
+                    <article className={scss.orderDetailCard}>
+                      <h4>{"Статус и доставка"}</h4>
+                      <dl className={scss.orderMetaList}>
+                        <div>
+                          <dt>{"Статус заказа"}</dt>
+                          <dd>{STATUS_LABELS[selectedOrder.status]}</dd>
+                        </div>
+                        <div>
+                          <dt>{"Оплата"}</dt>
+                          <dd>{PAYMENT_STATUS_LABELS[selectedOrder.payment_status]}</dd>
+                        </div>
+                        <div>
+                          <dt>{"Способ доставки"}</dt>
+                          <dd>{DELIVERY_METHOD_LABELS[selectedOrder.delivery_method]}</dd>
+                        </div>
+                        <div>
+                          <dt>{"Создан"}</dt>
+                          <dd>{formatDate(selectedOrder.created_at)}</dd>
+                        </div>
+                        <div>
+                          <dt>{"Обновлен"}</dt>
+                          <dd>{formatDate(selectedOrder.updated_at)}</dd>
+                        </div>
+                      </dl>
+                    </article>
+
+                    <article className={scss.orderDetailCard}>
+                      <div className={scss.orderSectionHead}>
+                        <h4>{"Управление статусом"}</h4>
+                        <span>{STATUS_LABELS[normalizeWorkflowStatus(selectedOrder.status)]}</span>
+                      </div>
+
+                      {selectedOrder.status === "cancelled" || selectedOrder.status === "returned" ? (
+                        <p className={scss.statusHint}>
+                          {"Для отмененных и возвращённых заказов поэтапный переход отключен."}
+                        </p>
+                      ) : (
+                        <>
+                          <div className={scss.statusFlow}>
+                            {ORDER_WORKFLOW.map((status, index) => {
+                              const currentIndex = ORDER_WORKFLOW.indexOf(
+                                normalizeWorkflowStatus(selectedOrder.status),
+                              );
+                              const isActive = normalizeWorkflowStatus(selectedOrder.status) === status;
+                              const isCompleted = currentIndex > index;
+                              const isNext = currentIndex + 1 === index;
+
+                              return (
+                                <button
+                                  key={status}
+                                  type="button"
+                                  className={`${scss.statusStep} ${
+                                    isActive
+                                      ? scss.statusStepActive
+                                      : isCompleted
+                                        ? scss.statusStepCompleted
+                                        : ""
+                                  }`}
+                                  disabled={!isNext || isUpdatingOrderStatus}
+                                  onClick={() => void handleOrderStatusChange(selectedOrder.id, status)}
+                                >
+                                  {STATUS_LABELS[status]}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          <p className={scss.statusHint}>
+                            {"Доступен только следующий этап: размещен → собирается → в пути → доставлен."}
+                          </p>
+                        </>
+                      )}
+                    </article>
+
+                    {selectedOrder.delivery_method === "courier" && selectedOrder.address.trim() && (
+                      <article className={scss.orderDetailCard}>
+                        <h4>{"Адрес доставки"}</h4>
+                        <dl className={scss.orderMetaList}>
+                          <div>
+                            <dt>{"Город"}</dt>
+                            <dd>{selectedOrder.city || "-"}</dd>
+                          </div>
+                          <div className={scss.orderMetaWide}>
+                            <dt>{"Адрес"}</dt>
+                            <dd>{selectedOrder.address}</dd>
+                          </div>
+                        </dl>
+                      </article>
+                    )}
+                  </div>
+
+                  <article className={scss.orderDetailCard}>
+                    <div className={scss.orderSectionHead}>
+                      <h4>{"Состав заказа"}</h4>
+                      <span>
+                        {selectedOrder.items.length} {"товаров"}
+                      </span>
+                    </div>
+
+                    <div className={scss.orderItemsList}>
+                      {selectedOrder.items.map((item, index) => (
+                        <div
+                          key={`${selectedOrder.id}-${item.product_id}-${index}`}
+                          className={scss.orderItemRow}
+                        >
+                          <div className={scss.orderItemPreview}>
+                            {item.image_url ? (
+                              <img
+                                src={resolveImageUrl(item.image_url)}
+                                alt={item.color || item.product_name}
+                              />
+                            ) : (
+                              <div className={scss.orderItemPlaceholder}>
+                                {"Нет фото"}
+                              </div>
+                            )}
+                          </div>
+                          <div className={scss.orderItemInfo}>
+                            <strong>{item.product_name}</strong>
+                            <span>{"Цвет"}: {item.color || "-"}</span>
+                            <span>{"Размер"}: {item.size || "-"}</span>
+                          </div>
+                          <div className={scss.orderItemMeta}>
+                            <span>{item.quantity} {"шт."}</span>
+                            <span>{formatMoney(item.unit_price)}</span>
+                            <strong>{formatMoney(item.total_price)}</strong>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+
+                  <article className={scss.orderDetailCard}>
+                    <h4>{"Итоги"}</h4>
+                    <ul className={scss.orderTotals}>
+                      <li>
+                        <span>{"Товары"}</span>
+                        <strong>{formatMoney(selectedOrder.subtotal)}</strong>
+                      </li>
+                      <li>
+                        <span>{"Доставка"}</span>
+                        <strong>{formatMoney(selectedOrder.delivery_price)}</strong>
+                      </li>
+                      <li>
+                        <span>{"Скидка"}</span>
+                        <strong>{formatMoney(selectedOrder.discount_amount)}</strong>
+                      </li>
+                      <li className={scss.orderTotalFinal}>
+                        <span>{"Итог к оплате"}</span>
+                        <strong>{formatMoney(selectedOrder.total_amount)}</strong>
+                      </li>
+                    </ul>
+                  </article>
+                </div>
+
+                <div className={scss.modalActions}>
+                  <button
+                    type="button"
+                    className={scss.secondary}
+                    onClick={closeOrderDetailsModal}
+                  >
+                    {"Закрыть"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           {isProductModalOpen && (
             <div
               className={scss.modalOverlay}
@@ -1628,6 +2214,19 @@ const AdminPanel = () => {
                             onChange={(event) =>
                               handleProductFieldChange("base_price", event.target.value)
                             }
+                          />
+                        </label>
+
+                        <label className={scss.formField}>
+                          <span>Cost price</span>
+                          <input
+                            type="number"
+                            min={0}
+                            value={productForm.cost_price}
+                            onChange={(event) =>
+                              handleProductFieldChange("cost_price", event.target.value)
+                            }
+                            placeholder="Used for profit calculation"
                           />
                         </label>
 
@@ -1769,4 +2368,7 @@ const AdminPanel = () => {
 };
 
 export default AdminPanel;
+
+
+
 

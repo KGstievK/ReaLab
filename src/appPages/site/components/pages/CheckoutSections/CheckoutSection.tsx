@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -70,53 +70,53 @@ type FormErrors = Partial<Record<keyof FormData, string>> & {
 type ResultState = "success" | "error" | null;
 
 const DELIVERY_PRICE = 200;
-const DISCOUNT_PRICE = 600;
+const DISCOUNT_PRICE = 0;
 
 const TEXT = {
-  notSelected: "\u041d\u0435 \u0432\u044b\u0431\u0440\u0430\u043d",
-  cityBishkek: "\u0411\u0438\u0448\u043a\u0435\u043a",
-  cityOsh: "\u041e\u0448",
-  cityKarakol: "\u041a\u0430\u0440\u0430\u043a\u043e\u043b",
-  phoneError: "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u044b\u0439 \u043d\u043e\u043c\u0435\u0440",
-  stepOneTitle: "\u041b\u0418\u0427\u041d\u0410\u042f \u0418\u041d\u0424\u041e\u0420\u041c\u0410\u0426\u0418\u042f",
-  stepTwoTitle: "\u0414\u041e\u0421\u0422\u0410\u0412\u041a\u0410",
-  stepThreeTitle: "\u041f\u041e\u0414\u0422\u0412\u0415\u0420\u0416\u0414\u0415\u041d\u0418\u0415",
-  checkoutTitle: "\u041e\u0444\u043e\u0440\u043c\u043b\u0435\u043d\u0438\u0435 \u0437\u0430\u043a\u0430\u0437\u0430",
-  confirmationTitle: "\u041f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0438\u0435",
-  payDetails: "\u0414\u0435\u0442\u0430\u043b\u0438 \u043e\u043f\u043b\u0430\u0442\u044b",
-  home: "\u0413\u043b\u0430\u0432\u043d\u0430\u044f",
-  cart: "\u041a\u043e\u0440\u0437\u0438\u043d\u0430",
-  back: "\u041d\u0430\u0437\u0430\u0434",
-  name: "\u0418\u041c\u042f",
-  phone: "\u041d\u041e\u041c\u0415\u0420 \u0422\u0415\u041b\u0415\u0424\u041e\u041d\u0410",
-  city: "\u0413\u041e\u0420\u041e\u0414",
-  address: "\u0410\u0414\u0420\u0415\u0421",
-  namePlaceholder: "\u0410\u0439\u0433\u0435\u0440\u0438\u043c",
+  notSelected: "Не выбран",
+  cityBishkek: "Бишкек",
+  cityOsh: "Ош",
+  cityKarakol: "Каракол",
+  phoneError: "Введите корректный номер",
+  stepOneTitle: "ЛИЧНАЯ ИНФОРМАЦИЯ",
+  stepTwoTitle: "ДОСТАВКА",
+  stepThreeTitle: "ПОДТВЕРЖДЕНИЕ",
+  checkoutTitle: "Оформление заказа",
+  confirmationTitle: "Подтверждение",
+  payDetails: "Детали оплаты",
+  home: "Главная",
+  cart: "Корзина",
+  back: "Назад",
+  name: "ИМЯ",
+  phone: "НОМЕР ТЕЛЕФОНА",
+  city: "ГОРОД",
+  address: "АДРЕС",
+  namePlaceholder: "Айгерим",
   addressPlaceholder:
-    "ABC 12A, \u0411\u0438\u0448\u043a\u0435\u043a, \u041a\u044b\u0440\u0433\u044b\u0437\u0441\u0442\u0430\u043d",
-  enterName: "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0438\u043c\u044f",
-  enterPhone: "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043d\u043e\u043c\u0435\u0440 \u0442\u0435\u043b\u0435\u0444\u043e\u043d\u0430",
-  chooseCity: "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0433\u043e\u0440\u043e\u0434",
-  enterAddress: "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0430\u0434\u0440\u0435\u0441",
-  chooseDelivery: "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0441\u043f\u043e\u0441\u043e\u0431 \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f",
-  choosePayment: "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0441\u043f\u043e\u0441\u043e\u0431 \u043e\u043f\u043b\u0430\u0442\u044b",
-  qrUnavailable: "QR-\u043a\u043e\u0434 \u0432\u0440\u0435\u043c\u0435\u043d\u043d\u043e \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u0435\u043d",
-  pickup: "\u0421\u0430\u043c\u043e\u0432\u044b\u0432\u043e\u0437",
-  pickupApi: "\u0441\u0430\u043c\u043e\u0432\u044b\u0437\u043e\u0432",
-  pickupEta: "1-2 \u0440\u0430\u0431\u043e\u0447\u0438\u0445 \u0434\u043d\u044f",
-  courier: "\u0414\u043e\u0441\u0442\u0430\u0432\u043a\u0430",
-  courierEta: "\u0437\u0430 \u0447\u0430\u0441",
-  returnToCart: "\u0412\u0435\u0440\u043d\u0443\u0442\u044c \u0432 \u043a\u043e\u0440\u0437\u0438\u043d\u0443",
-  notSpecified: "\u041d\u0435 \u0443\u043a\u0430\u0437\u0430\u043d",
-  subtotal: "\u0418\u0442\u043e\u0433",
-  delivery: "\u0414\u043e\u0441\u0442\u0430\u0432\u043a\u0430",
-  discount: "\u0421\u043a\u0438\u0434\u043a\u0430",
-  totalToPay: "\u0418\u0442\u043e\u0433\u043e \u043a \u043e\u043f\u043b\u0430\u0442\u0435:",
-  continue: "\u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u044c",
-  continueMobile: "\u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u044c \u2192",
-  pay: "\u041e\u043f\u043b\u0430\u0442\u0438\u0442\u044c",
-  wait: "\u041f\u043e\u0434\u043e\u0436\u0434\u0438\u0442\u0435...",
-  step: "\u0428\u0430\u0433",
+    "ABC 12A, Бишкек, Кыргызстан",
+  enterName: "Введите имя",
+  enterPhone: "Введите номер телефона",
+  chooseCity: "Выберите город",
+  enterAddress: "Введите адрес",
+  chooseDelivery: "Выберите способ получения",
+  choosePayment: "Выберите способ оплаты",
+  qrUnavailable: "QR-код временно недоступен",
+  pickup: "Самовывоз",
+  pickupApi: "самовызов",
+  pickupEta: "1-2 рабочих дня",
+  courier: "Доставка",
+  courierEta: "за час",
+  returnToCart: "Вернуть в корзину",
+  notSpecified: "Не указан",
+  subtotal: "Итог",
+  delivery: "Доставка",
+  discount: "Скидка",
+  totalToPay: "Итого к оплате:",
+  continue: "Продолжить",
+  continueMobile: "Продолжить →",
+  pay: "Оплатить",
+  wait: "Подождите...",
+  step: "Шаг",
 } as const;
 
 const toNumber = (value: unknown) => {
@@ -124,7 +124,7 @@ const toNumber = (value: unknown) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-const formatSom = (value: number) => `${value.toLocaleString("ru-RU")}\u0441`;
+const formatSom = (value: number) => `${value.toLocaleString("ru-RU")}с`;
 
 const getPaymentMethodLabel = (method: PaymentMethod) =>
   PAYMENT_METHOD_OPTIONS.find((item) => item.id === method)?.label ??
@@ -287,7 +287,7 @@ const CheckoutSection = () => {
       cart_id: normalizedCart.id,
       delivery: (deliveryMethod === "pickup"
         ? TEXT.pickupApi
-        : "\u043a\u0443\u0440\u044c\u0435\u0440") as IOrderPost["delivery"],
+        : "курьер") as IOrderPost["delivery"],
       first_name: formData.firstName,
       phone_number: formData.phoneNumber,
       city: formData.city,
@@ -309,17 +309,23 @@ const CheckoutSection = () => {
         deliveryPrice: String(deliveryPrice),
         discountPrice: String(discountPrice),
         totalToPay: String(totalToPay),
-        items: basketData.map((item) => ({
-          name: item.clothes.clothes_name,
-          colorName:
-            item.clothes.clothes_img.find((img) => img.id === item.color)
-              ?.color || TEXT.notSpecified,
-          size: item.size,
-          quantity: item.quantity,
-          unitPrice: String(item.just_price),
-          lineTotal: String(toNumber(item.just_price) * item.quantity),
-          photos: item.clothes.clothes_img.map((img) => img.photo),
-        })),
+        items: basketData.map((item) => {
+          const selectedImage = item.clothes.clothes_img.find(
+            (img) => img.id === item.color,
+          );
+          const selectedPhoto =
+            selectedImage?.photo || item.clothes.clothes_img[0]?.photo;
+
+          return {
+            name: item.clothes.clothes_name,
+            colorName: selectedImage?.color || TEXT.notSpecified,
+            size: item.size,
+            quantity: item.quantity,
+            unitPrice: String(item.just_price),
+            lineTotal: String(toNumber(item.just_price) * item.quantity),
+            photos: selectedPhoto ? [selectedPhoto] : [],
+          };
+        }),
       });
 
       setResultState("success");
@@ -671,3 +677,4 @@ const CheckoutSection = () => {
 };
 
 export default CheckoutSection;
+

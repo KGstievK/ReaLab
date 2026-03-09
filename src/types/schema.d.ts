@@ -505,6 +505,7 @@ interface AdminOrderItem {
   total_price: number;
   size: string;
   color: string;
+  image_url: string;
 }
 
 interface AdminOrder {
@@ -513,6 +514,8 @@ interface AdminOrder {
   customer_id: number;
   customer_name: string;
   customer_phone: string;
+  city: string;
+  address: string;
   created_at: string;
   updated_at: string;
   status: AdminOrderStatus;
@@ -551,6 +554,7 @@ interface AdminProductVariant {
   quantity: number;
   price: number;
   discount_price: number | null;
+  cost_price: number;
   active: boolean;
 }
 
@@ -568,6 +572,9 @@ interface AdminProduct {
   average_rating: number;
   sold_items: number;
   total_stock: number;
+  base_price: number;
+  discount_price: number | null;
+  cost_price: number;
   promo_categories: string[];
   images: AdminProductImage[];
   variants: AdminProductVariant[];
@@ -580,6 +587,7 @@ interface AdminProductPayload {
   textile_name: string;
   active: boolean;
   base_price: number;
+  cost_price: number;
   discount_price: number | null;
   sizes: string[];
   colors: string[];
@@ -667,12 +675,14 @@ interface AdminFinanceSummary {
   period_start: string;
   period_end: string;
   currency: "KGS";
+  product_revenue: number;
   gross_revenue: number;
   net_revenue: number;
   discount_total: number;
   delivery_income: number;
   refund_total: number;
   expenses_total: number;
+  cost_of_goods_sold: number;
   profit: number;
   average_order_value: number;
   paid_orders: number;

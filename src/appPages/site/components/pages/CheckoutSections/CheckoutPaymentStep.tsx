@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Mbank from "@/assets/images/Mbank.svg";
@@ -38,7 +38,7 @@ const CheckoutPaymentStep = ({
     <div className={scss.section}>
       <h2>
         {
-          "\u041e\u041f\u041b\u0410\u0422\u0418\u0422\u042c \u0427\u0415\u0420\u0415\u0417:"
+          "ОПЛАТИТЬ ЧЕРЕЗ:"
         }
       </h2>
 
@@ -77,7 +77,7 @@ const CheckoutPaymentStep = ({
         <div className={scss.qrBlock}>
           <p>
             {
-              "\u041e\u043f\u043b\u0430\u0442\u0438\u0442\u0435 \u043f\u043e QR-\u043a\u043e\u0434\u0443 \u0438 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u043e\u043f\u043b\u0430\u0442\u0443."
+              "Оплатите по QR-коду и подтвердите оплату."
             }
           </p>
 
@@ -98,7 +98,7 @@ const CheckoutPaymentStep = ({
 
           {qrWhatsapp && (
             <a href={qrWhatsapp} target="_blank" rel="noreferrer">
-              {"\u041e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u0447\u0435\u043a \u0432 WhatsApp"}
+              {"Отправить чек в WhatsApp"}
             </a>
           )}
         </div>
@@ -110,4 +110,5 @@ const CheckoutPaymentStep = ({
 };
 
 export default CheckoutPaymentStep;
+
 

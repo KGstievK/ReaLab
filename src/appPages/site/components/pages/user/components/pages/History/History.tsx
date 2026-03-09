@@ -1,11 +1,22 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { FaBoxOpen } from "react-icons/fa6";
+import { GrBasket } from "react-icons/gr";
+import { HiOutlineArrowPath } from "react-icons/hi2";
+import { TbTruckDelivery } from "react-icons/tb";
 import { useGetOrderQuery } from "../../../../../../../../redux/api/product";
 import styles from "./History.module.scss";
 
 type OrderTab = "current" | "delivered";
+type TimelineStatus =
+  | "placed"
+  | "processing"
+  | "shipping"
+  | "delivered"
+  | "cancelled"
+  | "returned";
 
 interface OrderItem {
   id?: number;
@@ -31,13 +42,59 @@ interface OrderCard {
   };
 }
 
+const STATUS_LABELS: Record<TimelineStatus, string> = {
+  placed: "Заказ размещен",
+  processing: "Собирается",
+  shipping: "В пути",
+  delivered: "Доставлен",
+  cancelled: "Отменен",
+  returned: "Возврат",
+};
+
+const STATUS_MESSAGES: Record<TimelineStatus, string> = {
+  placed: "Ваш заказ размещен.",
+  processing: "Ваш заказ собирается.",
+  shipping: "Ваш заказ в пути.",
+  delivered: "Ваш заказ доставлен.",
+  cancelled: "Ваш заказ отменен.",
+  returned: "Заказ находится в статусе возврата.",
+};
+
+const WORKFLOW: TimelineStatus[] = ["placed", "processing", "shipping", "delivered"];
+
+const TIMELINE_ITEMS: Array<{
+  status: Extract<TimelineStatus, "placed" | "processing" | "shipping" | "delivered">;
+  label: string;
+  icon: ReactNode;
+}> = [
+  {
+    status: "placed",
+    label: "Заказ размещен",
+    icon: <GrBasket />,
+  },
+  {
+    status: "processing",
+    label: "Собирается",
+    icon: <HiOutlineArrowPath />,
+  },
+  {
+    status: "shipping",
+    label: "В пути",
+    icon: <TbTruckDelivery />,
+  },
+  {
+    status: "delivered",
+    label: "Доставлен",
+    icon: <FaBoxOpen />,
+  },
+];
+
 const toNumber = (value: unknown) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-const formatSom = (value: string | number) =>
-  `${toNumber(value).toLocaleString("ru-RU")}\u0441`;
+const formatSom = (value: string | number) => `${toNumber(value).toLocaleString("ru-RU")}с`;
 
 const formatDate = (raw: string) => {
   const date = new Date(raw);
@@ -50,14 +107,38 @@ const formatDate = (raw: string) => {
 
 const normalize = (value: string) => value.trim().toLowerCase();
 
-const isDeliveredStatus = (status: string) => {
+const normalizeOrderStatus = (status: string): TimelineStatus => {
   const normalized = normalize(status);
-  return (
-    normalized.includes("\u0434\u043e\u0441\u0442\u0430\u0432") ||
+
+  if (normalized.includes("cancel") || normalized.includes("отмен")) {
+    return "cancelled";
+  }
+  if (normalized.includes("return") || normalized.includes("возврат")) {
+    return "returned";
+  }
+  if (
     normalized.includes("delivered") ||
-    normalized.includes("\u043f\u043e\u043b\u0443\u0447")
-  );
+    normalized.includes("достав") ||
+    normalized.includes("получ")
+  ) {
+    return "delivered";
+  }
+  if (normalized.includes("shipping") || normalized.includes("в пути")) {
+    return "shipping";
+  }
+  if (
+    normalized.includes("processing") ||
+    normalized.includes("packaging") ||
+    normalized.includes("обработ") ||
+    normalized.includes("собира")
+  ) {
+    return "processing";
+  }
+
+  return "placed";
 };
+
+const isDeliveredStatus = (status: string) => normalizeOrderStatus(status) === "delivered";
 
 const getOrderImages = (order: OrderCard) =>
   order.cart.cart_items
@@ -70,6 +151,8 @@ const getOrderImages = (order: OrderCard) =>
 const History = () => {
   const { data } = useGetOrderQuery();
   const [tab, setTab] = useState<OrderTab>("current");
+  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+  const statusPanelRef = useRef<HTMLDivElement | null>(null);
 
   const orders: OrderCard[] = useMemo(
     () => (Array.isArray(data) ? (data as OrderCard[]) : []),
@@ -92,15 +175,43 @@ const History = () => {
   );
 
   useEffect(() => {
-    if (deliveredOrders.length > 0) {
+    if (tab === "current" && currentOrders.length === 0 && deliveredOrders.length > 0) {
       setTab("delivered");
+    }
+    if (tab === "delivered" && deliveredOrders.length === 0 && currentOrders.length > 0) {
+      setTab("current");
+    }
+  }, [currentOrders.length, deliveredOrders.length, tab]);
+
+  const visibleOrders = tab === "current" ? currentOrders : deliveredOrders;
+
+  const selectedOrder = useMemo(
+    () => visibleOrders.find((order) => order.id === selectedOrderId) ?? null,
+    [selectedOrderId, visibleOrders],
+  );
+
+  useEffect(() => {
+    if (selectedOrderId && !visibleOrders.some((order) => order.id === selectedOrderId)) {
+      setSelectedOrderId(null);
+    }
+  }, [selectedOrderId, visibleOrders]);
+
+  useEffect(() => {
+    if (!selectedOrder) {
       return;
     }
 
-    setTab("current");
-  }, [deliveredOrders.length]);
+    requestAnimationFrame(() => {
+      statusPanelRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  }, [selectedOrder]);
 
-  const visibleOrders = tab === "current" ? currentOrders : deliveredOrders;
+  const handleStatusToggle = (orderId: number) => {
+    setSelectedOrderId((prev) => (prev === orderId ? null : orderId));
+  };
 
   const renderThumbs = (order: OrderCard) => {
     const images = getOrderImages(order);
@@ -111,12 +222,7 @@ const History = () => {
       <div className={styles.orderItems}>
         {visible.map((photo, idx) => (
           <div key={`${order.id}-img-${idx}`} className={styles.item}>
-            <Image
-              src={photo}
-              alt={"\u0422\u043e\u0432\u0430\u0440"}
-              width={162}
-              height={112}
-            />
+            <Image src={photo} alt={"Товар"} width={162} height={112} />
           </div>
         ))}
 
@@ -125,14 +231,76 @@ const History = () => {
     );
   };
 
+  const renderStatusPanel = () => {
+    if (!selectedOrder) {
+      return null;
+    }
+
+    const normalizedStatus = normalizeOrderStatus(selectedOrder.order_status);
+    const currentIndex = WORKFLOW.indexOf(normalizedStatus);
+
+    return (
+      <div ref={statusPanelRef} className={styles.statusPanel}>
+        <div className={styles.statusPanelHeader}>
+          <h3>{STATUS_MESSAGES[normalizedStatus]}</h3>
+          {/* <p>
+            {
+              "Отслеживание, возврат или покупка товаров"
+            }
+          </p> */}
+        </div>
+
+        <div className={styles.statusTimeline}>
+          {TIMELINE_ITEMS.map((item, index) => {
+            const isActive = normalizedStatus === item.status;
+            const isCompleted = currentIndex >= index && currentIndex >= 0;
+
+            return (
+              <div
+                key={`${selectedOrder.id}-${item.status}`}
+                className={`${styles.timelineItem} ${
+                  isActive
+                    ? styles.timelineItemActive
+                    : isCompleted
+                      ? styles.timelineItemCompleted
+                      : ""
+                }`}
+              >
+                <div className={styles.timelineIcon}>{item.icon}</div>
+                <p>{item.label}</p>
+              </div>
+            );
+          })}
+        </div>
+
+        <p className={styles.statusMessage}></p>
+
+        {/* <div className={styles.statusMeta}>
+          <div className={styles.statusMetaItem}>
+            <span>{"Дата заказа"}</span>
+            <strong>{formatDate(selectedOrder.date)}</strong>
+          </div>
+          <div className={styles.statusMetaItem}>
+            <span>{"Всего"}</span>
+            <strong>{formatSom(selectedOrder.cart.total_price)}</strong>
+          </div>
+          <div className={styles.statusMetaItem}>
+            <span>{"Номер заказа"}</span>
+            <strong>#{selectedOrder.id}</strong>
+          </div>
+        </div> */}
+
+        {/* {renderThumbs(selectedOrder)} */}
+      </div>
+    );
+  };
+
   return (
     <section className={styles.History}>
-      <h2 className={styles.title}>
-        {"\u0418\u0441\u0442\u043e\u0440\u0438\u044f \u0437\u0430\u043a\u0430\u0437\u043e\u0432"}
-      </h2>
+      <h2 className={styles.title}>{"История заказов"}</h2>
       <p className={styles.subtitle}>
         {
-          "\u041e\u0442\u0441\u043b\u0435\u0436\u0438\u0432\u0430\u043d\u0438\u0435, \u0432\u043e\u0437\u0432\u0440\u0430\u0442 \u0438\u043b\u0438 \u043f\u043e\u043a\u0443\u043f\u043a\u0430 \u0442\u043e\u0432\u0430\u0440\u043e\u0432"
+          "Отслеживание, возврат или покупка товаров"
         }
       </p>
 
@@ -142,7 +310,7 @@ const History = () => {
           className={`${styles.tab} ${tab === "current" ? styles.active : ""}`}
           onClick={() => setTab("current")}
         >
-          {"\u0422\u0435\u043a\u0443\u0449\u0438\u0439"}
+          {"Текущий"}
           <span className={`${styles.tabBadge} ${currentOrders.length > 0 ? styles.tabBadgeFilled : ""}`}>
             {currentOrders.length}
           </span>
@@ -153,19 +321,21 @@ const History = () => {
           className={`${styles.tab} ${tab === "delivered" ? styles.active : ""}`}
           onClick={() => setTab("delivered")}
         >
-          {"\u0414\u043e\u0441\u0442\u0430\u0432\u043b\u0435\u043d"}
+          {"Доставлен"}
           <span className={`${styles.tabBadge} ${deliveredOrders.length > 0 ? styles.tabBadgeFilled : ""}`}>
             {deliveredOrders.length}
           </span>
         </button>
       </div>
 
+      {renderStatusPanel()}
+
       {visibleOrders.length === 0 ? (
         <div className={styles.emptyState}>
           <p>
             {tab === "current"
-              ? "\u0423 \u0432\u0430\u0441 \u043d\u0435\u0442 \u0442\u0435\u043a\u0443\u0449\u0438\u0445 \u0437\u0430\u043a\u0430\u0437\u043e\u0432"
-              : "\u0423 \u0432\u0430\u0441 \u043d\u0435\u0442 \u0434\u043e\u0441\u0442\u0430\u0432\u043b\u0435\u043d\u043d\u044b\u0445 \u0437\u0430\u043a\u0430\u0437\u043e\u0432"}
+              ? "У вас нет текущих заказов"
+              : "У вас нет доставленных заказов"}
           </p>
         </div>
       ) : (
@@ -174,22 +344,35 @@ const History = () => {
             <article key={order.id} className={styles.orderCard}>
               <div className={styles.orderMeta}>
                 <div className={styles.metaItem}>
-                  <span>{"\u041d\u043e\u043c\u0435\u0440 \u0437\u0430\u043a\u0430\u0437\u0430"}</span>
+                  <span>{"Номер заказа"}</span>
                   <strong>#{order.id}</strong>
                 </div>
 
                 <div className={styles.metaItem}>
-                  <span>{"\u0412\u0441\u0435\u0433\u043e"}</span>
+                  <span>{"Всего"}</span>
                   <strong>{formatSom(order.cart.total_price)}</strong>
                 </div>
 
                 <div className={styles.metaItem}>
                   <span>
                     {tab === "delivered"
-                      ? "\u0414\u0430\u0442\u0430 \u0434\u043e\u0441\u0442\u0430\u0432\u043a\u0438"
-                      : "\u0414\u0430\u0442\u0430 \u0437\u0430\u043a\u0430\u0437\u0430"}
+                      ? "Дата доставки"
+                      : "Дата заказа"}
                   </span>
                   <strong>{formatDate(order.date)}</strong>
+                </div>
+
+                <div className={styles.metaAction}>
+                  <button
+                    type="button"
+                    className={`${styles.statusAction} ${
+                      selectedOrder?.id === order.id ? styles.statusActionActive : ""
+                    }`}
+                    onClick={() => handleStatusToggle(order.id)}
+                    aria-expanded={selectedOrder?.id === order.id}
+                  >
+                    {"Статус заказа"}
+                  </button>
                 </div>
               </div>
 
@@ -203,3 +386,4 @@ const History = () => {
 };
 
 export default History;
+
