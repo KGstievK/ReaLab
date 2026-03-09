@@ -6,14 +6,19 @@ export type TelegramNotifyPayload = {
   city: string;
   address: string;
   delivery: string;
+  paymentMethod: string;
   orderUser: number;
-  totalPrice: string;
+  subtotal: string;
+  deliveryPrice: string;
+  discountPrice: string;
+  totalToPay: string;
   items: Array<{
     name: string;
-    color: number;
+    colorName: string;
     size: string;
     quantity: number;
     unitPrice: string;
+    lineTotal: string;
     photos: string[];
   }>;
 };
@@ -37,4 +42,3 @@ export const notifyTelegramFrontend = async (
     console.error("Telegram notification failed:", error);
   }
 };
-

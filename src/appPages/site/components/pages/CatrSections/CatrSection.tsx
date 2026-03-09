@@ -49,6 +49,12 @@ const toNumber = (value: unknown) => {
 
 const formatSom = (value: number) => `${value.toLocaleString("ru-RU")}c`;
 
+const withUpdatedQuantity = (item: CartItem, quantity: number): CartItem => ({
+  ...item,
+  quantity,
+  total_price: toNumber(item.just_price) * quantity,
+});
+
 const CatrSection = () => {
   const { data: cart, refetch, isLoading } = useGetCartQuery(undefined, {
     refetchOnMountOrArgChange: true,
@@ -80,6 +86,8 @@ const CatrSection = () => {
       return;
     }
 
+    const previousBasketData = basketData;
+
     try {
       const currentItem = basketData.find((item) => item.id === itemId);
       if (!currentItem) {
@@ -99,6 +107,16 @@ const CatrSection = () => {
           sameItems.reduce((total, item) => total + item.quantity, 0) +
           quantity;
 
+        setBasketData(
+          basketData
+            .filter((item) => !sameItems.some((same) => same.id === item.id))
+            .map((item) =>
+              item.id === itemId
+                ? withUpdatedQuantity(item, mergedQuantity)
+                : item,
+            ),
+        );
+
         for (const item of sameItems) {
           await deleteMutation(item.id).unwrap();
         }
@@ -108,14 +126,21 @@ const CatrSection = () => {
           updateBasket: { quantity: mergedQuantity },
         }).unwrap();
       } else {
+        setBasketData(
+          basketData.map((item) =>
+            item.id === itemId ? withUpdatedQuantity(item, quantity) : item,
+          ),
+        );
+
         await updateMutation({
           id: itemId,
           updateBasket: { quantity },
         }).unwrap();
       }
 
-      await refetch();
+      void refetch();
     } catch (error) {
+      setBasketData(previousBasketData);
       console.error("Error updating basket:", error);
     }
   };
@@ -147,7 +172,10 @@ const CatrSection = () => {
     (sum, item) => sum + toNumber(item.total_price),
     0,
   );
-  const subtotal = toNumber(normalizedCart?.total_price) || calculatedSubtotal;
+  const subtotal =
+    basketData.length > 0
+      ? calculatedSubtotal
+      : toNumber(normalizedCart?.total_price);
   const delivery = basketData.length > 0 ? DELIVERY_PRICE : 0;
   const discount = basketData.length > 0 ? DISCOUNT_PRICE : 0;
   const payableTotal = Math.max(subtotal + delivery - discount, 0);

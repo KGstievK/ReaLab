@@ -71,7 +71,7 @@ const Welcome = () => {
                 <h1>{data[0].title}</h1>
                 <button onClick={() => router.push("/catalog")}>
                   Каталог
-                  <Image src={arrow} alt="Valid src" />
+                  <Image src={arrow} alt="Valid src"  loading="eager"/>
                 </button>
               </div>
               <div className={scss.Swiper_Image}>
@@ -84,6 +84,7 @@ const Welcome = () => {
                     height={630}
                     style={{ cursor: "pointer" }}
                     onClick={handleMainImageClick}
+                    loading="eager"
                   />
                   <Link href={activeImage.link || "/"}>
                     Купить <Image src={arrow} alt="Valid src" />
@@ -98,6 +99,7 @@ const Welcome = () => {
                     height={234}
                     style={{ cursor: "pointer" }}
                     onClick={() => handlePreviewImageClick(previewPosition + 1)}
+                    loading="eager"
                   />
                 ))}
               </div>

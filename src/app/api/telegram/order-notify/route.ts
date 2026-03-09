@@ -7,10 +7,11 @@ const MAX_MESSAGE_LENGTH = 3500;
 
 type OrderItem = {
   name: string;
-  color: number;
+  colorName: string;
   size: string;
   quantity: number;
   unitPrice: string;
+  lineTotal: string;
   photos: string[];
 };
 
@@ -20,8 +21,12 @@ type OrderNotifyPayload = {
   city: string;
   address: string;
   delivery: string;
+  paymentMethod: string;
   orderUser: number;
-  totalPrice: string;
+  subtotal: string;
+  deliveryPrice: string;
+  discountPrice: string;
+  totalToPay: string;
   items: OrderItem[];
 };
 
@@ -34,6 +39,25 @@ const normalizeNumber = (value: unknown): number | null => {
   const parsed = Number(value);
   if (!Number.isInteger(parsed) || parsed < 0) return null;
   return parsed;
+};
+
+const normalizeMoney = (value: unknown, max = 32): string => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(value);
+  }
+
+  return normalizeText(value, max);
+};
+
+const formatMoney = (value: string): string => {
+  const normalized = value.replace(/\s+/g, "").replace(",", ".");
+  const parsed = Number(normalized);
+
+  if (!Number.isFinite(parsed)) {
+    return value;
+  }
+
+  return `${parsed.toLocaleString("ru-RU")} с`;
 };
 
 const isHttpUrl = (value: string): boolean => {
@@ -50,12 +74,13 @@ const parseItem = (value: unknown): OrderItem | null => {
   const item = value as Partial<OrderItem>;
 
   const name = normalizeText(item.name);
+  const colorName = normalizeText(item.colorName, 40);
   const size = normalizeText(item.size, 20);
-  const unitPrice = normalizeText(item.unitPrice, 32);
-  const color = normalizeNumber(item.color);
+  const unitPrice = normalizeMoney(item.unitPrice, 32);
+  const lineTotal = normalizeMoney(item.lineTotal, 32);
   const quantity = normalizeNumber(item.quantity);
 
-  if (!name || !size || !unitPrice || color === null || quantity === null || quantity < 1) {
+  if (!name || !colorName || !size || !unitPrice || !lineTotal || quantity === null || quantity < 1) {
     return null;
   }
 
@@ -68,10 +93,11 @@ const parseItem = (value: unknown): OrderItem | null => {
 
   return {
     name,
-    color,
+    colorName,
     size,
     quantity,
     unitPrice,
+    lineTotal,
     photos,
   };
 };
@@ -85,10 +111,26 @@ const parsePayload = (value: unknown): OrderNotifyPayload | null => {
   const city = normalizeText(payload.city);
   const address = normalizeText(payload.address, 255);
   const delivery = normalizeText(payload.delivery, 50);
-  const totalPrice = normalizeText(payload.totalPrice, 32);
+  const paymentMethod = normalizeText(payload.paymentMethod, 50);
+  const subtotal = normalizeMoney(payload.subtotal, 32);
+  const deliveryPrice = normalizeMoney(payload.deliveryPrice, 32);
+  const discountPrice = normalizeMoney(payload.discountPrice, 32);
+  const totalToPay = normalizeMoney(payload.totalToPay, 32);
   const orderUser = normalizeNumber(payload.orderUser);
 
-  if (!firstName || !phoneNumber || !city || !address || !delivery || !totalPrice || orderUser === null) {
+  if (
+    !firstName ||
+    !phoneNumber ||
+    !city ||
+    !address ||
+    !delivery ||
+    !paymentMethod ||
+    !subtotal ||
+    !deliveryPrice ||
+    !discountPrice ||
+    !totalToPay ||
+    orderUser === null
+  ) {
     return null;
   }
 
@@ -110,34 +152,45 @@ const parsePayload = (value: unknown): OrderNotifyPayload | null => {
     city,
     address,
     delivery,
+    paymentMethod,
     orderUser,
-    totalPrice,
+    subtotal,
+    deliveryPrice,
+    discountPrice,
+    totalToPay,
     items,
   };
 };
 
 const buildMessage = (payload: OrderNotifyPayload): string => {
   const lines: string[] = [];
-  lines.push(`Recipient: ${payload.firstName}`);
-  lines.push(`User ID: ${payload.orderUser}`);
-  lines.push("Items:");
+  lines.push("Новый заказ");
+  lines.push("");
+  lines.push("Покупатель:");
+  lines.push(`Имя: ${payload.firstName}`);
+  lines.push(`Телефон: ${payload.phoneNumber}`);
+  lines.push(`Город: ${payload.city}`);
+  lines.push(`Адрес: ${payload.address}`);
+  lines.push(`Способ доставки: ${payload.delivery}`);
+  lines.push(`Способ оплаты: ${payload.paymentMethod}`);
+  lines.push("");
+  lines.push("Состав заказа:");
 
   payload.items.forEach((item, index) => {
+    lines.push(`${index + 1}. ${item.name}`);
+    lines.push(`Цвет: ${item.colorName}`);
+    lines.push(`Размер: ${item.size}`);
+    lines.push(`Количество: ${item.quantity} шт.`);
+    lines.push(`Цена за 1 шт.: ${formatMoney(item.unitPrice)}`);
+    lines.push(`Сумма: ${formatMoney(item.lineTotal)}`);
     lines.push("");
-    lines.push(`- Item ${index + 1}`);
-    lines.push(`Name: ${item.name}`);
-    lines.push(`Color ID: ${item.color}`);
-    lines.push(`Size: ${item.size}`);
-    lines.push(`Quantity: ${item.quantity}`);
-    lines.push(`Unit price: ${item.unitPrice}`);
   });
 
-  lines.push("");
-  lines.push(`Total: ${payload.totalPrice}`);
-  lines.push(`Delivery: ${payload.delivery}`);
-  lines.push(`City: ${payload.city}`);
-  lines.push(`Address: ${payload.address}`);
-  lines.push(`Phone: ${payload.phoneNumber}`);
+  lines.push("Итого:");
+  lines.push(`Товары: ${formatMoney(payload.subtotal)}`);
+  lines.push(`Доставка: ${formatMoney(payload.deliveryPrice)}`);
+  lines.push(`Скидка: -${formatMoney(payload.discountPrice)}`);
+  lines.push(`К оплате: ${formatMoney(payload.totalToPay)}`);
 
   return lines.join("\n").slice(0, MAX_MESSAGE_LENGTH);
 };
@@ -375,7 +428,7 @@ export async function POST(request: NextRequest) {
 
       const caption =
         index === 0
-          ? `Check photo: ${item.name}, qty ${item.quantity}`
+          ? `Фото товара: ${item.name}\nЦвет: ${item.colorName}\nКоличество: ${item.quantity} шт.`
           : undefined;
 
       const sentByUrl = await sendTelegramPhotoByUrl({
@@ -394,7 +447,7 @@ export async function POST(request: NextRequest) {
         chatId: telegramChatId,
         photoUrl: resolvedPhoto,
         caption,
-        fallbackName: `product-${item.color}-${index + 1}.jpg`,
+        fallbackName: `product-${item.name}-${index + 1}.jpg`,
       });
     }
   }

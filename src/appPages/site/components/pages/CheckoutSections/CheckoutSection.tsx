@@ -17,7 +17,11 @@ import {
 } from "../../../../../redux/api/product";
 import PaymentResultModal from "./PaymentResultModal";
 import CheckoutPaymentStep, { CheckoutQrItem } from "./CheckoutPaymentStep";
-import { isQrPaymentMethod, PaymentMethod } from "./paymentMethods";
+import {
+  isQrPaymentMethod,
+  PAYMENT_METHOD_OPTIONS,
+  PaymentMethod,
+} from "./paymentMethods";
 import { notifyTelegramFrontend } from "./frontend";
 import scss from "./CheckoutSection.module.scss";
 
@@ -73,7 +77,11 @@ const toNumber = (value: unknown) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-const formatSom = (value: number) => `${value.toLocaleString("ru-RU")}с`;
+const formatSom = (value: number) => `${value.toLocaleString("ru-RU")}СЃ`;
+
+const getPaymentMethodLabel = (method: PaymentMethod) =>
+  PAYMENT_METHOD_OPTIONS.find((item) => item.id === method)?.label ??
+  "РќРµ РІС‹Р±СЂР°РЅ";
 
 const CheckoutSection = () => {
   const router = useRouter();
@@ -104,7 +112,7 @@ const CheckoutSection = () => {
     phoneTouched &&
     formData.phoneNumber &&
     !isValidPhoneNumber(formData.phoneNumber)
-      ? "Введите корректный номер"
+      ? "Р’РІРµРґРёС‚Рµ РєРѕСЂСЂРµРєС‚РЅС‹Р№ РЅРѕРјРµСЂ"
       : "";
 
   const phoneError = errors.phoneNumber || phoneLocalError;
@@ -158,18 +166,18 @@ const CheckoutSection = () => {
   const totalToPay = Math.max(subtotal + deliveryPrice - discountPrice, 0);
 
   const stepLabelThree = isMobile
-    ? "ПОДТВЕРЖДЕНИЕ"
+    ? "РџРћР”РўР’Р•Р Р–Р”Р•РќРР•"
     : step === 3
-      ? "ОПЛАТА"
-      : "ПОДТВЕРЖДЕНИЕ";
+      ? "РћРџР›РђРўРђ"
+      : "РџРћР”РўР’Р•Р Р–Р”Р•РќРР•";
   const pageTitle = isMobile
-    ? "Оформление заказа"
+    ? "РћС„РѕСЂРјР»РµРЅРёРµ Р·Р°РєР°Р·Р°"
     : step === 2
-      ? "Доставка"
+      ? "Р”РѕСЃС‚Р°РІРєР°"
       : step === 3
-        ? "Оплата"
-        : "Оформление заказа";
-  const desktopActionLabel = step === 3 ? "Оплатить" : "Продолжить";
+        ? "РћРїР»Р°С‚Р°"
+        : "РћС„РѕСЂРјР»РµРЅРёРµ Р·Р°РєР°Р·Р°";
+  const desktopActionLabel = step === 3 ? "РћРїР»Р°С‚РёС‚СЊ" : "РџСЂРѕРґРѕР»Р¶РёС‚СЊ";
 
   const qrItems: CheckoutQrItem[] = Array.isArray(payData)
     ? (payData[0]?.pay_title ?? [])
@@ -198,18 +206,18 @@ const CheckoutSection = () => {
     const nextErrors: FormErrors = {};
 
     if (!formData.firstName.trim()) {
-      nextErrors.firstName = "Введите имя";
+      nextErrors.firstName = "Р’РІРµРґРёС‚Рµ РёРјСЏ";
     }
     if (!formData.phoneNumber.trim()) {
-      nextErrors.phoneNumber = "Введите номер телефона";
+      nextErrors.phoneNumber = "Р’РІРµРґРёС‚Рµ РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°";
     } else if (!isValidPhoneNumber(formData.phoneNumber)) {
-      nextErrors.phoneNumber = "Введите корректный номер";
+      nextErrors.phoneNumber = "Р’РІРµРґРёС‚Рµ РєРѕСЂСЂРµРєС‚РЅС‹Р№ РЅРѕРјРµСЂ";
     }
     if (!formData.city.trim()) {
-      nextErrors.city = "Выберите город";
+      nextErrors.city = "Р’С‹Р±РµСЂРёС‚Рµ РіРѕСЂРѕРґ";
     }
     if (!formData.address.trim()) {
-      nextErrors.address = "Введите адрес";
+      nextErrors.address = "Р’РІРµРґРёС‚Рµ Р°РґСЂРµСЃ";
     }
 
     setErrors(nextErrors);
@@ -218,7 +226,7 @@ const CheckoutSection = () => {
 
   const validateStepTwo = () => {
     if (!deliveryMethod) {
-      setErrors({ delivery: "Выберите способ получения" });
+      setErrors({ delivery: "Р’С‹Р±РµСЂРёС‚Рµ СЃРїРѕСЃРѕР± РїРѕР»СѓС‡РµРЅРёСЏ" });
       return false;
     }
 
@@ -251,8 +259,8 @@ const CheckoutSection = () => {
       order_user: normalizedCart.user,
       cart_id: normalizedCart.id,
       delivery: (deliveryMethod === "pickup"
-        ? "самовывоз"
-        : "курьер") as IOrderPost["delivery"],
+        ? "СЃР°РјРѕРІС‹РІРѕР·"
+        : "РєСѓСЂСЊРµСЂ") as IOrderPost["delivery"],
       first_name: formData.firstName,
       phone_number: formData.phoneNumber,
       city: formData.city,
@@ -268,14 +276,21 @@ const CheckoutSection = () => {
         city: formData.city,
         address: formData.address,
         delivery: deliveryMethod === "pickup" ? "Самовывоз" : "Доставка",
+        paymentMethod: getPaymentMethodLabel(paymentMethod),
         orderUser: normalizedCart.user,
-        totalPrice: String(normalizedCart.total_price),
+        subtotal: String(subtotal),
+        deliveryPrice: String(deliveryPrice),
+        discountPrice: String(discountPrice),
+        totalToPay: String(totalToPay),
         items: basketData.map((item) => ({
           name: item.clothes.clothes_name,
-          color: item.color,
+          colorName:
+            item.clothes.clothes_img.find((img) => img.id === item.color)
+              ?.color || "Не указан",
           size: item.size,
           quantity: item.quantity,
           unitPrice: String(item.just_price),
+          lineTotal: String(toNumber(item.just_price) * item.quantity),
           photos: item.clothes.clothes_img.map((img) => img.photo),
         })),
       });
@@ -339,15 +354,15 @@ const CheckoutSection = () => {
                 <button
                   type="button"
                   className={scss.backButton}
-                  aria-label="Назад"
+                  aria-label="РќР°Р·Р°Рґ"
                   onClick={() => router.back()}
                 >
                   <Image src={backIcon} alt="" />
                 </button>
-                <Link href="/">Главная</Link>
+                <Link href="/">Р“Р»Р°РІРЅР°СЏ</Link>
                 <span>/</span>
                 <Link href="/cart" className={scss.current}>
-                  Корзина
+                  РљРѕСЂР·РёРЅР°
                 </Link>
               </nav>
 
@@ -362,8 +377,12 @@ const CheckoutSection = () => {
                   >
                     {step > 1 ? <IoCheckmark /> : <FiUser />}
                   </div>
-                  <span>Шаг 1</span>
-                  <h4>ЛИЧНАЯ ИНФОРМАЦИЯ</h4>
+                  <span className={`${
+                      step === 1 ? scss.active : step > 1 ? scss.completed : ""
+                    }`}>РЁР°Рі 1</span>
+                  <h4 className={`${
+                      step === 1 ? scss.active : step > 1 ? scss.completed : ""
+                    }`}>Р›РР§РќРђРЇ РРќР¤РћР РњРђР¦РРЇ</h4>
                 </div>
 
                 <span className={scss.stepLine} />
@@ -376,8 +395,12 @@ const CheckoutSection = () => {
                   >
                     {step > 2 ? <IoCheckmark /> : <FiTruck />}
                   </div>
-                  <span>Шаг 2</span>
-                  <h4>ДОСТАВКА</h4>
+                  <span className={`${
+                      step === 2 ? scss.active : step > 2 ? scss.completed : ""
+                    }`}>РЁР°Рі 2</span>
+                  <h4 className={`${
+                      step === 2 ? scss.active : step > 2 ? scss.completed : ""
+                    }`}>Р”РћРЎРўРђР’РљРђ</h4>
                 </div>
 
                 <span className={scss.stepLine} />
@@ -388,7 +411,9 @@ const CheckoutSection = () => {
                   >
                     <IoCardOutline />
                   </div>
-                  <span>Шаг 3</span>
+                  <span className={`${
+                      step === 3 ? scss.active : step > 3 ? scss.completed : ""
+                    }`}>РЁР°Рі 3</span>
                   <h4>{stepLabelThree}</h4>
                 </div>
               </div>
@@ -396,15 +421,15 @@ const CheckoutSection = () => {
               <div className={scss.formBlock}>
                 {step === 1 && (
                   <div className={scss.section}>
-                    <h2>ЛИЧНАЯ ИНФОРМАЦИЯ</h2>
+                    <h2>Р›РР§РќРђРЇ РРќР¤РћР РњРђР¦РРЇ</h2>
 
                     <label>
-                      ИМЯ
+                      РРњРЇ
                       <input
                         type="text"
                         value={formData.firstName}
                         onChange={handleChange("firstName")}
-                        placeholder="Айгерим"
+                        placeholder="РђР№РіРµСЂРёРј"
                       />
                       {errors.firstName && (
                         <p role="alert">{errors.firstName}</p>
@@ -412,7 +437,7 @@ const CheckoutSection = () => {
                     </label>
 
                     <label>
-                      НОМЕР ТЕЛЕФОНА
+                      РќРћРњР•Р  РўР•Р›Р•Р¤РћРќРђ
                       <div
                         className={`${scss.phoneField} ${phoneError ? scss.errorField : ""}`}
                       >
@@ -441,15 +466,15 @@ const CheckoutSection = () => {
                     </label>
 
                     <label>
-                      ГОРОД
+                      Р“РћР РћР”
                       <div className={scss.cityField}>
                         <select
                           value={formData.city}
                           onChange={handleChange("city")}
                         >
-                          <option value="Бишкек">Бишкек</option>
-                          <option value="Ош">Ош</option>
-                          <option value="Каракол">Каракол</option>
+                          <option value="Р‘РёС€РєРµРє">Р‘РёС€РєРµРє</option>
+                          <option value="РћС€">РћС€</option>
+                          <option value="РљР°СЂР°РєРѕР»">РљР°СЂР°РєРѕР»</option>
                         </select>
 
                         <FiChevronDown />
@@ -458,12 +483,12 @@ const CheckoutSection = () => {
                     </label>
 
                     <label>
-                      АДРЕС
+                      РђР”Р Р•РЎ
                       <input
                         type="text"
                         value={formData.address}
                         onChange={handleChange("address")}
-                        placeholder="ABC 12A, Бишкек, Кыргызстан"
+                        placeholder="ABC 12A, Р‘РёС€РєРµРє, РљС‹СЂРіС‹Р·СЃС‚Р°РЅ"
                       />
                       {errors.address && <p role="alert">{errors.address}</p>}
                     </label>
@@ -472,7 +497,7 @@ const CheckoutSection = () => {
 
                 {step === 2 && (
                   <div className={scss.section}>
-                    <h2>ДОСТАВКА</h2>
+                    <h2>Р”РћРЎРўРђР’РљРђ</h2>
 
                     <button
                       type="button"
@@ -483,8 +508,8 @@ const CheckoutSection = () => {
                     >
                       <span className={scss.radio} />
                       <div>
-                        <h5>Самовывоз</h5>
-                        <p>1-2 рабочих дней</p>
+                        <h5>РЎР°РјРѕРІС‹РІРѕР·</h5>
+                        <p>1-2 СЂР°Р±РѕС‡РёС… РґРЅРµР№</p>
                       </div>
                     </button>
 
@@ -497,10 +522,10 @@ const CheckoutSection = () => {
                     >
                       <span className={scss.radio} />
                       <div>
-                        <h5>Доставка</h5>
-                        <p>за час</p>
+                        <h5>Р”РѕСЃС‚Р°РІРєР°</h5>
+                        <p>Р·Р° С‡Р°СЃ</p>
                       </div>
-                      <strong>200с</strong>
+                      <strong>200СЃ</strong>
                     </button>
 
                     {errors.delivery && (
@@ -526,17 +551,17 @@ const CheckoutSection = () => {
                       className={scss.backStep}
                       onClick={handleBackStep}
                     >
-                      Назад
+                      РќР°Р·Р°Рґ
                     </button>
                   )}
 
-                  <Link href="/cart">Вернуть в корзину</Link>
+                  <Link href="/cart">Р’РµСЂРЅСѓС‚СЊ РІ РєРѕСЂР·РёРЅСѓ</Link>
                 </div>
               </div>
             </div>
 
             <aside className={scss.rightColumn}>
-              <h2>Детали оплаты</h2>
+              <h2>Р”РµС‚Р°Р»Рё РѕРїР»Р°С‚С‹</h2>
 
               <div className={scss.summaryItems}>
                 {basketData.map((item) => {
@@ -554,7 +579,7 @@ const CheckoutSection = () => {
                       />
                       <div className={scss.summaryText}>
                         <h4>{item.clothes.clothes_name}</h4>
-                        <p>{selectedImage?.color || "Черный"}</p>
+                        <p>{selectedImage?.color || "Р§РµСЂРЅС‹Р№"}</p>
                         <p>
                           {item.quantity} x {toNumber(item.just_price)}
                         </p>
@@ -566,19 +591,19 @@ const CheckoutSection = () => {
 
               <div className={scss.summaryRows}>
                 <div className={scss.row}>
-                  <span>Итог</span>
+                  <span>РС‚РѕРі</span>
                   <span>{formatSom(subtotal)}</span>
                 </div>
                 <div className={scss.row}>
-                  <span>Доставка</span>
+                  <span>Р”РѕСЃС‚Р°РІРєР°</span>
                   <span>{formatSom(deliveryPrice)}</span>
                 </div>
                 <div className={scss.row}>
-                  <span>Скидка</span>
+                  <span>РЎРєРёРґРєР°</span>
                   <span>-{formatSom(discountPrice)}</span>
                 </div>
                 <div className={`${scss.row} ${scss.totalRow}`}>
-                  <span>Итого к оплате:</span>
+                  <span>РС‚РѕРіРѕ Рє РѕРїР»Р°С‚Рµ:</span>
                   <span>{formatSom(totalToPay)}</span>
                 </div>
               </div>
@@ -588,9 +613,9 @@ const CheckoutSection = () => {
                 className={scss.mainAction}
                 onClick={handleMainAction}
               >
-                {isSubmitting ? "Подождите..." : desktopActionLabel}
+                {isSubmitting ? "РџРѕРґРѕР¶РґРёС‚Рµ..." : desktopActionLabel}
                 <span>
-                  {isSubmitting ? "Подождите..." : "Посмотреть все →"}
+                  {isSubmitting ? "РџРѕРґРѕР¶РґРёС‚Рµ..." : "РџРѕСЃРјРѕС‚СЂРµС‚СЊ РІСЃРµ в†’"}
                 </span>
               </button>
             </aside>

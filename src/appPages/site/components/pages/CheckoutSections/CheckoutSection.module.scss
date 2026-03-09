@@ -55,71 +55,87 @@
     margin: 0;
     color: #a73539;
     font-family: "Playfair Display", serif;
-    font-size: 64px;
+    font-size: clamp(48px, 5vw, 64px);
     font-weight: 500;
     line-height: 1.1;
   }
 
   .stepper {
+    width: 100%;
     display: flex;
     align-items: flex-start;
     gap: 8px;
     margin: 8px 0 10px;
-  }
+    .stepItem {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
 
-  .stepItem {
-    width: 212px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
+      > span {
+        width: 100%;
+        color: #b7b7b7;
+        font-family: "Inter", sans-serif;
+        font-size: clamp(10px, 1.2vw, 14px);
+        font-weight: 400;
+        line-height: 10px;
+        &.active {
+          color: #b23941;
+        }
 
-    > span {
-      color: #b7b7b7;
-      font-family: "Inter", sans-serif;
-      font-size: 12px;
-      font-weight: 400;
-      line-height: 20px;
-    }
+        &.completed {
+          color: #b23941;
+        }
+      }
 
-    h4 {
-      margin: 0;
-      color: #c0c0c0;
-      font-family: "Inter", sans-serif;
-      font-size: 16px;
-      font-weight: 500;
-      line-height: 28px;
-    }
-  }
+      h4 {
+        width: 100%;
+        margin: 0;
+        color: #c0c0c0;
+        font-family: "Inter", sans-serif;
+        font-size: clamp(9px, 1.5vw, 16px);
+        font-weight: 500;
+        line-height: clamp(12px, 1.5vw, 16px);
+        &.active {
+          color: #b23941;
+        }
 
-  .stepCircle {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    border: 1px solid #d3d3d3;
-    background: #f7f3f1;
-    color: #bdbdbd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
+        &.completed {
+          color: #b23941;
+        }
+      }
+      .stepCircle {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 1px solid #d3d3d3;
+        background: #f7f3f1;
+        color: #bdbdbd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
 
-    &.active {
-      color: #b23941;
-      border-color: #d5d5d5;
-      background: #f4f1f0;
-    }
+        &.active {
+          color: #b23941;
+          border-color: #d5d5d5;
+          background: #f4f1f0;
+        }
 
-    &.completed {
-      color: #b23941;
-      border-color: #e0dddd;
-      background: #ece8e6;
+        &.completed {
+          color: #b23941;
+          border-color: #e0dddd;
+          background: #ece8e6;
+        }
+      }
     }
   }
 
   .stepLine {
-    width: 152px;
+    // width: 152px;
+    width: 100%;
     margin-top: 19px;
     border-top: 2px solid #e5e5e5;
   }
@@ -150,7 +166,7 @@
       width: 100%;
       display: flex;
       flex-direction: column;
-      color: #3E3E3E;
+      color: #3e3e3e;
       font-family: "Inter", sans-serif;
       font-size: 16px;
       font-weight: 500;
@@ -699,11 +715,17 @@
   .CheckoutSection {
     padding: 16px 0 102px;
 
+    .content {
+      gap: 20px;
+    }
+
     .leftColumn {
       gap: 16px;
     }
 
     .breadcrumbs {
+      gap: 10px;
+      flex-wrap: wrap;
       font-size: 14px;
       line-height: 18px;
     }
@@ -713,12 +735,12 @@
     }
 
     .pageTitle {
-      font-size: 46px;
-      line-height: 54px;
+      font-size: 38px;
+      line-height: 44px;
     }
 
     .stepper {
-      gap: 6px;
+      gap: 8px;
       overflow-x: auto;
       padding-bottom: 2px;
       scrollbar-width: none;
@@ -730,77 +752,104 @@
     }
 
     .stepItem {
-      width: 150px;
-
       > span {
-        font-size: 14px;
+        font-size: 9px;
         line-height: 16px;
       }
 
       h4 {
-        font-size: 13px;
+        font-size: 9px;
         line-height: 16px;
       }
     }
 
     .stepCircle {
-      width: 38px;
-      height: 38px;
+      width: 34px;
+      height: 34px;
       font-size: 18px;
     }
 
     .stepLine {
-      width: 56px;
-      margin-top: 19px;
+      // width: 44px;
+      margin-top: 17px;
+    }
+
+    .formBlock {
+      gap: 16px;
     }
 
     .section {
-      gap: 14px;
+      gap: 12px;
 
       h2 {
         font-size: 18px;
-        line-height: 24px;
+        line-height: 22px;
       }
 
       label {
-        font-size: 13px;
-        line-height: 18px;
+        font-size: 12px;
+        line-height: 16px;
 
         input,
         select {
-          height: 52px;
+          height: 50px;
           font-size: 14px;
+          padding: 0 14px;
         }
       }
     }
 
-    .phoneField,
-    .cityField {
-      height: 52px;
+    .phoneField {
+      height: 50px;
+      padding: 0 12px;
 
-      span,
-      svg {
+      :global(.PhoneInputInput) {
+        font-size: 16px;
+      }
+    }
+
+    .cityField {
+      margin-top: 4px;
+
+      select {
+        height: 50px;
         font-size: 14px;
+      }
+
+      svg {
+        font-size: 24px;
       }
     }
 
     .deliveryCard {
-      min-height: 60px;
+      min-height: 58px;
+      padding: 12px;
+      gap: 10px;
+
+      .radio {
+        width: 20px;
+        height: 20px;
+
+        &::after {
+          width: 10px;
+          height: 10px;
+        }
+      }
 
       div {
         h5 {
-          font-size: 16px;
-          line-height: 20px;
+          font-size: 15px;
+          line-height: 18px;
         }
 
         p {
           font-size: 12px;
-          line-height: 16px;
+          line-height: 15px;
         }
       }
 
       strong {
-        font-size: 13px;
+        font-size: 14px;
         line-height: 18px;
       }
     }
@@ -811,16 +860,36 @@
     }
 
     .paymentMethodCard {
-      height: 60px;
+      height: 56px;
+      padding: 0 12px;
+
+      .radio {
+        width: 20px;
+        height: 20px;
+      }
 
       .mbank {
-        font-size: 26px;
+        font-size: 24px;
         line-height: 24px;
       }
 
       .finca {
-        font-size: 31px;
+        font-size: 26px;
         line-height: 24px;
+      }
+    }
+
+    .paymentInfoCard {
+      padding: 12px;
+
+      h4 {
+        font-size: 16px;
+        line-height: 20px;
+      }
+
+      p {
+        font-size: 13px;
+        line-height: 18px;
       }
     }
 
@@ -829,61 +898,107 @@
       grid-template-columns: 1fr;
     }
 
+    .qrBlock {
+      padding: 12px;
+      gap: 12px;
+
+      > p {
+        font-size: 14px;
+        line-height: 18px;
+      }
+    }
+
+    .qrCard {
+      img {
+        height: 120px;
+      }
+    }
+
     .bottomActions {
-      margin-top: 6px;
-      padding-bottom: 10px;
+      margin-top: 4px;
+      padding-bottom: 8px;
       border-bottom: 1px solid #dedede;
+      flex-wrap: wrap;
+      gap: 10px 16px;
 
       .backStep,
       a {
-        font-size: 16px;
+        font-size: 15px;
         line-height: 20px;
       }
     }
 
     .rightColumn {
       max-width: 100%;
-      padding: 20px 16px;
+      padding: 20px 16px 22px;
       border-radius: 10px;
+      gap: 16px;
 
       h2 {
-        font-size: 42px;
-        line-height: 32px;
+        font-size: 24px;
+        line-height: 30px;
+      }
+    }
+
+    .summaryItems {
+      gap: 12px;
+    }
+
+    .summaryItem {
+      gap: 12px;
+
+      img {
+        width: 86px;
+        height: 92px;
       }
     }
 
     .summaryText {
-      h4,
-      p {
-        font-size: 32px;
-        line-height: 24px;
+      gap: 4px;
+
+      h4 {
+        font-size: 15px;
+        line-height: 20px;
       }
+
+      p {
+        font-size: 15px;
+        line-height: 20px;
+      }
+    }
+
+    .summaryRows {
+      gap: 8px;
     }
 
     .row {
       span {
-        font-size: 35px;
-        line-height: 26px;
+        font-size: 15px;
+        line-height: 22px;
       }
     }
 
     .totalRow {
+      margin-top: 4px;
+      padding-top: 12px;
+
       span {
-        font-size: 48px;
-        line-height: 32px;
+        font-size: 16px;
+        line-height: 24px;
       }
     }
 
     .mainAction {
+      height: 54px;
       font-size: 18px;
       line-height: 22px;
 
       > :first-child {
-        display: none;
+        display: inline;
       }
 
       span {
-        display: inline;
+        display: none;
       }
     }
   }
