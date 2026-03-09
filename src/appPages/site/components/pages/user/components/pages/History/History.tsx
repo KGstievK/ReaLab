@@ -1,4 +1,4 @@
-﻿"use client";
+﻿﻿"use client";
 
 import Image from "next/image";
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
@@ -386,4 +386,3 @@ const History = () => {
 };
 
 export default History;
-
