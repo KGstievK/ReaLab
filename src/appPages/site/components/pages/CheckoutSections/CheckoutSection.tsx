@@ -18,9 +18,9 @@ import {
 import PaymentResultModal from "./PaymentResultModal";
 import CheckoutPaymentStep, { CheckoutQrItem } from "./CheckoutPaymentStep";
 import {
-  isQrPaymentMethod,
   PAYMENT_METHOD_OPTIONS,
   PaymentMethod,
+  isQrPaymentMethod,
 } from "./paymentMethods";
 import { notifyTelegramFrontend } from "./frontend";
 import scss from "./CheckoutSection.module.scss";
@@ -72,16 +72,63 @@ type ResultState = "success" | "error" | null;
 const DELIVERY_PRICE = 200;
 const DISCOUNT_PRICE = 600;
 
+const TEXT = {
+  notSelected: "\u041d\u0435 \u0432\u044b\u0431\u0440\u0430\u043d",
+  cityBishkek: "\u0411\u0438\u0448\u043a\u0435\u043a",
+  cityOsh: "\u041e\u0448",
+  cityKarakol: "\u041a\u0430\u0440\u0430\u043a\u043e\u043b",
+  phoneError: "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u044b\u0439 \u043d\u043e\u043c\u0435\u0440",
+  stepOneTitle: "\u041b\u0418\u0427\u041d\u0410\u042f \u0418\u041d\u0424\u041e\u0420\u041c\u0410\u0426\u0418\u042f",
+  stepTwoTitle: "\u0414\u041e\u0421\u0422\u0410\u0412\u041a\u0410",
+  stepThreeTitle: "\u041f\u041e\u0414\u0422\u0412\u0415\u0420\u0416\u0414\u0415\u041d\u0418\u0415",
+  checkoutTitle: "\u041e\u0444\u043e\u0440\u043c\u043b\u0435\u043d\u0438\u0435 \u0437\u0430\u043a\u0430\u0437\u0430",
+  confirmationTitle: "\u041f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0438\u0435",
+  payDetails: "\u0414\u0435\u0442\u0430\u043b\u0438 \u043e\u043f\u043b\u0430\u0442\u044b",
+  home: "\u0413\u043b\u0430\u0432\u043d\u0430\u044f",
+  cart: "\u041a\u043e\u0440\u0437\u0438\u043d\u0430",
+  back: "\u041d\u0430\u0437\u0430\u0434",
+  name: "\u0418\u041c\u042f",
+  phone: "\u041d\u041e\u041c\u0415\u0420 \u0422\u0415\u041b\u0415\u0424\u041e\u041d\u0410",
+  city: "\u0413\u041e\u0420\u041e\u0414",
+  address: "\u0410\u0414\u0420\u0415\u0421",
+  namePlaceholder: "\u0410\u0439\u0433\u0435\u0440\u0438\u043c",
+  addressPlaceholder:
+    "ABC 12A, \u0411\u0438\u0448\u043a\u0435\u043a, \u041a\u044b\u0440\u0433\u044b\u0437\u0441\u0442\u0430\u043d",
+  enterName: "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0438\u043c\u044f",
+  enterPhone: "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043d\u043e\u043c\u0435\u0440 \u0442\u0435\u043b\u0435\u0444\u043e\u043d\u0430",
+  chooseCity: "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0433\u043e\u0440\u043e\u0434",
+  enterAddress: "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0430\u0434\u0440\u0435\u0441",
+  chooseDelivery: "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0441\u043f\u043e\u0441\u043e\u0431 \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f",
+  choosePayment: "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0441\u043f\u043e\u0441\u043e\u0431 \u043e\u043f\u043b\u0430\u0442\u044b",
+  qrUnavailable: "QR-\u043a\u043e\u0434 \u0432\u0440\u0435\u043c\u0435\u043d\u043d\u043e \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u0435\u043d",
+  pickup: "\u0421\u0430\u043c\u043e\u0432\u044b\u0432\u043e\u0437",
+  pickupApi: "\u0441\u0430\u043c\u043e\u0432\u044b\u0437\u043e\u0432",
+  pickupEta: "1-2 \u0440\u0430\u0431\u043e\u0447\u0438\u0445 \u0434\u043d\u044f",
+  courier: "\u0414\u043e\u0441\u0442\u0430\u0432\u043a\u0430",
+  courierEta: "\u0437\u0430 \u0447\u0430\u0441",
+  returnToCart: "\u0412\u0435\u0440\u043d\u0443\u0442\u044c \u0432 \u043a\u043e\u0440\u0437\u0438\u043d\u0443",
+  notSpecified: "\u041d\u0435 \u0443\u043a\u0430\u0437\u0430\u043d",
+  subtotal: "\u0418\u0442\u043e\u0433",
+  delivery: "\u0414\u043e\u0441\u0442\u0430\u0432\u043a\u0430",
+  discount: "\u0421\u043a\u0438\u0434\u043a\u0430",
+  totalToPay: "\u0418\u0442\u043e\u0433\u043e \u043a \u043e\u043f\u043b\u0430\u0442\u0435:",
+  continue: "\u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u044c",
+  continueMobile: "\u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u044c \u2192",
+  pay: "\u041e\u043f\u043b\u0430\u0442\u0438\u0442\u044c",
+  wait: "\u041f\u043e\u0434\u043e\u0436\u0434\u0438\u0442\u0435...",
+  step: "\u0428\u0430\u0433",
+} as const;
+
 const toNumber = (value: unknown) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-const formatSom = (value: number) => `${value.toLocaleString("ru-RU")}СЃ`;
+const formatSom = (value: number) => `${value.toLocaleString("ru-RU")}\u0441`;
 
 const getPaymentMethodLabel = (method: PaymentMethod) =>
   PAYMENT_METHOD_OPTIONS.find((item) => item.id === method)?.label ??
-  "РќРµ РІС‹Р±СЂР°РЅ";
+  TEXT.notSelected;
 
 const CheckoutSection = () => {
   const router = useRouter();
@@ -95,7 +142,6 @@ const CheckoutSection = () => {
     useState<DeliveryMethod>("courier");
   const [paymentMethod, setPaymentMethod] =
     useState<PaymentMethod>("mbank_redirect");
-  const [isMobile, setIsMobile] = useState(false);
   const [resultState, setResultState] = useState<ResultState>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -104,7 +150,7 @@ const CheckoutSection = () => {
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     phoneNumber: "",
-    city: "\u0411\u0438\u0448\u043a\u0435\u043a",
+    city: TEXT.cityBishkek,
     address: "",
   });
 
@@ -112,7 +158,7 @@ const CheckoutSection = () => {
     phoneTouched &&
     formData.phoneNumber &&
     !isValidPhoneNumber(formData.phoneNumber)
-      ? "Р’РІРµРґРёС‚Рµ РєРѕСЂСЂРµРєС‚РЅС‹Р№ РЅРѕРјРµСЂ"
+      ? TEXT.phoneError
       : "";
 
   const phoneError = errors.phoneNumber || phoneLocalError;
@@ -121,6 +167,7 @@ const CheckoutSection = () => {
     if (Array.isArray(cart)) {
       return cart[0] as CartData | undefined;
     }
+
     return cart as CartData | undefined;
   }, [cart]);
 
@@ -142,20 +189,6 @@ const CheckoutSection = () => {
     setPhoneTouched(false);
   }, [meData]);
 
-  useEffect(() => {
-    const media = window.matchMedia("(max-width: 750px)");
-    const sync = () => setIsMobile(media.matches);
-    sync();
-
-    if (typeof media.addEventListener === "function") {
-      media.addEventListener("change", sync);
-      return () => media.removeEventListener("change", sync);
-    }
-
-    media.addListener(sync);
-    return () => media.removeListener(sync);
-  }, []);
-
   const subtotalByItems = basketData.reduce(
     (sum, item) => sum + toNumber(item.total_price),
     0,
@@ -165,19 +198,13 @@ const CheckoutSection = () => {
   const discountPrice = basketData.length > 0 ? DISCOUNT_PRICE : 0;
   const totalToPay = Math.max(subtotal + deliveryPrice - discountPrice, 0);
 
-  const stepLabelThree = isMobile
-    ? "РџРћР”РўР’Р•Р Р–Р”Р•РќРР•"
-    : step === 3
-      ? "РћРџР›РђРўРђ"
-      : "РџРћР”РўР’Р•Р Р–Р”Р•РќРР•";
-  const pageTitle = isMobile
-    ? "РћС„РѕСЂРјР»РµРЅРёРµ Р·Р°РєР°Р·Р°"
-    : step === 2
-      ? "Р”РѕСЃС‚Р°РІРєР°"
+  const pageTitle =
+    step === 2
+      ? TEXT.stepTwoTitle
       : step === 3
-        ? "РћРїР»Р°С‚Р°"
-        : "РћС„РѕСЂРјР»РµРЅРёРµ Р·Р°РєР°Р·Р°";
-  const desktopActionLabel = step === 3 ? "РћРїР»Р°С‚РёС‚СЊ" : "РџСЂРѕРґРѕР»Р¶РёС‚СЊ";
+        ? TEXT.confirmationTitle
+        : TEXT.checkoutTitle;
+  const desktopActionLabel = step === 3 ? TEXT.pay : TEXT.continue;
 
   const qrItems: CheckoutQrItem[] = Array.isArray(payData)
     ? (payData[0]?.pay_title ?? [])
@@ -206,18 +233,18 @@ const CheckoutSection = () => {
     const nextErrors: FormErrors = {};
 
     if (!formData.firstName.trim()) {
-      nextErrors.firstName = "Р’РІРµРґРёС‚Рµ РёРјСЏ";
+      nextErrors.firstName = TEXT.enterName;
     }
     if (!formData.phoneNumber.trim()) {
-      nextErrors.phoneNumber = "Р’РІРµРґРёС‚Рµ РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°";
+      nextErrors.phoneNumber = TEXT.enterPhone;
     } else if (!isValidPhoneNumber(formData.phoneNumber)) {
-      nextErrors.phoneNumber = "Р’РІРµРґРёС‚Рµ РєРѕСЂСЂРµРєС‚РЅС‹Р№ РЅРѕРјРµСЂ";
+      nextErrors.phoneNumber = TEXT.phoneError;
     }
     if (!formData.city.trim()) {
-      nextErrors.city = "Р’С‹Р±РµСЂРёС‚Рµ РіРѕСЂРѕРґ";
+      nextErrors.city = TEXT.chooseCity;
     }
     if (!formData.address.trim()) {
-      nextErrors.address = "Р’РІРµРґРёС‚Рµ Р°РґСЂРµСЃ";
+      nextErrors.address = TEXT.enterAddress;
     }
 
     setErrors(nextErrors);
@@ -226,7 +253,7 @@ const CheckoutSection = () => {
 
   const validateStepTwo = () => {
     if (!deliveryMethod) {
-      setErrors({ delivery: "Р’С‹Р±РµСЂРёС‚Рµ СЃРїРѕСЃРѕР± РїРѕР»СѓС‡РµРЅРёСЏ" });
+      setErrors({ delivery: TEXT.chooseDelivery });
       return false;
     }
 
@@ -238,11 +265,11 @@ const CheckoutSection = () => {
     const nextErrors: FormErrors = {};
 
     if (!paymentMethod) {
-      nextErrors.payment = "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0441\u043f\u043e\u0441\u043e\u0431 \u043e\u043f\u043b\u0430\u0442\u044b";
+      nextErrors.payment = TEXT.choosePayment;
     }
 
     if (isQrPaymentMethod(paymentMethod) && qrItems.length === 0) {
-      nextErrors.payment = "QR-\u043a\u043e\u0434 \u0432\u0440\u0435\u043c\u0435\u043d\u043d\u043e \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u0435\u043d";
+      nextErrors.payment = TEXT.qrUnavailable;
     }
 
     setErrors(nextErrors);
@@ -259,8 +286,8 @@ const CheckoutSection = () => {
       order_user: normalizedCart.user,
       cart_id: normalizedCart.id,
       delivery: (deliveryMethod === "pickup"
-        ? "СЃР°РјРѕРІС‹РІРѕР·"
-        : "РєСѓСЂСЊРµСЂ") as IOrderPost["delivery"],
+        ? TEXT.pickupApi
+        : "\u043a\u0443\u0440\u044c\u0435\u0440") as IOrderPost["delivery"],
       first_name: formData.firstName,
       phone_number: formData.phoneNumber,
       city: formData.city,
@@ -275,7 +302,7 @@ const CheckoutSection = () => {
         phoneNumber: formData.phoneNumber,
         city: formData.city,
         address: formData.address,
-        delivery: deliveryMethod === "pickup" ? "Самовывоз" : "Доставка",
+        delivery: deliveryMethod === "pickup" ? TEXT.pickup : TEXT.courier,
         paymentMethod: getPaymentMethodLabel(paymentMethod),
         orderUser: normalizedCart.user,
         subtotal: String(subtotal),
@@ -286,7 +313,7 @@ const CheckoutSection = () => {
           name: item.clothes.clothes_name,
           colorName:
             item.clothes.clothes_img.find((img) => img.id === item.color)
-              ?.color || "Не указан",
+              ?.color || TEXT.notSpecified,
           size: item.size,
           quantity: item.quantity,
           unitPrice: String(item.just_price),
@@ -354,15 +381,15 @@ const CheckoutSection = () => {
                 <button
                   type="button"
                   className={scss.backButton}
-                  aria-label="РќР°Р·Р°Рґ"
+                  aria-label={TEXT.back}
                   onClick={() => router.back()}
                 >
                   <Image src={backIcon} alt="" />
                 </button>
-                <Link href="/">Р“Р»Р°РІРЅР°СЏ</Link>
+                <Link href="/">{TEXT.home}</Link>
                 <span>/</span>
                 <Link href="/cart" className={scss.current}>
-                  РљРѕСЂР·РёРЅР°
+                  {TEXT.cart}
                 </Link>
               </nav>
 
@@ -377,12 +404,20 @@ const CheckoutSection = () => {
                   >
                     {step > 1 ? <IoCheckmark /> : <FiUser />}
                   </div>
-                  <span className={`${
+                  <span
+                    className={`${
                       step === 1 ? scss.active : step > 1 ? scss.completed : ""
-                    }`}>РЁР°Рі 1</span>
-                  <h4 className={`${
+                    }`}
+                  >
+                    {`${TEXT.step} 1`}
+                  </span>
+                  <h4
+                    className={`${
                       step === 1 ? scss.active : step > 1 ? scss.completed : ""
-                    }`}>Р›РР§РќРђРЇ РРќР¤РћР РњРђР¦РРЇ</h4>
+                    }`}
+                  >
+                    {TEXT.stepOneTitle}
+                  </h4>
                 </div>
 
                 <span className={scss.stepLine} />
@@ -395,12 +430,20 @@ const CheckoutSection = () => {
                   >
                     {step > 2 ? <IoCheckmark /> : <FiTruck />}
                   </div>
-                  <span className={`${
+                  <span
+                    className={`${
                       step === 2 ? scss.active : step > 2 ? scss.completed : ""
-                    }`}>РЁР°Рі 2</span>
-                  <h4 className={`${
+                    }`}
+                  >
+                    {`${TEXT.step} 2`}
+                  </span>
+                  <h4
+                    className={`${
                       step === 2 ? scss.active : step > 2 ? scss.completed : ""
-                    }`}>Р”РћРЎРўРђР’РљРђ</h4>
+                    }`}
+                  >
+                    {TEXT.stepTwoTitle}
+                  </h4>
                 </div>
 
                 <span className={scss.stepLine} />
@@ -411,33 +454,33 @@ const CheckoutSection = () => {
                   >
                     <IoCardOutline />
                   </div>
-                  <span className={`${
-                      step === 3 ? scss.active : step > 3 ? scss.completed : ""
-                    }`}>РЁР°Рі 3</span>
-                  <h4>{stepLabelThree}</h4>
+                  <span className={`${step === 3 ? scss.active : ""}`}>
+                    {`${TEXT.step} 3`}
+                  </span>
+                  <h4 className={`${step === 3 ? scss.active : ""}`}>
+                    {TEXT.stepThreeTitle}
+                  </h4>
                 </div>
               </div>
 
               <div className={scss.formBlock}>
                 {step === 1 && (
                   <div className={scss.section}>
-                    <h2>Р›РР§РќРђРЇ РРќР¤РћР РњРђР¦РРЇ</h2>
+                    <h2>{TEXT.stepOneTitle}</h2>
 
                     <label>
-                      РРњРЇ
+                      {TEXT.name}
                       <input
                         type="text"
                         value={formData.firstName}
                         onChange={handleChange("firstName")}
-                        placeholder="РђР№РіРµСЂРёРј"
+                        placeholder={TEXT.namePlaceholder}
                       />
-                      {errors.firstName && (
-                        <p role="alert">{errors.firstName}</p>
-                      )}
+                      {errors.firstName && <p role="alert">{errors.firstName}</p>}
                     </label>
 
                     <label>
-                      РќРћРњР•Р  РўР•Р›Р•Р¤РћРќРђ
+                      {TEXT.phone}
                       <div
                         className={`${scss.phoneField} ${phoneError ? scss.errorField : ""}`}
                       >
@@ -466,15 +509,12 @@ const CheckoutSection = () => {
                     </label>
 
                     <label>
-                      Р“РћР РћР”
+                      {TEXT.city}
                       <div className={scss.cityField}>
-                        <select
-                          value={formData.city}
-                          onChange={handleChange("city")}
-                        >
-                          <option value="Р‘РёС€РєРµРє">Р‘РёС€РєРµРє</option>
-                          <option value="РћС€">РћС€</option>
-                          <option value="РљР°СЂР°РєРѕР»">РљР°СЂР°РєРѕР»</option>
+                        <select value={formData.city} onChange={handleChange("city")}>
+                          <option value={TEXT.cityBishkek}>{TEXT.cityBishkek}</option>
+                          <option value={TEXT.cityOsh}>{TEXT.cityOsh}</option>
+                          <option value={TEXT.cityKarakol}>{TEXT.cityKarakol}</option>
                         </select>
 
                         <FiChevronDown />
@@ -483,12 +523,12 @@ const CheckoutSection = () => {
                     </label>
 
                     <label>
-                      РђР”Р Р•РЎ
+                      {TEXT.address}
                       <input
                         type="text"
                         value={formData.address}
                         onChange={handleChange("address")}
-                        placeholder="ABC 12A, Р‘РёС€РєРµРє, РљС‹СЂРіС‹Р·СЃС‚Р°РЅ"
+                        placeholder={TEXT.addressPlaceholder}
                       />
                       {errors.address && <p role="alert">{errors.address}</p>}
                     </label>
@@ -497,7 +537,7 @@ const CheckoutSection = () => {
 
                 {step === 2 && (
                   <div className={scss.section}>
-                    <h2>Р”РћРЎРўРђР’РљРђ</h2>
+                    <h2>{TEXT.stepTwoTitle}</h2>
 
                     <button
                       type="button"
@@ -508,8 +548,8 @@ const CheckoutSection = () => {
                     >
                       <span className={scss.radio} />
                       <div>
-                        <h5>РЎР°РјРѕРІС‹РІРѕР·</h5>
-                        <p>1-2 СЂР°Р±РѕС‡РёС… РґРЅРµР№</p>
+                        <h5>{TEXT.pickup}</h5>
+                        <p>{TEXT.pickupEta}</p>
                       </div>
                     </button>
 
@@ -522,10 +562,10 @@ const CheckoutSection = () => {
                     >
                       <span className={scss.radio} />
                       <div>
-                        <h5>Р”РѕСЃС‚Р°РІРєР°</h5>
-                        <p>Р·Р° С‡Р°СЃ</p>
+                        <h5>{TEXT.courier}</h5>
+                        <p>{TEXT.courierEta}</p>
                       </div>
-                      <strong>200СЃ</strong>
+                      <strong>{formatSom(DELIVERY_PRICE)}</strong>
                     </button>
 
                     {errors.delivery && (
@@ -551,17 +591,17 @@ const CheckoutSection = () => {
                       className={scss.backStep}
                       onClick={handleBackStep}
                     >
-                      РќР°Р·Р°Рґ
+                      {TEXT.back}
                     </button>
                   )}
 
-                  <Link href="/cart">Р’РµСЂРЅСѓС‚СЊ РІ РєРѕСЂР·РёРЅСѓ</Link>
+                  <Link href="/cart">{TEXT.returnToCart}</Link>
                 </div>
               </div>
             </div>
 
             <aside className={scss.rightColumn}>
-              <h2>Р”РµС‚Р°Р»Рё РѕРїР»Р°С‚С‹</h2>
+              <h2>{TEXT.payDetails}</h2>
 
               <div className={scss.summaryItems}>
                 {basketData.map((item) => {
@@ -579,7 +619,7 @@ const CheckoutSection = () => {
                       />
                       <div className={scss.summaryText}>
                         <h4>{item.clothes.clothes_name}</h4>
-                        <p>{selectedImage?.color || "Р§РµСЂРЅС‹Р№"}</p>
+                        <p>{selectedImage?.color || TEXT.notSpecified}</p>
                         <p>
                           {item.quantity} x {toNumber(item.just_price)}
                         </p>
@@ -591,19 +631,19 @@ const CheckoutSection = () => {
 
               <div className={scss.summaryRows}>
                 <div className={scss.row}>
-                  <span>РС‚РѕРі</span>
+                  <span>{TEXT.subtotal}</span>
                   <span>{formatSom(subtotal)}</span>
                 </div>
                 <div className={scss.row}>
-                  <span>Р”РѕСЃС‚Р°РІРєР°</span>
+                  <span>{TEXT.delivery}</span>
                   <span>{formatSom(deliveryPrice)}</span>
                 </div>
                 <div className={scss.row}>
-                  <span>РЎРєРёРґРєР°</span>
+                  <span>{TEXT.discount}</span>
                   <span>-{formatSom(discountPrice)}</span>
                 </div>
                 <div className={`${scss.row} ${scss.totalRow}`}>
-                  <span>РС‚РѕРіРѕ Рє РѕРїР»Р°С‚Рµ:</span>
+                  <span>{TEXT.totalToPay}</span>
                   <span>{formatSom(totalToPay)}</span>
                 </div>
               </div>
@@ -613,10 +653,8 @@ const CheckoutSection = () => {
                 className={scss.mainAction}
                 onClick={handleMainAction}
               >
-                {isSubmitting ? "РџРѕРґРѕР¶РґРёС‚Рµ..." : desktopActionLabel}
-                <span>
-                  {isSubmitting ? "РџРѕРґРѕР¶РґРёС‚Рµ..." : "РџРѕСЃРјРѕС‚СЂРµС‚СЊ РІСЃРµ в†’"}
-                </span>
+                {isSubmitting ? TEXT.wait : desktopActionLabel}
+                <span>{isSubmitting ? TEXT.wait : TEXT.continueMobile}</span>
               </button>
             </aside>
           </div>
