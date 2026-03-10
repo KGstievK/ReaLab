@@ -240,6 +240,18 @@ const SinglePageSection: FC = () => {
               <h4>{currentPrice} с</h4>
             </div>
 
+
+            <div className={scss.textile}>
+              <h5>Ткань:</h5>
+              <h4>
+                {textile_clothes
+                  .map((item: { textile_name: string }) =>
+                    capitalize(item.textile_name),
+                  )
+                  .join(", ")}
+              </h4>
+            </div>
+
             <div className={scss.colors}>
               <h5>Цвета:</h5>
               <ColorsClothes
@@ -259,18 +271,6 @@ const SinglePageSection: FC = () => {
                 </p>
               )}
             </div>
-
-            <div className={scss.textile}>
-              <h5>Ткань:</h5>
-              <h4>
-                {textile_clothes
-                  .map((item: { textile_name: string }) =>
-                    capitalize(item.textile_name),
-                  )
-                  .join(", ")}
-              </h4>
-            </div>
-
             <div className={scss.description}>
               <p>{clothes_description}</p>
             </div>
