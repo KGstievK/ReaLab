@@ -83,13 +83,29 @@
   }
 }
 
+@media (max-width: 960px) {
+  .sale {
+    .content {
+      min-height: 0;
+      grid-template-columns: 1fr;
+    }
+
+    .media {
+      min-height: 360px;
+    }
+
+    .copy {
+      padding: 40px 28px;
+    }
+  }
+}
+
 @media (max-width: 750px) {
   .sale {
     margin-top: 34px;
 
     .content {
       min-height: 0;
-      grid-template-columns: 1fr;
     }
 
     .media {

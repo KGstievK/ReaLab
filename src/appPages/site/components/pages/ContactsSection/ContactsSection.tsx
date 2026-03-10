@@ -12,8 +12,9 @@ const ContactsSection = () => {
         <div className={scss.content}>
           <h1>Контакты</h1>
           {data?.length ? (
-            data.map((item, index) => (
-              <div key={index}>
+            <div className={scss.cards}>
+              {data.map((item, index) => (
+                <div key={index} className={scss.card}>
                 <p>
                   WhatsApp:{" "}
                   <a
@@ -28,8 +29,9 @@ const ContactsSection = () => {
                   Email: <a href={`mailto:${item.email}`}>{item.email}</a>
                 </p>
                 <p>{item.address}</p>
-              </div>
-            ))
+                </div>
+              ))}
+            </div>
           ) : (
             <p>Контактные данные появятся здесь.</p>
           )}

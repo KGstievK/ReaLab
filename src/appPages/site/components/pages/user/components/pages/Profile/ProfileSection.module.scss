@@ -202,6 +202,14 @@
   }
 }
 
+@media (max-width: 960px) and (min-width: 751px) {
+  .ProfileSection {
+    .content {
+      width: 100%;
+    }
+  }
+}
+
 @media (max-width: 750px) {
   .ProfileSection {
     .content {
@@ -261,6 +269,22 @@
     .submit {
       height: 56px;
       font-size: 18px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .ProfileSection {
+    .avatarBlock {
+      flex-wrap: wrap;
+    }
+
+    .avatarMeta {
+      width: 100%;
+
+      .avatarUploadButton {
+        width: 100%;
+      }
     }
   }
 }

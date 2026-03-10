@@ -3,9 +3,19 @@
   flex-direction: column;
   justify-content: space-between;
   min-height: 100vh;
+
+  main {
+    width: 100%;
+    min-width: 0;
+  }
+
   header {
     margin-bottom: 45px;
+    @media (max-width: 750px) {
+      margin-bottom: 24px;
+    }
   }
+
   footer {
     margin-top: auto;
   }

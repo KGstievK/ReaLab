@@ -3,10 +3,19 @@
 	justify-content: center;
 	align-items: center;
 	min-height: 100vh;
+	padding: 24px 16px;
+
+	main {
+		width: 100%;
+		display: flex;
+		justify-content: center;
+	}
 
 	@media (max-width: 768px) {
 		align-items: flex-start;
 		justify-content: center;
+		min-height: 100vh;
 		min-height: 100dvh;
+		padding: 0;
 	}
 }

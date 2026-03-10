@@ -34,7 +34,7 @@
   }
 
   .contacts {
-    width: 320px;
+    width: min(100%, 320px);
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -66,6 +66,7 @@
     align-items: flex-start;
     justify-content: flex-end;
     gap: 54px;
+    flex-wrap: wrap;
   }
 
   .column {
@@ -134,6 +135,19 @@
     .navColumns {
       justify-content: flex-start;
       gap: 24px;
+    }
+  }
+}
+
+@media (max-width: 560px) {
+  .footer {
+    .navColumns {
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .contacts {
+      width: 100%;
     }
   }
 }

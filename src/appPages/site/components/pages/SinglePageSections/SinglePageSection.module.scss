@@ -7,6 +7,7 @@
     align-items: center;
     gap: 19px;
     margin-bottom: 30px;
+    flex-wrap: wrap;
 
     a,
     span {
@@ -430,6 +431,42 @@
 
     .review {
       margin-top: 24px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .SinglePageSection {
+    .mainImg {
+      img {
+        height: 340px;
+      }
+    }
+
+    .thumbnails {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+
+      .thumbnail {
+        img {
+          height: 74px;
+        }
+      }
+    }
+
+    h1 {
+      font-size: 26px;
+    }
+
+    .price {
+      h4 {
+        font-size: 24px;
+      }
+    }
+
+    .description {
+      p {
+        font-size: 15px;
+      }
     }
   }
 }

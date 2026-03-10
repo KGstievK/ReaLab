@@ -87,3 +87,15 @@
   }
 }
 
+@media (max-width: 480px) {
+  .sizes {
+    .spans {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .size {
+      font-size: 15px;
+    }
+  }
+}
+

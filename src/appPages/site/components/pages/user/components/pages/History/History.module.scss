@@ -350,10 +350,13 @@
     .tabs {
       margin-top: 14px;
       gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 4px;
 
       .tab {
         font-size: 16px;
         line-height: 1.4;
+        white-space: nowrap;
       }
     }
 
@@ -444,6 +447,22 @@
       .more {
         font-size: 24px;
         line-height: 92px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .History {
+    .orderItems {
+      .item,
+      .more {
+        width: 110px;
+        height: 74px;
+      }
+
+      .more {
+        line-height: 74px;
       }
     }
   }

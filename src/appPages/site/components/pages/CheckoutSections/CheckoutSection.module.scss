@@ -273,6 +273,8 @@
       font-size: 16px;
       background: #e5bfbd66;
 
+      -webkit-appearance: none;
+      -moz-appearance: none;
       appearance: none;
       outline: none;
       cursor: pointer;
@@ -712,6 +714,27 @@
   }
 }
 
+@media (max-width: 960px) and (min-width: 751px) {
+  .CheckoutSection {
+    .breadcrumbs {
+      flex-wrap: wrap;
+    }
+
+    .stepper {
+      flex-wrap: wrap;
+      row-gap: 16px;
+    }
+
+    .stepLine {
+      min-width: 44px;
+    }
+
+    .rightColumn {
+      max-width: 100%;
+    }
+  }
+}
+
 @media (max-width: 750px) {
   .CheckoutSection {
     padding: 16px 0 102px;
@@ -1001,6 +1024,27 @@
       span {
         display: none;
       }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .CheckoutSection {
+    .pageTitle {
+      font-size: 32px;
+      line-height: 38px;
+    }
+
+    .deliveryCard {
+      grid-template-columns: auto 1fr;
+
+      strong {
+        grid-column: 2;
+      }
+    }
+
+    .mainAction {
+      font-size: 16px;
     }
   }
 }

@@ -69,9 +69,13 @@ const Welcome = () => {
               <div className={scss.Swiper_Title}>
                 <h4>{data[0].made}</h4>
                 <h1>{data[0].title}</h1>
-                <button onClick={() => router.push("/catalog")}>
+                <button
+                  type="button"
+                  className={scss.catalogButton}
+                  onClick={() => router.push("/catalog")}
+                >
                   Каталог
-                  <Image src={arrow} alt="Valid src"  loading="eager"/>
+                  <Image src={arrow} alt="Valid src" loading="eager" />
                 </button>
               </div>
               <div className={scss.Swiper_Image}>
@@ -86,13 +90,14 @@ const Welcome = () => {
                     onClick={handleMainImageClick}
                     loading="eager"
                   />
-                  <Link href={activeImage.link || "/"}>
+                  <Link href={activeImage.link || "/"} className={scss.buyLink}>
                     Купить <Image src={arrow} alt="Valid src" />
                   </Link>
                 </div>
                 {previewImageIndexes.map((visibleIndex, previewPosition) => (
                   <Image
                     key={images[visibleIndex].id}
+                    className={scss.previewImage}
                     src={images[visibleIndex].image}
                     alt={`Slide ${visibleIndex}`}
                     width={156}

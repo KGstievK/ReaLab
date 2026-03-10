@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.scss";
 import LayoutClient from "./layout.client";
@@ -21,6 +21,12 @@ export const metadata: Metadata = {
   description: "Интернет-магазин одежды, хиджабы, абайки, платки",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default async function RootLayout({
   children,
   authModal,
@@ -29,7 +35,7 @@ export default async function RootLayout({
   authModal: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ru">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <LayoutClient>
           {children}

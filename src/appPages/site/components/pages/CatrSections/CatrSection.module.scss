@@ -382,6 +382,50 @@
   }
 }
 
+@media (max-width: 900px) and (min-width: 751px) {
+  .CatrSection {
+    .itemRow,
+    .itemsColumn {
+      .tableHead {
+        grid-template-columns: minmax(0, 1fr) 90px 140px 90px;
+      }
+    }
+
+    .itemRow {
+      grid-template-columns: minmax(0, 1fr) 90px 140px 90px;
+      gap: 12px;
+      padding: 20px 0;
+    }
+
+    .productCell {
+      gap: 14px;
+
+      img {
+        width: 112px;
+        height: 112px;
+      }
+    }
+
+    .productInfo {
+      gap: 10px;
+
+      h3 {
+        font-size: 18px;
+        line-height: 22px;
+      }
+
+      p {
+        font-size: 15px;
+        line-height: 18px;
+      }
+    }
+
+    .summaryCard {
+      max-width: 100%;
+    }
+  }
+}
+
 @media (max-width: 750px) {
   .CatrSection {
     padding: 16px 0 102px;

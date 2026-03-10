@@ -1,4 +1,5 @@
 .AdminPanel {
+  min-height: 100vh;
   min-height: 100dvh;
   background: #f4f4f4;
   padding: 18px;
@@ -597,6 +598,7 @@
     box-shadow: 0 22px 56px rgb(38 17 18 / 28%);
     display: flex;
     flex-direction: column;
+    max-height: calc(100vh - 32px);
     max-height: calc(100dvh - 32px);
   }
 
@@ -1145,6 +1147,7 @@
     }
 
     .modal {
+      max-height: calc(100vh - 20px);
       max-height: calc(100dvh - 20px);
     }
 
@@ -1154,6 +1157,40 @@
       button {
         flex: 1 1 48%;
       }
+    }
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .AdminPanel {
+    .modalOverlay {
+      background: rgba(26, 26, 26, 0.56);
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .AdminPanel {
+    .sidebar {
+      ul {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .topBar {
+      h1 {
+        font-size: 24px;
+      }
+    }
+
+    .modalActions {
+      button {
+        flex: 1 1 100%;
+      }
+    }
+
+    .previewGrid {
+      grid-template-columns: 1fr;
     }
   }
 }

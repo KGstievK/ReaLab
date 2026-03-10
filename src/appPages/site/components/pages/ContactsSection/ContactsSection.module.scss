@@ -1,5 +1,76 @@
 .ContactsSection {
   .content {
-    
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    h1 {
+      margin: 0;
+      color: #a73539;
+      font-family: "Playfair Display", serif;
+      font-size: clamp(34px, 5vw, 56px);
+      font-weight: 500;
+      line-height: 1.08;
+    }
+
+    > p {
+      border-radius: 14px;
+      border: 1px solid #ead9da;
+      background: #fffaf5;
+      padding: 20px;
+      color: #6d6d6d;
+      font-family: "Inter", sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+  }
+
+  padding: 12px 0 64px;
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    border-radius: 14px;
+    border: 1px solid #ead9da;
+    background: #fffaf5;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    p,
+    a {
+      color: #2b2b2b;
+      font-family: "Inter", sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    a {
+      color: #a73539;
+    }
+  }
+}
+
+@media (max-width: 750px) {
+  .ContactsSection {
+    padding: 8px 0 48px;
+
+    .content {
+      gap: 16px;
+
+      > p {
+        padding: 16px;
+      }
+    }
+
+    .card {
+      padding: 16px;
+    }
   }
 }

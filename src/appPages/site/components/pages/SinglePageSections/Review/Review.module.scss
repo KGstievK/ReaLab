@@ -518,3 +518,37 @@
   }
 }
 
+@media (max-width: 480px) {
+  .reviewSection {
+    .ratingRow {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ratingItem {
+      width: 100%;
+    }
+
+    .attachRow {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .commentTop {
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .commentPhotos {
+      overflow-x: auto;
+      padding-bottom: 4px;
+
+      img {
+        width: 110px;
+        height: 74px;
+        flex-shrink: 0;
+      }
+    }
+  }
+}
+

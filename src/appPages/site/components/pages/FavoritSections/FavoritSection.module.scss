@@ -297,3 +297,15 @@
     }
   }
 }
+
+@media (max-width: 420px) {
+  .FavoritSection {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .mainImage {
+      height: 260px;
+    }
+  }
+}

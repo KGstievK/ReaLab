@@ -6,6 +6,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 14px;
+    flex-wrap: wrap;
 
     h2 {
       margin: 0;
@@ -142,6 +143,18 @@
   }
 }
 
+@media (max-width: 1200px) and (min-width: 901px) {
+  .catalog {
+    .grid {
+      min-height: 620px;
+    }
+
+    .tunic {
+      min-height: 480px;
+    }
+  }
+}
+
 @media (max-width: 750px) {
   .catalog {
     margin-top: 34px;
@@ -152,7 +165,7 @@
       }
 
       h2 {
-        font-size: 42px;
+        font-size: clamp(34px, 9vw, 42px);
       }
     }
 
@@ -166,7 +179,7 @@
       border-radius: 6px;
 
       span {
-        font-size: 40px;
+        font-size: clamp(30px, 10vw, 40px);
       }
     }
 
@@ -175,6 +188,19 @@
       width: 100%;
       display: inline-flex;
       justify-content: center;
+    }
+  }
+}
+
+@media (max-width: 520px) {
+  .catalog {
+    .tile,
+    .tunic {
+      min-height: 164px;
+
+      span {
+        padding: 0 14px;
+      }
     }
   }
 }
