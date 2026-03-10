@@ -86,7 +86,7 @@ const SideBar: FC = () => {
   }, [isMobileFilterOpen]);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(min-width: 751px)");
+    const mediaQuery = window.matchMedia("(min-width: 1025px)");
     const handleChange = (event: MediaQueryListEvent | MediaQueryList) => {
       if (event.matches) {
         setIsMobileFilterOpen(false);
@@ -335,6 +335,9 @@ const SideBar: FC = () => {
           type="button"
           className={scss.mobileFilterButton}
           onClick={() => setIsMobileFilterOpen(true)}
+          aria-label="Открыть фильтры"
+          aria-expanded={isMobileFilterOpen}
+          aria-controls="catalog-mobile-filter"
         >
           <Image src={filterImg} alt="filter" width={18} height={18} />
           <h4>ФИЛЬТР</h4>
@@ -360,6 +363,7 @@ const SideBar: FC = () => {
         onClick={() => setIsMobileFilterOpen(false)}
       >
         <div
+          id="catalog-mobile-filter"
           className={`${scss.mobileSheet} ${isMobileFilterOpen ? scss.mobileSheetOpen : ""}`}
           onClick={(event) => event.stopPropagation()}
         >
@@ -372,7 +376,7 @@ const SideBar: FC = () => {
               type="button"
               className={scss.mobileClose}
               onClick={() => setIsMobileFilterOpen(false)}
-              aria-label="Close filter"
+              aria-label="Закрыть фильтры"
             >
               ×
             </button>

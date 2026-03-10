@@ -4,7 +4,8 @@
   z-index: 999;
   height: 66px;
   background: #fff;
-  border-bottom: 1px solid rgba(175, 143, 119, 0.4);
+  // border-bottom: 1px solid rgba(175, 143, 119, 0.4);
+  box-shadow: 0 2px 4px rgba(175, 143, 119, 0.4);
   display: flex;
   align-items: center;
 
@@ -76,6 +77,9 @@
   }
 }
 
+// .mobileHidden {
+// }
+
 @media (max-width: 1024px) {
   .Header {
     .content {
@@ -143,6 +147,9 @@
   .Header {
     height: auto;
     padding: 0;
+    border-radius: 0 0 20px 20px;
+    transition: transform 0.28s ease, box-shadow 0.28s ease;
+    will-change: transform;
 
     .content {
       flex-direction: column;
@@ -167,5 +174,16 @@
         display: none;
       }
     }
+  }
+
+  .mobileHidden {
+    transform: translateY(calc(-100% - 12px));
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .Header {
+    transition: none;
   }
 }

@@ -284,17 +284,19 @@
   }
 
   .mobileSheet {
-    width: 100%;
+    width: min(360px, 88vw);
+    max-width: 100%;
     height: 100vh;
     height: 100dvh;
     background: #ededed;
-    transform: translateY(-100%);
+    transform: translateX(-100%);
     transition: transform 0.3s ease;
     overflow: hidden;
+    box-shadow: 18px 0 48px rgba(0, 0, 0, 0.14);
   }
 
   .mobileSheetOpen {
-    transform: translateY(0);
+    transform: translateX(0);
   }
 
   .mobileSheetTop {
@@ -327,53 +329,16 @@
   }
 }
 
-@media (max-width: 1100px) and (min-width: 751px) {
+@media (max-width: 1024px) {
   .filter {
     flex-direction: column;
-    gap: 18px;
-    padding-bottom: 72px;
-
-    .blockFilter {
-      max-width: none;
-    }
-
-    .desktopFilter {
-      .filterContainer {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 16px;
-
-        .filterSection {
-          margin-bottom: 0;
-        }
-
-        .colorShortcut,
-        .clearFilter {
-          grid-column: 1 / -1;
-        }
-      }
-    }
-  }
-}
-
-@media (max-width: 920px) and (min-width: 751px) {
-  .filter {
-    .desktopFilter {
-      .filterContainer {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-  }
-}
-
-@media (max-width: 750px) {
-  .filter {
-    flex-direction: column;
-    gap: 12px;
+    gap: 14px;
     padding-bottom: 70px;
 
     .blockFilter {
       max-width: none;
+      display: flex;
+      justify-content: flex-start;
     }
 
     .desktopFilter {
@@ -381,29 +346,25 @@
     }
 
     .mobileFilterButton {
-      width: 100%;
-      border: none;
-      background: transparent;
-      display: flex;
+      width: 48px;
+      height: 48px;
+      border: 1px solid #d8c6bf;
+      border-radius: 999px;
+      background: #fff;
+      display: inline-flex;
       align-items: center;
-      gap: 10px;
-      padding: 8px 2px 12px;
-      border-bottom: 1px solid #dddddd;
+      justify-content: center;
+      padding: 0;
+      box-shadow: 0 8px 22px rgba(81, 53, 47, 0.08);
 
       h4 {
-        color: #2f2f2f;
-        font-size: 16px;
-        letter-spacing: 0.5px;
-        font-weight: 600;
+        display: none;
       }
-    }
-
-    .mobileOverlay {
-      background: transparent;
     }
 
     .mobileSheet {
       background: #ededed;
+      border-radius: 0 24px 24px 0;
     }
 
     .mobileSheetTop {
@@ -418,6 +379,61 @@
         font-size: 21px;
         letter-spacing: 0.4px;
       }
+    }
+
+    .filterContainer {
+      &.mobileFilterContainer {
+        padding: 16px 16px 20px;
+      }
+
+      .filterHeader {
+        h4 {
+          font-size: 16px;
+        }
+      }
+
+      .filterContent {
+        padding-left: 0;
+        padding-right: 0;
+        margin-bottom: 20px;
+      }
+
+      .priceInputs {
+        gap: 36px;
+      }
+
+      .rangeSliderWrap {
+        width: 100%;
+      }
+
+      .checkboxContainer {
+        .optionLabel {
+          font-size: 15px;
+        }
+      }
+
+      .colorShortcut {
+        font-size: 20px;
+      }
+    }
+  }
+}
+
+@media (max-width: 750px) {
+  .filter {
+    gap: 12px;
+
+    .mobileFilterButton {
+      width: 46px;
+      height: 46px;
+    }
+
+    .mobileOverlay {
+      background: rgba(0, 0, 0, 0.16);
+    }
+
+    .mobileSheet {
+      width: min(340px, 88vw);
     }
 
     .filterContainer {

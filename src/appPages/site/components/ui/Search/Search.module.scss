@@ -73,7 +73,9 @@
     visibility: hidden;
     pointer-events: none;
     transform: translateY(-10px);
-    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    transition:
+      opacity 0.3s ease-in-out,
+      transform 0.3s ease-in-out;
     overflow: hidden;
 
     &.resultsVisible {
@@ -123,6 +125,7 @@
   .Search {
     max-width: 100%;
     justify-content: stretch;
+    padding: 0 0 12px 0;
 
     &.open {
       max-width: 100%;
