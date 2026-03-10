@@ -2,21 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { GoHome, GoHomeFill } from "react-icons/go";
 import { HiOutlineShoppingCart, HiOutlineUser, HiOutlineViewGrid } from "react-icons/hi";
 import { HiShoppingCart, HiUser, HiViewGrid } from "react-icons/hi";
 import { getStoredAccessToken } from "../../../../../utils/authStorage";
 import s from "./TabBAr.module.scss";
 
-const Tabbar = () => {
+interface TabbarProps {
+  isHidden?: boolean;
+}
+
+const Tabbar = ({ isHidden = false }: TabbarProps) => {
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const safeFromPath = pathname && pathname.startsWith("/") ? pathname : "/";
-
-  const [isVisible, setIsVisible] = useState(true);
-  const lastScrollY = useRef(0);
-  const ticking = useRef(false);
 
   const buildSignInHref = (nextPath: string) =>
     `/auth/sign-in?next=${encodeURIComponent(nextPath)}&from=${encodeURIComponent(safeFromPath)}`;
@@ -30,34 +30,6 @@ const Tabbar = () => {
     window.addEventListener("storage", syncAuth);
 
     return () => window.removeEventListener("storage", syncAuth);
-  }, []);
-
-  useEffect(() => {
-    const onScroll = () => {
-      if (ticking.current) {
-        return;
-      }
-
-      ticking.current = true;
-      window.requestAnimationFrame(() => {
-        const currentY = window.scrollY;
-        const delta = currentY - lastScrollY.current;
-
-        if (currentY <= 10) {
-          setIsVisible(true);
-        } else if (delta > 6) {
-          setIsVisible(false);
-        } else if (delta < -6) {
-          setIsVisible(true);
-        }
-
-        lastScrollY.current = currentY;
-        ticking.current = false;
-      });
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const tabs = [
@@ -100,7 +72,7 @@ const Tabbar = () => {
   };
 
   return (
-    <div className={`${s.TabBar} ${isVisible ? s.show : s.hide}`}>
+    <div className={`${s.TabBar} ${isHidden ? s.hide : s.show}`}>
       <div className="container">
         <div className={s.content}>
           {tabs.map((tab) => {

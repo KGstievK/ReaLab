@@ -10,11 +10,13 @@
   padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
   transform: translateY(115%);
   opacity: 0;
-  transition: transform 0.28s ease, opacity 0.28s ease;
+  transition:
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
   pointer-events: none;
   display: none;
   box-shadow: 0 -2px 8px rgba(175, 143, 119, 0.4);
-  
+  will-change: transform, opacity;
 }
 
 .show {
@@ -106,5 +108,11 @@
       font-size: 11px;
       line-height: 14px;
     }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .TabBar {
+    transition: none;
   }
 }

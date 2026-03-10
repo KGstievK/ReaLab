@@ -1,5 +1,5 @@
 ﻿import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import scss from "./Header.module.scss";
 import Link from "next/link";
 import Image from "next/image";
@@ -9,13 +9,14 @@ import cart from "@/assets/icons/cart.svg";
 import Search from "../../ui/Search/Search";
 import { getStoredAccessToken } from "../../../../../utils/authStorage";
 
-const Header = () => {
+interface HeaderProps {
+  isMobileHidden?: boolean;
+}
+
+const Header = ({ isMobileHidden = false }: HeaderProps) => {
   const pathname = usePathname();
   const isProfileRoute = pathname.startsWith("/profile");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isMobileHeaderHidden, setIsMobileHeaderHidden] = useState(false);
-  const lastScrollY = useRef(0);
-  const animationFrameId = useRef<number | null>(null);
 
   const links = [
     { link: "/", name: "Главная" },
@@ -42,66 +43,8 @@ const Header = () => {
     return () => window.removeEventListener("storage", syncAuth);
   }, []);
 
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 750px)");
-    const scrollThreshold = 10;
-
-    const syncHeaderState = () => {
-      if (!mediaQuery.matches) {
-        setIsMobileHeaderHidden(false);
-      }
-
-      lastScrollY.current = Math.max(window.scrollY, 0);
-    };
-
-    const updateHeaderVisibility = () => {
-      animationFrameId.current = null;
-
-      if (!mediaQuery.matches) {
-        setIsMobileHeaderHidden(false);
-        return;
-      }
-
-      const currentScrollY = Math.max(window.scrollY, 0);
-      const scrollDelta = currentScrollY - lastScrollY.current;
-
-      if (currentScrollY <= 12) {
-        setIsMobileHeaderHidden(false);
-      } else if (scrollDelta > scrollThreshold) {
-        setIsMobileHeaderHidden(true);
-      } else if (scrollDelta < -scrollThreshold) {
-        setIsMobileHeaderHidden(false);
-      }
-
-      lastScrollY.current = currentScrollY;
-    };
-
-    const onScroll = () => {
-      if (animationFrameId.current !== null) {
-        return;
-      }
-
-      animationFrameId.current = window.requestAnimationFrame(updateHeaderVisibility);
-    };
-
-    syncHeaderState();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", syncHeaderState);
-    mediaQuery.addEventListener("change", syncHeaderState);
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", syncHeaderState);
-      mediaQuery.removeEventListener("change", syncHeaderState);
-
-      if (animationFrameId.current !== null) {
-        window.cancelAnimationFrame(animationFrameId.current);
-      }
-    };
-  }, []);
-
   return (
-    <header className={`${scss.Header} ${isMobileHeaderHidden ? scss.mobileHidden : ""}`}>
+    <header className={`${scss.Header} ${isMobileHidden ? scss.mobileHidden : ""}`}>
       <div className="container">
         <div className={scss.content}>
           <div className={scss.Logo}>
