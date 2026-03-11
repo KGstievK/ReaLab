@@ -1,5 +1,12 @@
 import { api as index } from "..";
 
+const toNumber = (value: unknown) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const updateCategoryQueryData = index.util.updateQueryData as any;
+
 const api = index.injectEndpoints({
   endpoints: (build) => ({
     getFirstSection: build.query<
@@ -10,6 +17,7 @@ const api = index.injectEndpoints({
         url: "/title/",
         method: "GET",
       }),
+      keepUnusedDataFor: 300,
       providesTags: ["category"],
     }),
 
@@ -21,6 +29,7 @@ const api = index.injectEndpoints({
         url: "/contact_info/",
         method: "GET",
       }),
+      keepUnusedDataFor: 300,
       providesTags: ["category"],
     }),
 
@@ -32,6 +41,7 @@ const api = index.injectEndpoints({
         url: "/sale/",
         method: "GET",
       }),
+      keepUnusedDataFor: 300,
       providesTags: ["category"],
     }),
 
@@ -43,6 +53,7 @@ const api = index.injectEndpoints({
         url: "/end_title/",
         method: "GET",
       }),
+      keepUnusedDataFor: 300,
     }),
     getAllCategory: build.query<
       ICATEGORY.getCategoryRes,
@@ -52,6 +63,7 @@ const api = index.injectEndpoints({
         url: "/category/",
         method: "GET",
       }),
+      keepUnusedDataFor: 300,
       providesTags: ["category"],
     }),
 
@@ -64,6 +76,7 @@ const api = index.injectEndpoints({
         method: "GET",
         params,
       }),
+      keepUnusedDataFor: 60,
       providesTags: ["category"],
     }),
 
@@ -75,6 +88,7 @@ const api = index.injectEndpoints({
         url: `/${id}/`,
         method: "GET",
       }),
+      keepUnusedDataFor: 60,
       providesTags: ["category"],
     }),
 
@@ -86,6 +100,7 @@ const api = index.injectEndpoints({
         url: "/favorite_item/list/",
         method: "GET",
       }),
+      keepUnusedDataFor: 60,
       providesTags: ["category"],
     }),
 
@@ -98,7 +113,58 @@ const api = index.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["category"],
+      async onQueryStarted(data, { dispatch, queryFulfilled }) {
+        const tempId = -Date.now();
+        const patchResult = dispatch(
+          updateCategoryQueryData("getToFavorite", undefined, (draft: GetFavorites[]) => {
+            if (!Array.isArray(draft)) return;
+
+            const exists = draft.some((item) => item.clothes.id === data.clothes_id);
+            if (exists) {
+              return;
+            }
+
+            draft.unshift({
+              id: tempId,
+              clothes: {
+                id: data.clothes_id,
+                promo_category: data.clothes.promo_category || [],
+                clothes_name: data.clothes.clothes_name || "",
+                price: toNumber(data.clothes.price),
+                discount_price: String(toNumber(data.clothes.price)),
+                size: data.clothes.size || "",
+                average_rating: "0",
+                created_date: new Date().toISOString(),
+                clothes_img: [],
+              },
+              time: new Date().toISOString(),
+            });
+          }),
+        );
+
+        try {
+          const { data: created } = await queryFulfilled;
+          dispatch(
+            updateCategoryQueryData("getToFavorite", undefined, (draft: GetFavorites[]) => {
+              if (!Array.isArray(draft)) return;
+
+              const tempIndex = draft.findIndex((item) => item.id === tempId);
+              if (tempIndex >= 0) {
+                draft[tempIndex] = created as unknown as GetFavorites;
+                return;
+              }
+
+              const createdFavorite = created as unknown as GetFavorites;
+              const exists = draft.some((item) => item.clothes.id === createdFavorite.clothes.id);
+              if (!exists) {
+                draft.unshift(createdFavorite);
+              }
+            }),
+          );
+        } catch {
+          patchResult.undo();
+        }
+      },
     }),
 
     deleteFavorite: build.mutation<
@@ -110,7 +176,24 @@ const api = index.injectEndpoints({
         method: "DELETE",
         body: id,
       }),
-      invalidatesTags: ["category"],
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          updateCategoryQueryData("getToFavorite", undefined, (draft: GetFavorites[]) => {
+            if (!Array.isArray(draft)) return;
+
+            const indexToRemove = draft.findIndex((item) => item.id === id);
+            if (indexToRemove >= 0) {
+              draft.splice(indexToRemove, 1);
+            }
+          }),
+        );
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
     }),
   }),
 });

@@ -2,6 +2,8 @@ namespace ICATEGORY {
   type getAllClothesRes = AllClothes[];
   type getAllClothesReq =
     | {
+        page?: number;
+        page_size?: number;
         limit?: number;
         search?: string;
         category?: string;
@@ -24,14 +26,17 @@ namespace ICATEGORY {
   >;
   type getCategoryReq = void;
 
-  type postToFavoreRes = PostToFavoriteRes[];
+  type postToFavoreRes = GetFavorites;
 
   type postToFavoreReq = PostToFavoriteReq;
 
   type getToFavoreRes = GetFavorites[];
   type getToFavoreReq = void;
 
-  type deleteFavoreRes = GetFavorites[];
+  type deleteFavoreRes = {
+    success: boolean;
+    id: number;
+  };
   type deleteFavoreReq = number;
 
   type getFirstSectionRes = firstSection[];

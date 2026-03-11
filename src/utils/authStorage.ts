@@ -4,6 +4,7 @@ export type StoredTokens = {
 };
 
 const STORAGE_KEY = "accessToken";
+const AUTH_STORAGE_EVENT = "auth-storage-changed";
 
 const decodeBase64Url = (value: string): string | null => {
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
@@ -113,12 +114,14 @@ export const saveAuthTokens = (tokens: StoredTokens, rememberMe: boolean): void 
 
   target.setItem(STORAGE_KEY, JSON.stringify(tokens));
   fallback.removeItem(STORAGE_KEY);
+  window.dispatchEvent(new Event(AUTH_STORAGE_EVENT));
 };
 
 export const clearAuthTokens = (): void => {
   if (typeof window === "undefined") return;
   localStorage.removeItem(STORAGE_KEY);
   sessionStorage.removeItem(STORAGE_KEY);
+  window.dispatchEvent(new Event(AUTH_STORAGE_EVENT));
 };
 
 export const getStoredAccessToken = (): string | null => {
@@ -128,3 +131,5 @@ export const getStoredAccessToken = (): string | null => {
 
   return tokens?.access || null;
 };
+
+export const AUTH_STORAGE_CHANGED_EVENT = AUTH_STORAGE_EVENT;

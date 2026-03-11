@@ -1,5 +1,6 @@
 "use client";
 import ReduxProvider from "../providers/ReduxProvider";
+import RealtimeBridge from "../providers/RealtimeBridge";
 import { SessionProvider } from "../providers/SessionProvider";
 import React, { FC, ReactNode } from "react";
 
@@ -9,7 +10,10 @@ interface RootLayoutClientProps {
 const RootLayoutClient: FC<RootLayoutClientProps> = ({ children }) => {
   return (
     <ReduxProvider>
-      <SessionProvider>{children}</SessionProvider>
+      <SessionProvider>
+        <RealtimeBridge />
+        {children}
+      </SessionProvider>
     </ReduxProvider>
   );
 };

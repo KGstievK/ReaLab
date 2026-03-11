@@ -1,20 +1,27 @@
 namespace PRODUCT {
-  type getBasketRes = cart;
+  type getBasketRes = cart[];
   type getBasketReq = void;
 
   type getCartItemRes = get_cart_item;
-  type getCartItemReq = void;
+  type getCartItemReq = number;
 
-  type addToBasketRes = post_cart_item[];
+  type addToBasketRes = {
+    success: boolean;
+    total_price: string;
+  };
   type addToBasketReq = post_cart_item;
 
-  type editBasketRes = AllCart;
+  type editBasketRes = cart;
   type editBasketReq = {
     id?: number;
     updateBasket: patch_cart_item;
   };
 
-  type deleteBasketRes = cart[];
+  type deleteBasketRes = {
+    success: boolean;
+    id: number;
+    total_price: string;
+  };
   type deleteBasketReq = number;
 
   type getAllCartRes = AllCart;
@@ -28,8 +35,7 @@ namespace PRODUCT {
 
   type getOrderRes = IOrder[];
   type getOrderReq = void;
-  
+
   type getPayRes = Pay;
   type getPayReq = void;
-
 }

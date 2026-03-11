@@ -9,7 +9,7 @@ const api = index.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["auth"],
+      invalidatesTags: ["category", "review"],
     }),
   }),
 });

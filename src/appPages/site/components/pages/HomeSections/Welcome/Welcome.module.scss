@@ -126,7 +126,7 @@
                   opacity: 1;
                   position: absolute;
                   top: 0;
-                  left: 0;
+                  left: -10px;
                   width: 368px;
                   height: 460px;
                   z-index: 1;
@@ -182,8 +182,13 @@
                 margin-bottom: 0;
               }
               @media (max-width: 430px) {
+                // width: auto;
+                // height: auto;
                 width: auto;
-                height: auto;
+                min-height: 360px;
+                max-height: 430px;
+                height: 100%;
+                left: -10px;
               }
             }
           }
