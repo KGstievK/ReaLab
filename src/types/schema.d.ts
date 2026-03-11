@@ -1,4 +1,4 @@
-// interface User {
+﻿// interface User {
 //   _id?: number;
 //   username: string;
 //   email: string;
@@ -23,6 +23,7 @@ interface SaleContent {
 
 interface AllClothes {
   id: number;
+  category_name: string;
   promo_category: Array<{
     promo_category: string;
   }>;
@@ -135,6 +136,7 @@ interface AboutUs {
 
 interface category {
   category_name: string;
+  count?: number;
   clothes_category: Array<{
     id: number;
     promo_category: Array<{
@@ -153,14 +155,11 @@ interface category {
   }>;
 }
 //! data type
-interface Category {
-  category_name: string;
-}
 
 interface Review {
   author: {
     name: string;
-    avatar: string; // Допустим, можно добавить фото автора
+    avatar: string; // Р”РѕРїСѓСЃС‚РёРј, РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ С„РѕС‚Рѕ Р°РІС‚РѕСЂР°
   };
   text: string;
   stars: number;
@@ -186,7 +185,7 @@ interface Textile {
 interface IOrderPost {
   order_user: number;
   cart_id: number;
-  delivery: "курьер" | "самовызов";
+  delivery: "РєСѓСЂСЊРµСЂ" | "СЃР°РјРѕРІС‹Р·РѕРІ";
   first_name: string;
   phone_number: string;
   city: string;
@@ -194,11 +193,11 @@ interface IOrderPost {
 }
 
 type OrderStatus =
-  | "Oбработка"
-  | "заказ собирается"
-  | "в процессе  доставки"
-  | "Доставлен"
-  | "Отменен";
+  | "OР±СЂР°Р±РѕС‚РєР°"
+  | "Р·Р°РєР°Р· СЃРѕР±РёСЂР°РµС‚СЃСЏ"
+  | "РІ РїСЂРѕС†РµСЃСЃРµ  РґРѕСЃС‚Р°РІРєРё"
+  | "Р”РѕСЃС‚Р°РІР»РµРЅ"
+  | "РћС‚РјРµРЅРµРЅ";
 
 interface IOrder {
   id: number;
@@ -713,3 +712,5 @@ interface AdminPaginatedResponse<T> {
   previous: string | null;
   results: T[];
 }
+
+

@@ -19,6 +19,7 @@ import {
 } from "../../../../../../redux/api/category";
 import { useGetMeQuery } from "../../../../../../redux/api/auth";
 import { queueFavoriteIntent } from "../../../../../../utils/authIntent";
+import { resolveMediaUrl } from "@/utils/media";
 
 interface ClothesItem {
   id: number;
@@ -39,7 +40,7 @@ interface ClothesItem {
 const AboutRecommendations = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { data: clothes = [] } = useGetAllClothesQuery();
+  const { data: clothes = [] } = useGetAllClothesQuery({ limit: 48 });
   const { data: me } = useGetMeQuery();
   const { data: favoriteItems } = useGetToFavoriteQuery(undefined, {
     refetchOnMountOrArgChange: true,
@@ -252,7 +253,7 @@ const AboutRecommendations = () => {
 
                   {item.clothes_img[0] && (
                     <Image
-                      src={item.clothes_img[0].photo}
+                      src={resolveMediaUrl(item.clothes_img[0].photo)}
                       alt={item.clothes_name}
                       width={450}
                       height={560}
@@ -300,3 +301,5 @@ const AboutRecommendations = () => {
 };
 
 export default AboutRecommendations;
+
+

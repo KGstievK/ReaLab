@@ -314,8 +314,11 @@
       width: 100%;
       min-width: 820px;
       border-collapse: collapse;
+        overflow-y: hidden;
 
       thead {
+        width: 100%;
+        overflow-y: hidden;
         th {
           text-align: left;
           padding: 10px;
@@ -326,15 +329,21 @@
           border-bottom: 1px solid #ead9da;
           text-transform: uppercase;
           letter-spacing: 0.03em;
+          overflow-y: hidden;
         }
       }
 
       tbody {
+        width: 100%;
+        overflow-y: hidden;
         tr {
+          width: 100%;
           border-bottom: 1px solid #f1e5e6;
+          overflow-y: hidden;
         }
 
         td {
+          overflow-y: auto;
           padding: 12px 10px;
           color: #202020;
           font-size: 14px;
@@ -1161,7 +1170,9 @@
   }
 }
 
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+@supports not (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
   .AdminPanel {
     .modalOverlay {
       background: rgba(26, 26, 26, 0.56);

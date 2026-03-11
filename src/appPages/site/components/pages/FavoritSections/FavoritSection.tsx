@@ -11,6 +11,7 @@ import {
   useGetToFavoriteQuery,
 } from "../../../../../redux/api/category";
 import scss from "./FavoritSection.module.scss";
+import { resolveMediaUrl } from "@/utils/media";
 
 interface FavoriteItem {
   id: number;
@@ -105,7 +106,7 @@ const Favorite = () => {
   };
 
   const renderCard = (item: FavoriteItem) => {
-    const image = item.clothes.clothes_img[0]?.photo || "/fallback-image.png";
+    const image = resolveMediaUrl(item.clothes.clothes_img[0]?.photo) || "/fallback-image.png";
     const colors = item.clothes.clothes_img.slice(0, 3);
     const price = formatSom(item.clothes.discount_price);
     const oldPrice =

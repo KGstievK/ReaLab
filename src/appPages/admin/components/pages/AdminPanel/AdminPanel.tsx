@@ -31,6 +31,7 @@ import {
   usePostAdminProductMutation,
   usePostAdminProductImagesMutation,
 } from "../../../../../redux/api/admin";
+import { resolveMediaUrl } from "../../../../../utils/media";
 import scss from "./AdminPanel.module.scss";
 
 type AdminTab =
@@ -79,6 +80,7 @@ const parseCsv = (value: string): string[] =>
 const MAX_PRODUCT_IMAGE_SIZE_MB = 7;
 const MAX_PRODUCT_IMAGE_SIZE_BYTES = MAX_PRODUCT_IMAGE_SIZE_MB * 1024 * 1024;
 const ALLOWED_PRODUCT_IMAGE_EXTENSIONS = new Set([
+  "svg",
   "jpg",
   "jpeg",
   "png",
@@ -141,16 +143,6 @@ const getApiErrorMessage = (error: unknown, fallback: string): string => {
 
 const toStringOrEmpty = (value: number | null | undefined): string =>
   value === null || value === undefined ? "" : String(value);
-
-const resolveImageUrl = (value: string): string => {
-  if (!value) return "";
-  if (/^https?:\/\//i.test(value) || value.startsWith("blob:") || value.startsWith("data:")) {
-    return value;
-  }
-
-  const apiBaseUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
-  return `${apiBaseUrl}${value}`;
-};
 
 const createEmptyProductForm = (defaultCategoryId: number): ProductFormState => ({
   name: "",
@@ -260,6 +252,31 @@ const DELIVERY_METHOD_LABELS: Record<AdminDeliveryMethod, string> = {
   courier: "Курьер",
   pickup: "Самовывоз",
 };
+
+const ROLE_LABELS: Record<string, string> = {
+  ADMIN: "Администратор",
+  MANAGER: "Менеджер",
+  OWNER: "Владелец",
+  CUSTOMER: "Покупатель",
+  USER: "Пользователь",
+  admin: "Администратор",
+  manager: "Менеджер",
+  owner: "Владелец",
+  customer: "Покупатель",
+  user: "Пользователь",
+};
+
+const formatRoleLabel = (role: string): string => ROLE_LABELS[role] || role;
+
+const RANGE_LABELS: Record<AdminDateRange, string> = {
+  today: "Сегодня",
+  week: "Неделя",
+  month: "Месяц",
+  quarter: "Квартал",
+  year: "Год",
+  custom: "Произвольный период",
+};
+
 const RANGE_OPTIONS: AdminDateRange[] = [
   "today",
   "week",
@@ -926,19 +943,19 @@ const AdminPanel = () => {
         : "";
 
       if (!file.type.startsWith("image/")) {
-        errors.push(`${file.name}: not an image file`);
+        errors.push(`${file.name}: файл не является изображением`);
         return;
       }
 
       if (!extension || !ALLOWED_PRODUCT_IMAGE_EXTENSIONS.has(extension)) {
         errors.push(
-          `${file.name}: unsupported format (use jpg, jpeg, png, webp, gif, jfif, avif)`,
+          `${file.name}: неподдерживаемый формат (используйте svg, jpg, jpeg, png, webp, gif, jfif, avif)`,
         );
         return;
       }
 
       if (file.size > MAX_PRODUCT_IMAGE_SIZE_BYTES) {
-        errors.push(`${file.name}: file is larger than ${MAX_PRODUCT_IMAGE_SIZE_MB}MB`);
+        errors.push(`${file.name}: файл больше ${MAX_PRODUCT_IMAGE_SIZE_MB} МБ`);
         return;
       }
 
@@ -950,7 +967,7 @@ const AdminPanel = () => {
     if (!validFiles.length) {
       setMessage({
         type: "error",
-        text: errors[0] || "No valid image files selected.",
+        text: errors[0] || "Не выбрано ни одного подходящего изображения.",
       });
       return;
     }
@@ -961,7 +978,7 @@ const AdminPanel = () => {
     if (errors.length) {
       setMessage({
         type: "error",
-        text: `${errors[0]}${errors.length > 1 ? ` (+${errors.length - 1} more)` : ""}`,
+        text: `${errors[0]}${errors.length > 1 ? ` (+ ещё ${errors.length - 1})` : ""}`,
       });
     }
   };
@@ -1050,7 +1067,7 @@ const AdminPanel = () => {
     if (!homeTitleForm.made.trim() || !homeTitleForm.title.trim()) {
       setMessage({
         type: "error",
-        text: "Fill HomeTitle made and title.",
+        text: "Заполните подзаголовок и заголовок главного баннера.",
       });
       return;
     }
@@ -1064,7 +1081,7 @@ const AdminPanel = () => {
     if (clothesIds.length !== 3 || new Set(clothesIds).size !== 3) {
       setMessage({
         type: "error",
-        text: "Select 3 different products for HomeTitle.",
+        text: "Выберите 3 разных товара для главного баннера.",
       });
       return;
     }
@@ -1080,14 +1097,14 @@ const AdminPanel = () => {
 
       setMessage({
         type: "success",
-        text: "HomeTitle updated successfully.",
+        text: "Главный баннер обновлен.",
       });
     } catch (error) {
       setMessage({
         type: "error",
         text: getApiErrorMessage(
           error,
-          "Failed to update HomeTitle.",
+          "Не удалось обновить главный баннер.",
         ),
       });
     }
@@ -1115,29 +1132,29 @@ const AdminPanel = () => {
           hasDifferentListValues(colors, currentColors);
 
     if (!productForm.name.trim() || !productForm.description.trim()) {
-      setMessage({ type: "error", text: "Fill product name and description." });
+      setMessage({ type: "error", text: "Заполните название и описание товара." });
       return;
     }
 
     if (!Number.isFinite(basePrice) || basePrice <= 0) {
-      setMessage({ type: "error", text: "Base price must be greater than 0." });
+      setMessage({ type: "error", text: "Базовая цена должна быть больше 0." });
       return;
     }
 
     if (!Number.isFinite(costPrice) || costPrice < 0) {
-      setMessage({ type: "error", text: "Cost price must be 0 or greater." });
+      setMessage({ type: "error", text: "Себестоимость не может быть отрицательной." });
       return;
     }
 
     if (discountPrice !== null && (!Number.isFinite(discountPrice) || discountPrice <= 0)) {
-      setMessage({ type: "error", text: "Discount price must be greater than 0." });
+      setMessage({ type: "error", text: "Цена со скидкой должна быть больше 0." });
       return;
     }
 
     if (shouldUpdateVariants && (!sizes.length || !colors.length)) {
       setMessage({
         type: "error",
-        text: "Add at least one size and one color (CSV).",
+        text: "Добавьте хотя бы один размер и один цвет через запятую.",
       });
       return;
     }
@@ -1193,8 +1210,8 @@ const AdminPanel = () => {
         type: "success",
         text:
           productModalMode === "create"
-            ? "Product created successfully."
-            : "Product updated successfully.",
+            ? "Товар успешно создан."
+            : "Товар успешно обновлен.",
       });
 
       closeProductModal();
@@ -1203,7 +1220,7 @@ const AdminPanel = () => {
         type: "error",
         text: getApiErrorMessage(
           error,
-          "Failed to save product. Check request data and access.",
+          "Не удалось сохранить товар. Проверьте данные и права доступа.",
         ),
       });
     }
@@ -1214,14 +1231,14 @@ const AdminPanel = () => {
     const discountPrice = rawValue.length ? Number(rawValue) : null;
 
     if (discountPrice !== null && (!Number.isFinite(discountPrice) || discountPrice <= 0)) {
-      setMessage({ type: "error", text: "Discount price must be greater than 0." });
+      setMessage({ type: "error", text: "Цена со скидкой должна быть больше 0." });
       return;
     }
 
     if (discountPrice !== null && discountPrice >= product.base_price) {
       setMessage({
         type: "error",
-        text: `Discount price for "${product.name}" must be lower than base price.`,
+        text: `Цена со скидкой для "${product.name}" должна быть ниже базовой цены.`,
       });
       return;
     }
@@ -1241,13 +1258,13 @@ const AdminPanel = () => {
         type: "success",
         text:
           discountPrice === null
-            ? `Discount removed for "${product.name}".`
-            : `Discount updated for "${product.name}".`,
+            ? `Скидка для "${product.name}" удалена.`
+            : `Скидка для "${product.name}" обновлена.`,
       });
     } catch (error) {
       setMessage({
         type: "error",
-        text: getApiErrorMessage(error, "Failed to update discount."),
+        text: getApiErrorMessage(error, "Не удалось обновить скидку."),
       });
     } finally {
       setDiscountSavingId(null);
@@ -1264,13 +1281,13 @@ const AdminPanel = () => {
       await deleteAdminProductMutation(selectedProduct.id).unwrap();
       setMessage({
         type: "success",
-        text: `Product "${selectedProduct.name}" deleted.`,
+        text: `Товар "${selectedProduct.name}" удален.`,
       });
       closeProductModal();
     } catch {
       setMessage({
         type: "error",
-        text: "Failed to delete product.",
+        text: "Не удалось удалить товар.",
       });
     }
   };
@@ -1317,7 +1334,7 @@ const AdminPanel = () => {
     <section className={scss.AdminPanel}>
       <div className={scss.shell}>
         <aside className={scss.sidebar}>
-          <h2>Jumana Admin</h2>
+          <h2>Jumana Админ</h2>
           <ul>
             {NAV_ITEMS.map((item) => (
               <li key={item.key}>
@@ -1357,7 +1374,7 @@ const AdminPanel = () => {
               <select value={range} onChange={handleRangeChange}>
                 {RANGE_OPTIONS.map((item) => (
                   <option key={item} value={item}>
-                    {item}
+                    {RANGE_LABELS[item]}
                   </option>
                 ))}
               </select>
@@ -1469,12 +1486,12 @@ const AdminPanel = () => {
                   <thead>
                     <tr>
                       <th>ID</th>
-                      <th>Name</th>
-                      <th>Category</th>
-                      <th>Stock</th>
-                      <th>Sold</th>
-                      <th>Status</th>
-                      <th>Actions</th>
+                      <th>Название</th>
+                      <th>Категория</th>
+                      <th>Остаток</th>
+                      <th>Продано</th>
+                      <th>Статус</th>
+                      <th>Действия</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1486,14 +1503,14 @@ const AdminPanel = () => {
                           <td>{item.category_name}</td>
                           <td>{item.total_stock}</td>
                           <td>{item.sold_items}</td>
-                          <td>{item.active ? "Active" : "Draft"}</td>
+                          <td>{item.active ? "Активен" : "Черновик"}</td>
                           <td>
                             <div className={scss.rowActions}>
                               <button
                                 type="button"
                                 className={scss.iconButton}
                                 onClick={() => openEditProductModal(item)}
-                                aria-label={`Edit ${item.name}`}
+                                aria-label={`Редактировать ${item.name}`}
                               >
                                 <FiEdit2 />
                               </button>
@@ -1501,7 +1518,7 @@ const AdminPanel = () => {
                                 type="button"
                                 className={`${scss.iconButton} ${scss.dangerIcon}`}
                                 onClick={() => openDeleteProductModal(item)}
-                                aria-label={`Delete ${item.name}`}
+                                aria-label={`Удалить ${item.name}`}
                               >
                                 <FiTrash2 />
                               </button>
@@ -1511,7 +1528,7 @@ const AdminPanel = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={7}>No products found.</td>
+                        <td colSpan={7}>Товары не найдены.</td>
                       </tr>
                     )}
                   </tbody>
@@ -1557,7 +1574,7 @@ const AdminPanel = () => {
                     <tr>
                       <th>Товар</th>
                       <th>Категория</th>
-                      <th>Р‘Р°Р·Р°</th>
+                      <th>Базовая цена</th>
                       <th>Себестоимость</th>
                       <th>Текущая цена</th>
                       <th>Скидка</th>
@@ -1716,7 +1733,7 @@ const AdminPanel = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={6}>No orders found.</td>
+                        <td colSpan={6}>Заказы не найдены.</td>
                       </tr>
                     )}
                   </tbody>
@@ -1730,18 +1747,18 @@ const AdminPanel = () => {
               <div className={scss.cards}>
                 <article>
                   <div className={scss.panelHead}>
-                    <h3>HomeTitle</h3>
+                    <h3>Главный баннер</h3>
                     <button
                       type="button"
                       onClick={() => void handleHomeTitleSave()}
                       disabled={isSavingHomeTitle}
                     >
-                      {isSavingHomeTitle ? "Saving..." : "Save HomeTitle"}
+                      {isSavingHomeTitle ? "Сохранение..." : "Сохранить баннер"}
                     </button>
                   </div>
                   <div className={scss.fieldGrid}>
                     <label className={scss.formField}>
-                      <span>Made</span>
+                      <span>Подзаголовок</span>
                       <input
                         value={homeTitleForm.made}
                         onChange={(event) =>
@@ -1751,26 +1768,26 @@ const AdminPanel = () => {
                       />
                     </label>
                     <label className={scss.formField}>
-                      <span>Title</span>
+                      <span>Заголовок</span>
                       <input
                         value={homeTitleForm.title}
                         onChange={(event) =>
                           handleHomeTitleFieldChange("title", event.target.value)
                         }
-                        placeholder="Main banner title"
+                        placeholder="Заголовок главного баннера"
                       />
                     </label>
                   </div>
                   <div className={scss.fieldGrid}>
                     <label className={scss.formField}>
-                      <span>Product 1</span>
+                      <span>Товар 1</span>
                       <select
                         value={homeTitleForm.clothes1_id}
                         onChange={(event) =>
                           handleHomeTitleFieldChange("clothes1_id", event.target.value)
                         }
                       >
-                        <option value="">Select product</option>
+                        <option value="">Выберите товар</option>
                         {contentProducts.results.map((product) => (
                           <option key={`home-title-1-${product.id}`} value={String(product.id)}>
                             #{product.id} {product.name}
@@ -1779,14 +1796,14 @@ const AdminPanel = () => {
                       </select>
                     </label>
                     <label className={scss.formField}>
-                      <span>Product 2</span>
+                      <span>Товар 2</span>
                       <select
                         value={homeTitleForm.clothes2_id}
                         onChange={(event) =>
                           handleHomeTitleFieldChange("clothes2_id", event.target.value)
                         }
                       >
-                        <option value="">Select product</option>
+                        <option value="">Выберите товар</option>
                         {contentProducts.results.map((product) => (
                           <option key={`home-title-2-${product.id}`} value={String(product.id)}>
                             #{product.id} {product.name}
@@ -1796,14 +1813,14 @@ const AdminPanel = () => {
                     </label>
                   </div>
                   <label className={scss.formField}>
-                    <span>Product 3</span>
+                    <span>Товар 3</span>
                     <select
                       value={homeTitleForm.clothes3_id}
                       onChange={(event) =>
                         handleHomeTitleFieldChange("clothes3_id", event.target.value)
                       }
                     >
-                      <option value="">Select product</option>
+                      <option value="">Выберите товар</option>
                       {contentProducts.results.map((product) => (
                         <option key={`home-title-3-${product.id}`} value={String(product.id)}>
                           #{product.id} {product.name}
@@ -1832,11 +1849,11 @@ const AdminPanel = () => {
                   <thead>
                     <tr>
                       <th>ID</th>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Role</th>
-                      <th>Orders</th>
-                      <th>Spent</th>
+                      <th>Имя</th>
+                      <th>Почта</th>
+                      <th>Роль</th>
+                      <th>Заказы</th>
+                      <th>Потрачено</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1847,7 +1864,7 @@ const AdminPanel = () => {
                           {item.first_name} {item.last_name}
                         </td>
                         <td>{item.email}</td>
-                        <td>{item.role}</td>
+                        <td>{formatRoleLabel(item.role)}</td>
                         <td>{item.total_orders}</td>
                         <td>{formatMoney(item.total_spent)}</td>
                       </tr>
@@ -1870,7 +1887,7 @@ const AdminPanel = () => {
                     </div>
                     <p>{item.message}</p>
                     <small>
-                      {item.actor.name} В· {item.actor.role}
+                      {item.actor.name} В· {formatRoleLabel(item.actor.role)}
                     </small>
                   </li>
                 ))}
@@ -1897,7 +1914,7 @@ const AdminPanel = () => {
                     type="button"
                     className={scss.closeButton}
                     onClick={closeOrderDetailsModal}
-                    aria-label="Close order details"
+                    aria-label="Закрыть детали заказа"
                   >
                     <FiX />
                   </button>
@@ -2030,7 +2047,7 @@ const AdminPanel = () => {
                           <div className={scss.orderItemPreview}>
                             {item.image_url ? (
                               <img
-                                src={resolveImageUrl(item.image_url)}
+                                src={resolveMediaUrl(item.image_url)}
                                 alt={item.color || item.product_name}
                               />
                             ) : (
@@ -2102,16 +2119,16 @@ const AdminPanel = () => {
                 <div className={scss.modalHeader}>
                   <h3>
                     {productModalMode === "create"
-                      ? "Create Product"
+                      ? "Создать товар"
                       : productModalMode === "edit"
-                        ? `Edit Product #${selectedProduct?.id ?? ""}`
-                        : `Delete Product #${selectedProduct?.id ?? ""}`}
+                        ? `Редактировать товар #${selectedProduct?.id ?? ""}`
+                        : `Удалить товар #${selectedProduct?.id ?? ""}`}
                   </h3>
                   <button
                     type="button"
                     className={scss.closeButton}
                     onClick={closeProductModal}
-                    aria-label="Close modal"
+                    aria-label="Закрыть окно"
                     disabled={isProductMutationLoading}
                   >
                     <FiX />
@@ -2121,7 +2138,7 @@ const AdminPanel = () => {
                 {productModalMode === "delete" ? (
                   <div className={scss.deleteBox}>
                     <p>
-                      Are you sure you want to delete
+                      Вы действительно хотите удалить
                       <strong> {selectedProduct?.name}</strong>?
                     </p>
                     <div className={scss.modalActions}>
@@ -2131,7 +2148,7 @@ const AdminPanel = () => {
                         onClick={closeProductModal}
                         disabled={isProductMutationLoading}
                       >
-                        Cancel
+                        Отмена
                       </button>
                       <button
                         type="button"
@@ -2139,7 +2156,7 @@ const AdminPanel = () => {
                         onClick={() => void handleProductDelete()}
                         disabled={isDeletingProduct}
                       >
-                        {isDeletingProduct ? "Deleting..." : "Delete"}
+                        {isDeletingProduct ? "Удаление..." : "Удалить"}
                       </button>
                     </div>
                   </div>
@@ -2147,31 +2164,31 @@ const AdminPanel = () => {
                   <>
                     <div className={scss.modalBody}>
                       <label className={scss.formField}>
-                        <span>Name</span>
+                        <span>Название</span>
                         <input
                           value={productForm.name}
                           onChange={(event) =>
                             handleProductFieldChange("name", event.target.value)
                           }
-                          placeholder="Product name"
+                          placeholder="Название товара"
                         />
                       </label>
 
                       <label className={scss.formField}>
-                        <span>Description</span>
+                        <span>Описание</span>
                         <textarea
                           value={productForm.description}
                           onChange={(event) =>
                             handleProductFieldChange("description", event.target.value)
                           }
                           rows={4}
-                          placeholder="Short product description"
+                          placeholder="Краткое описание товара"
                         />
                       </label>
 
                       <div className={scss.fieldGrid}>
                         <label className={scss.formField}>
-                          <span>Category</span>
+                          <span>Категория</span>
                           <select
                             value={productForm.category_id}
                             onChange={(event) =>
@@ -2186,27 +2203,27 @@ const AdminPanel = () => {
                               ))
                             ) : (
                               <option value={String(defaultCategoryId)}>
-                                Categories are not loaded
+                                Категории не загружены
                               </option>
                             )}
                           </select>
                         </label>
 
                         <label className={scss.formField}>
-                          <span>Textile</span>
+                          <span>Ткань</span>
                           <input
                             value={productForm.textile_name}
                             onChange={(event) =>
                               handleProductFieldChange("textile_name", event.target.value)
                             }
-                            placeholder="For example: Tafeta"
+                            placeholder="Например: Тафта"
                           />
                         </label>
                       </div>
 
                       <div className={scss.fieldGrid}>
                         <label className={scss.formField}>
-                          <span>Base price</span>
+                          <span>Базовая цена</span>
                           <input
                             type="number"
                             min={1}
@@ -2218,7 +2235,7 @@ const AdminPanel = () => {
                         </label>
 
                         <label className={scss.formField}>
-                          <span>Cost price</span>
+                          <span>Себестоимость</span>
                           <input
                             type="number"
                             min={0}
@@ -2226,12 +2243,12 @@ const AdminPanel = () => {
                             onChange={(event) =>
                               handleProductFieldChange("cost_price", event.target.value)
                             }
-                            placeholder="Used for profit calculation"
+                            placeholder="Используется для расчета прибыли"
                           />
                         </label>
 
                         <label className={scss.formField}>
-                          <span>Discount price</span>
+                          <span>Цена со скидкой</span>
                           <input
                             type="number"
                             min={0}
@@ -2239,14 +2256,14 @@ const AdminPanel = () => {
                             onChange={(event) =>
                               handleProductFieldChange("discount_price", event.target.value)
                             }
-                            placeholder="Optional"
+                            placeholder="Необязательно"
                           />
                         </label>
                       </div>
 
                       <div className={scss.fieldGrid}>
                         <label className={scss.formField}>
-                          <span>Sizes (CSV)</span>
+                          <span>Размеры через запятую</span>
                           <input
                             value={productForm.sizes}
                             onChange={(event) =>
@@ -2257,19 +2274,19 @@ const AdminPanel = () => {
                         </label>
 
                         <label className={scss.formField}>
-                          <span>Colors (CSV)</span>
+                          <span>Цвета через запятую</span>
                           <input
                             value={productForm.colors}
                             onChange={(event) =>
                               handleProductFieldChange("colors", event.target.value)
                             }
-                            placeholder="Black, Beige"
+                            placeholder="Черный, Бежевый"
                           />
                         </label>
                       </div>
 
                       <label className={scss.formField}>
-                        <span>Promo categories (CSV)</span>
+                        <span>Промо-категории через запятую</span>
                         <input
                           value={productForm.promo_categories}
                           onChange={(event) =>
@@ -2284,17 +2301,18 @@ const AdminPanel = () => {
 
                       <div className={scss.uploadBox}>
                         <label className={scss.formField}>
-                          <span>Product images</span>
+                          <span>Изображения товара</span>
                           <input
                             className={scss.fileInput}
                             type="file"
-                            accept="image/*"
+                            accept="image/*,.svg,.jpg,.jpeg,.png,.webp,.gif,.jfif,.avif"
                             multiple
                             onChange={handleProductImageFilesChange}
                           />
                         </label>
                         <small>
-                          Upload files to replace current photos. Up to 10 images, max 7MB each.
+                          Загрузите файлы, чтобы заменить текущие фото. До 10 изображений, максимум
+                          7 МБ каждое.
                         </small>
                       </div>
 
@@ -2315,8 +2333,8 @@ const AdminPanel = () => {
                             {selectedProduct?.images.map((image) => (
                               <div className={scss.previewItem} key={image.id}>
                                 <img
-                                  src={resolveImageUrl(image.photo)}
-                                  alt={image.color || "product-image"}
+                                  src={resolveMediaUrl(image.photo)}
+                                  alt={image.color || "изображение товара"}
                                 />
                               </div>
                             ))}
@@ -2331,7 +2349,7 @@ const AdminPanel = () => {
                             handleProductFieldChange("active", event.target.checked)
                           }
                         />
-                        <span>Publish product</span>
+                        <span>Опубликовать товар</span>
                       </label>
                     </div>
 
@@ -2342,7 +2360,7 @@ const AdminPanel = () => {
                         onClick={closeProductModal}
                         disabled={isProductMutationLoading}
                       >
-                        Cancel
+                        Отмена
                       </button>
                       <button
                         type="button"
@@ -2350,10 +2368,10 @@ const AdminPanel = () => {
                         disabled={isSavingProduct}
                       >
                         {isSavingProduct
-                          ? "Saving..."
+                          ? "Сохранение..."
                           : productModalMode === "create"
-                            ? "Create"
-                            : "Save"}
+                            ? "Создать"
+                            : "Сохранить"}
                       </button>
                     </div>
                   </>

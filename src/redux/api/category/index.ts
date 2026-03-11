@@ -59,9 +59,10 @@ const api = index.injectEndpoints({
       ICATEGORY.getAllClothesRes,
       ICATEGORY.getAllClothesReq
     >({
-      query: () => ({
+      query: (params) => ({
         url: "/",
         method: "GET",
+        params,
       }),
       providesTags: ["category"],
     }),

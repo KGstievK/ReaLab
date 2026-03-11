@@ -47,7 +47,7 @@ const SideBar: FC = () => {
 
     return categoryData.map((item) => ({
       label: item.category_name,
-      count: String(item.clothes_category?.length ?? 0),
+      count: String(item.count ?? item.clothes_category?.length ?? 0),
     }));
   }, [categoryData]);
 
@@ -392,3 +392,4 @@ const SideBar: FC = () => {
 };
 
 export default SideBar;
+

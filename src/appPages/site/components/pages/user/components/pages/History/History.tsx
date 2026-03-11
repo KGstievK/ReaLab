@@ -8,6 +8,7 @@ import { HiOutlineArrowPath } from "react-icons/hi2";
 import { TbTruckDelivery } from "react-icons/tb";
 import { useGetOrderQuery } from "../../../../../../../../redux/api/product";
 import styles from "./History.module.scss";
+import { resolveMediaUrl } from "@/utils/media";
 
 type OrderTab = "current" | "delivered";
 type TimelineStatus =
@@ -144,7 +145,10 @@ const getOrderImages = (order: OrderCard) =>
   order.cart.cart_items
     .map((item) => {
       const selected = item.clothes.clothes_img.find((img) => img.id === item.color);
-      return selected?.photo || item.clothes.clothes_img[0]?.photo || "/fallback-image.png";
+      return (
+        resolveMediaUrl(selected?.photo || item.clothes.clothes_img[0]?.photo) ||
+        "/fallback-image.png"
+      );
     })
     .filter(Boolean);
 

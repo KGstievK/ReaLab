@@ -5,6 +5,7 @@ import arrow from "@/assets/icons/arrow.svg";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useGetFirstSectionQuery } from "../../../../../../redux/api/category";
+import { resolveMediaUrl } from "@/utils/media";
 
 const Welcome = () => {
   const router = useRouter();
@@ -22,17 +23,17 @@ const Welcome = () => {
   const images = [
     {
       id: 0,
-      image: data[0].clothes1?.clothes_img?.[0]?.photo ?? "",
+      image: resolveMediaUrl(data[0].clothes1?.clothes_img?.[0]?.photo ?? ""),
       link: data[0].clothes1?.id ? `/${data[0].clothes1.id}` : "/",
     },
     {
       id: 1,
-      image: data[0].clothes2?.clothes_img?.[0]?.photo ?? "",
+      image: resolveMediaUrl(data[0].clothes2?.clothes_img?.[0]?.photo ?? ""),
       link: data[0].clothes2?.id ? `/${data[0].clothes2.id}` : "/",
     },
     {
       id: 2,
-      image: data[0].clothes3?.clothes_img?.[0]?.photo ?? "",
+      image: resolveMediaUrl(data[0].clothes3?.clothes_img?.[0]?.photo ?? ""),
       link: data[0].clothes3?.id ? `/${data[0].clothes3.id}` : "/",
     },
   ];

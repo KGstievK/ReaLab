@@ -22,7 +22,11 @@ const apiMediaPattern = (() => {
 
 const nextConfig: NextConfig = {
   images: {
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy:
+      "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
+      ...(apiMediaPattern ? [apiMediaPattern] : []),
       {
         protocol: "http",
         hostname: "16.171.227.181",

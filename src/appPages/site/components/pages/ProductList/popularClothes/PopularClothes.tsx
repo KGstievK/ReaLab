@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import Image from "next/image";
 import scss from "./popularClothes.module.scss";
 import star from "@/assets/images/star.png";
@@ -16,6 +16,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import backIcon from "@/assets/icons/backIcon.svg";
 import { queueFavoriteIntent } from "../../../../../../utils/authIntent";
+import { resolveMediaUrl } from "@/utils/media";
 
 interface ClothesCategoryItem {
   clothes_category: Array<{
@@ -43,12 +44,7 @@ const PopularClothes = () => {
   const { data: me } = useGetMeQuery();
   const currentUserId = me?.[0]?.id;
 
-  const { data } = useGetAllClothesQuery();
-  const newArrivals = data?.filter((item) =>
-    item.promo_category.some(
-      (category) => category.promo_category.toLowerCase() === "популярные",
-    ),
-  );
+  const { data: newArrivals } = useGetAllClothesQuery({ section: "popular" });
 
   const [postToFavorite] = usePostToFavoriteMutation();
   const [deleteFavorite] = useDeleteFavoriteMutation();
@@ -101,7 +97,7 @@ const PopularClothes = () => {
         }).unwrap();
       }
     } catch (error) {
-      console.error("Favori işlemi başarısız:", error);
+      console.error("Favori iЕџlemi baЕџarД±sД±z:", error);
     }
   };
 
@@ -114,9 +110,9 @@ const PopularClothes = () => {
       <div className="container">
         <div className={scss.header}>
           <Image src={backIcon} alt="icon " width={22} height={22} />
-          <Link href="/">Главная</Link>/<Link href="/popular">Популярные</Link>
+          <Link href="/">Р“Р»Р°РІРЅР°СЏ</Link>/<Link href="/popular">РџРѕРїСѓР»СЏСЂРЅС‹Рµ</Link>
         </div>
-        <h1 className={scss.title}>Популярные</h1>
+        <h1 className={scss.title}>РџРѕРїСѓР»СЏСЂРЅС‹Рµ</h1>
         <div className={scss.content}>
           <div className={scss.cards}>
             {newArrivals?.map((item) => (
@@ -163,7 +159,7 @@ const PopularClothes = () => {
                       width={5000}
                       height={3000}
                       layout="intrinsic"
-                      src={el.photo}
+                      src={resolveMediaUrl(el.photo)}
                       alt="photo"
                       className={scss.mainImg}
                     />
@@ -181,9 +177,9 @@ const PopularClothes = () => {
                   <h2>{item.clothes_name}</h2>
                   <div className={scss.price}>
                     <span>
-                      {Math.round(item.discount_price).toString()} cом
+                      {Math.round(item.discount_price).toString()} cРѕРј
                     </span>
-                    <del>{Math.round(item.price)} cом</del>
+                    <del>{Math.round(item.price)} cРѕРј</del>
                   </div>
                 </div>
               </div>
@@ -196,3 +192,5 @@ const PopularClothes = () => {
 };
 
 export default PopularClothes;
+
+

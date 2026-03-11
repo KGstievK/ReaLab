@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import {
   useDeleteFavoriteMutation,
-  useGetAllCategoryQuery,
+  useGetAllClothesQuery,
   useGetToFavoriteQuery,
   usePostToFavoriteMutation,
 } from "../../../../../../redux/api/category";
@@ -17,6 +17,7 @@ import heartRed from "@/assets/icons/red-heart-icon.svg";
 import star from "@/assets/images/star.png";
 import ColorsClothes from "../../../ui/colors/Colors";
 import scss from "./cards.module.scss";
+import { resolveMediaUrl } from "@/utils/media";
 
 interface ClothesCategoryItem {
   id: number;
@@ -37,8 +38,6 @@ interface ClothesCategoryItem {
   category_name: string;
 }
 
-const normalizeText = (value: string) => value.toLowerCase().trim();
-
 const Cards: FC<{
   value: string;
   size: string;
@@ -48,7 +47,36 @@ const Cards: FC<{
   const router = useRouter();
   const pathname = usePathname();
 
-  const { data } = useGetAllCategoryQuery();
+  const minPrice = Number.isFinite(priceRange[0]) ? priceRange[0] : 0;
+  const maxPrice = Number.isFinite(priceRange[1]) ? priceRange[1] : Number.MAX_SAFE_INTEGER;
+
+  const clothesQuery = useMemo(() => {
+    const query: Exclude<ICATEGORY.getAllClothesReq, void> = {};
+
+    if (value.trim()) {
+      query.category = value.trim();
+    }
+
+    if (size.trim()) {
+      query.size = size.trim();
+    }
+
+    if (color.trim()) {
+      query.color = color.trim();
+    }
+
+    if (minPrice > 0) {
+      query.min_price = minPrice;
+    }
+
+    if (maxPrice < Number.MAX_SAFE_INTEGER) {
+      query.max_price = maxPrice;
+    }
+
+    return query;
+  }, [color, maxPrice, minPrice, size, value]);
+
+  const { data: filteredItems = [] } = useGetAllClothesQuery(clothesQuery);
   const [postToFavorite] = usePostToFavoriteMutation();
   const [deleteFavorite] = useDeleteFavoriteMutation();
   const { data: me, refetch: refetchMe } = useGetMeQuery();
@@ -59,47 +87,6 @@ const Cards: FC<{
     skip: !hasAccessToken,
     refetchOnMountOrArgChange: true,
   });
-
-  const minPrice = Number.isFinite(priceRange[0]) ? priceRange[0] : 0;
-  const maxPrice = Number.isFinite(priceRange[1]) ? priceRange[1] : Number.MAX_SAFE_INTEGER;
-
-  const filteredItems = useMemo<ClothesCategoryItem[]>(() => {
-    if (!data) {
-      return [];
-    }
-
-    const normalizedCategory = normalizeText(value || "");
-    const normalizedSize = normalizeText(size || "");
-    const normalizedColor = normalizeText(color || "");
-
-    return data
-      .flatMap((category) =>
-        category.clothes_category.map((item) => ({
-          ...item,
-          category_name: category.category_name,
-        })),
-      )
-      .filter((item) => {
-        const matchCategory =
-          !normalizedCategory || normalizeText(item.category_name) === normalizedCategory;
-
-        const matchSize =
-          !normalizedSize ||
-          (Array.isArray(item.size) &&
-            item.size.some((sizeValue: string) => normalizeText(sizeValue) === normalizedSize));
-
-        const matchColor =
-          !normalizedColor ||
-          item.clothes_img.some(
-            (colorItem: { color: string }) => normalizeText(colorItem.color) === normalizedColor,
-          );
-
-        const price = Number(item.discount_price);
-        const matchPrice = Number.isFinite(price) && price >= minPrice && price <= maxPrice;
-
-        return matchCategory && matchSize && matchColor && matchPrice;
-      });
-  }, [color, data, maxPrice, minPrice, size, value]);
 
   const handleFavoriteClick = async (
     event: React.MouseEvent,
@@ -195,7 +182,7 @@ const Cards: FC<{
                     <Image
                       width={5000}
                       height={3000}
-                      src={image.photo as string | StaticImport}
+                      src={resolveMediaUrl(image.photo) as string | StaticImport}
                       alt="photo"
                       className={scss.mainImg}
                     />
@@ -225,3 +212,4 @@ const Cards: FC<{
 };
 
 export default Cards;
+

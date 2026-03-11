@@ -182,8 +182,8 @@ const ResetPasswordPage = () => {
       </button>
       <Image src={logo} alt="Jumana logo" className={scss.logo} priority />
 
-      <h1>Подтвердите номер телефона</h1>
-      <p>Введите код с номера телефона</p>
+      <h1>Подтвердите E-mail</h1>
+      <p>Введите код с E-mail</p>
 
       <div className={scss.codeGroup}>
         {digits.map((digit, index) => (

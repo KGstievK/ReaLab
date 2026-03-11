@@ -19,6 +19,7 @@ import heartRed from "@/assets/icons/red-heart-icon.svg";
 import star from "@/assets/icons/Star.svg";
 import ColorsClothes from "../../../ui/colors/Colors";
 import scss from "./New.module.scss";
+import { resolveMediaUrl } from "@/utils/media";
 
 interface ClothesItem {
   id: number;
@@ -36,18 +37,10 @@ interface ClothesItem {
   }>;
 }
 
-const NEW_PROMO_MARKERS = ["новинка", "новинки", "new", "рѕв"];
-
-const hasPromo = (item: ClothesItem, markers: string[]) =>
-  item.promo_category.some((category) => {
-    const value = category.promo_category.toLowerCase().trim();
-    return markers.some((marker) => value.includes(marker));
-  });
-
 const New = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { data } = useGetAllClothesQuery();
+  const { data: newArrivals = [] } = useGetAllClothesQuery({ section: "new", limit: 4 });
   const { data: me } = useGetMeQuery();
   const currentUserId = me?.[0]?.id;
 
@@ -56,9 +49,6 @@ const New = () => {
   const { data: favoriteItems } = useGetToFavoriteQuery(undefined, {
     refetchOnMountOrArgChange: true,
   });
-
-  const newArrivals =
-    data?.filter((item) => hasPromo(item as ClothesItem, NEW_PROMO_MARKERS)).slice(0, 4) ?? [];
 
   const handleFavoriteClick = async (
     event: React.MouseEvent,
@@ -162,7 +152,7 @@ const New = () => {
                     key={index}
                     width={1200}
                     height={1600}
-                    src={image.photo as string | StaticImport}
+                    src={resolveMediaUrl(image.photo) as string | StaticImport}
                     alt={item.clothes_name}
                     className={scss.mainImg}
                   />

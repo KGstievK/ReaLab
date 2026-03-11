@@ -24,6 +24,7 @@ import {
 } from "./paymentMethods";
 import { notifyTelegramFrontend } from "./frontend";
 import scss from "./CheckoutSection.module.scss";
+import { resolveMediaUrl } from "@/utils/media";
 
 interface CartItem {
   id: number;
@@ -620,7 +621,7 @@ const CheckoutSection = () => {
                       <Image
                         width={84}
                         height={90}
-                        src={selectedImage?.photo || "/fallback-image.png"}
+                        src={resolveMediaUrl(selectedImage?.photo) || "/fallback-image.png"}
                         alt={item.clothes.clothes_name}
                       />
                       <div className={scss.summaryText}>

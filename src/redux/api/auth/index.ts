@@ -4,31 +4,19 @@ const api = index.injectEndpoints({
   endpoints: (build) => ({
     getMe: build.query<AUTH.GetResponse, AUTH.GetRequest>({
       async queryFn(_arg, _api, _extraOptions, fetchWithBQ) {
-        const profileWithSlash = await fetchWithBQ({
+        const profile = await fetchWithBQ({
           url: "/profile/",
           method: "GET",
         });
 
-        if (!profileWithSlash.error) {
-          const data = profileWithSlash.data as AUTH.GetResponse | AUTH.GetResponse[number];
+        if (!profile.error) {
+          const data = profile.data as AUTH.GetResponse | AUTH.GetResponse[number];
           return {
             data: Array.isArray(data) ? data : [data],
           };
         }
 
-        const profileWithoutSlash = await fetchWithBQ({
-          url: "/profile",
-          method: "GET",
-        });
-
-        if (!profileWithoutSlash.error) {
-          const data = profileWithoutSlash.data as AUTH.GetResponse | AUTH.GetResponse[number];
-          return {
-            data: Array.isArray(data) ? data : [data],
-          };
-        }
-
-        const fallbackError = profileWithSlash.error ?? profileWithoutSlash.error ?? {
+        const fallbackError = profile.error ?? {
           status: "CUSTOM_ERROR" as const,
           error: "Unable to fetch profile",
         };

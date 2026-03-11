@@ -4,6 +4,7 @@ import search from "@/assets/icons/Search.svg";
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useGetAllClothesQuery } from "../../../../../redux/api/category";
 import { usePathname, useRouter } from "next/navigation";
+import { resolveMediaUrl } from "@/utils/media";
 
 const SEARCH_PLACEHOLDER = `${String.fromCharCode(1055, 1086, 1080, 1089, 1082)}...`;
 
@@ -15,21 +16,21 @@ const Search = () => {
   const normalizedQuery = query.trim().toLowerCase();
   const hasQuery = normalizedQuery.length > 0;
 
-  const { data = [] } = useGetAllClothesQuery(undefined, { skip: !hasQuery });
+  const { data = [] } = useGetAllClothesQuery(
+    hasQuery
+      ? {
+          search: normalizedQuery,
+          limit: 8,
+        }
+      : undefined,
+    { skip: !hasQuery },
+  );
 
   const router = useRouter();
   const pathname = usePathname();
   const searchRef = useRef<HTMLDivElement>(null);
 
-  const filteredData = useMemo(() => {
-    if (!hasQuery) {
-      return [];
-    }
-
-    return data.filter((item) =>
-      (item.clothes_name ?? "").toLowerCase().includes(normalizedQuery),
-    );
-  }, [data, hasQuery, normalizedQuery]);
+  const filteredData = useMemo(() => (hasQuery ? data : []), [data, hasQuery]);
 
   const shouldShowResults = isOpen && hasQuery && filteredData.length > 0;
 
@@ -127,7 +128,7 @@ const Search = () => {
             >
               {Array.isArray(item.clothes_img) && item.clothes_img.length > 0 && (
                 <Image
-                  src={item.clothes_img[0].photo}
+                  src={resolveMediaUrl(item.clothes_img[0].photo)}
                   alt="product"
                   width={100}
                   height={100}

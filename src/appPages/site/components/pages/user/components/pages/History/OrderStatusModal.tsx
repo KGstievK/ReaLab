@@ -7,6 +7,7 @@ import { GrBasket } from "react-icons/gr";
 import { HiOutlineArrowPath } from "react-icons/hi2";
 import { TbTruckDelivery } from "react-icons/tb";
 import { FaBoxOpen } from "react-icons/fa6";
+import { resolveMediaUrl } from "@/utils/media";
 
 type OrderStatus = string;
 
@@ -154,7 +155,7 @@ const OrderStatusModal = ({
               return (
                 <div key={idx} className={styles.item}>
                   <Image
-                    src={selectedImage?.photo || "/fallback-image.png"}
+                    src={resolveMediaUrl(selectedImage?.photo) || "/fallback-image.png"}
                     alt="Product"
                     width={100}
                     height={120}

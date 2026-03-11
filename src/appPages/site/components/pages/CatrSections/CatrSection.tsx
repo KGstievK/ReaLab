@@ -12,6 +12,7 @@ import {
   useGetCartQuery,
   useUpdateBasketMutation,
 } from "../../../../../redux/api/product";
+import { resolveMediaUrl } from "@/utils/media";
 
 interface CartItem {
   id: number;
@@ -233,7 +234,7 @@ const CatrSection = () => {
                           <Image
                             width={130}
                             height={130}
-                            src={selectedImage?.photo || "/fallback-image.png"}
+                            src={resolveMediaUrl(selectedImage?.photo) || "/fallback-image.png"}
                             alt={item.clothes.clothes_name}
                           />
                           <div className={scss.productInfo}>
@@ -301,7 +302,7 @@ const CatrSection = () => {
                         <Image
                           width={91}
                           height={98}
-                          src={selectedImage?.photo || "/fallback-image.png"}
+                          src={resolveMediaUrl(selectedImage?.photo) || "/fallback-image.png"}
                           alt={item.clothes.clothes_name}
                         />
                         <div className={scss.summaryItemText}>

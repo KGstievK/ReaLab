@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
@@ -17,6 +17,7 @@ import {
 } from "../../../../../../redux/api/category";
 import { useGetMeQuery } from "../../../../../../redux/api/auth";
 import { queueFavoriteIntent } from "../../../../../../utils/authIntent";
+import { resolveMediaUrl } from "@/utils/media";
 
 interface PromoCategoryItem {
   promo_category: string;
@@ -49,7 +50,10 @@ const SinglePageRecommendations: FC<RecommendationProps> = ({
 }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const { data: allClothes = [] } = useGetAllClothesQuery();
+  const { data: allClothes = [] } = useGetAllClothesQuery({
+    limit: 48,
+    exclude_id: currentProductId,
+  });
   const { data: favoriteItems } = useGetToFavoriteQuery(undefined, {
     refetchOnMountOrArgChange: true,
   });
@@ -203,7 +207,7 @@ const SinglePageRecommendations: FC<RecommendationProps> = ({
   return (
     <section className={scss.recommendations}>
       <div className={scss.header}>
-        <h2>Рекомендуемые товары</h2>
+        <h2>Р РµРєРѕРјРµРЅРґСѓРµРјС‹Рµ С‚РѕРІР°СЂС‹</h2>
       </div>
 
       <div className={scss.cards}>
@@ -240,7 +244,7 @@ const SinglePageRecommendations: FC<RecommendationProps> = ({
 
               {item.clothes_img[0] && (
                 <Image
-                  src={item.clothes_img[0].photo}
+                  src={resolveMediaUrl(item.clothes_img[0].photo)}
                   alt={item.clothes_name}
                   width={420}
                   height={540}
@@ -262,8 +266,8 @@ const SinglePageRecommendations: FC<RecommendationProps> = ({
               <h3>{item.clothes_name}</h3>
 
               <div className={scss.price}>
-                <span>{Math.round(item.discount_price)}сом</span>
-                <del>{Math.round(item.price)}сом</del>
+                <span>{Math.round(item.discount_price)}СЃРѕРј</span>
+                <del>{Math.round(item.price)}СЃРѕРј</del>
               </div>
             </div>
           </article>
@@ -274,4 +278,6 @@ const SinglePageRecommendations: FC<RecommendationProps> = ({
 };
 
 export default SinglePageRecommendations;
+
+
 

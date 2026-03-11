@@ -109,16 +109,16 @@ const ForgotPage = () => {
       </button>
       <Image src={logo} alt="Jumana logo" className={scss.logo} priority />
       <h1>Забыли пароль?</h1>
-      <p>Введите свой номер телефона, чтобы сбросить пароль</p>
+      <p>Введите свой E-mail, чтобы сбросить пароль</p>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <input
           type="text"
           {...register("email", { required: true })}
-          placeholder="Номер телефона"
-          autoComplete="tel"
+          placeholder="E-mail"
+          autoComplete="email"
         />
-        {errors.email && <span>Введите номер телефона</span>}
+        {errors.email && <span>Введите E-mail</span>}
         {submitError && <span>{submitError}</span>}
 
         <button type="submit" disabled={isLoading}>

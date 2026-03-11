@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import scss from "./SignUpPage.module.scss";
 import { usePostRegistrationMutation } from "../../../../redux/api/auth";
@@ -35,6 +35,7 @@ const SignUpPage: FC = () => {
   } = useForm<AUTH.PostRegistrationRequest>();
 
   const [rememberMe, setRememberMe] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const nextPath = searchParams.get("next");
   const fromPath = searchParams.get("from");
   const intentType = searchParams.get("intent");
@@ -44,6 +45,7 @@ const SignUpPage: FC = () => {
       ? nextPath
       : "/";
   const safeFromPath = fromPath && fromPath.startsWith("/") ? fromPath : null;
+
   const authFlowPath = (path: string) => {
     const params = new URLSearchParams();
 
@@ -67,8 +69,8 @@ const SignUpPage: FC = () => {
     return query ? `${path}?${query}` : path;
   };
 
-  const handleRememberMeChange = (e: CheckboxChangeEvent) => {
-    setRememberMe(e.target.checked);
+  const handleRememberMeChange = (event: CheckboxChangeEvent) => {
+    setRememberMe(event.target.checked);
   };
 
   const closeAuthAndRedirect = (path: string) => {
@@ -85,6 +87,13 @@ const SignUpPage: FC = () => {
   };
 
   const onSubmit: SubmitHandler<SignUpProps> = async (userData) => {
+    setSubmitError("");
+
+    if (userData.password !== userData.confirm_password) {
+      setSubmitError("Пароли не совпадают");
+      return;
+    }
+
     try {
       const response = await postRegisterMutation({
         username: userData.username,
@@ -104,7 +113,20 @@ const SignUpPage: FC = () => {
 
       clearAuthTokens();
       router.replace(authFlowPath("/auth/sign-in"));
-    } catch (error) {
+    } catch (error: any) {
+      const backendMessage = error?.data?.message;
+      const backendError = error?.data?.error;
+
+      if (Array.isArray(backendMessage) && backendMessage.length > 0) {
+        setSubmitError(String(backendMessage[0]));
+      } else if (typeof backendMessage === "string" && backendMessage.trim()) {
+        setSubmitError(backendMessage);
+      } else if (typeof backendError === "string" && backendError.trim()) {
+        setSubmitError(backendError);
+      } else {
+        setSubmitError("Не удалось зарегистрировать пользователя");
+      }
+
       console.error("Registration failed:", error);
     }
   };
@@ -112,7 +134,7 @@ const SignUpPage: FC = () => {
   return (
     <section className={scss.RegistrationPage}>
       <Link href="/" className={scss.Logo}>
-        <Image src={logo} alt="LOGO" />
+        <Image src={logo} alt="Логотип Jumana" />
       </Link>
       <h1>Создать аккаунт</h1>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -125,6 +147,7 @@ const SignUpPage: FC = () => {
         {errors.username?.type === "required" && (
           <p role="alert">*Придумайте имя пользователя</p>
         )}
+
         <input
           type="text"
           {...register("email", { required: true })}
@@ -134,6 +157,7 @@ const SignUpPage: FC = () => {
         {errors.email?.type === "required" && (
           <p role="alert">*Введите ваш адрес электронной почты</p>
         )}
+
         <input
           type="password"
           {...register("password", { required: true })}
@@ -143,6 +167,7 @@ const SignUpPage: FC = () => {
         {errors.password?.type === "required" && (
           <p role="alert">*Придумайте пароль</p>
         )}
+
         <input
           type="password"
           {...register("confirm_password", { required: true })}
@@ -152,6 +177,9 @@ const SignUpPage: FC = () => {
         {errors.confirm_password?.type === "required" && (
           <p role="alert">*Повторите пароль</p>
         )}
+
+        {submitError && <p role="alert">{submitError}</p>}
+
         <ConfigProvider
           theme={{
             token: {
@@ -167,8 +195,10 @@ const SignUpPage: FC = () => {
             Сохранить вход
           </Checkbox>
         </ConfigProvider>
+
         <button type="submit">Зарегистрироваться</button>
       </form>
+
       <div className={scss.links}>
         <p>У вас уже есть аккаунт?</p>
         <Link href={authFlowPath("/auth/sign-in")} className={scss.link}>

@@ -12,6 +12,7 @@ import { useGetMeQuery } from "../../../../../../redux/api/auth";
 import { useGetClothesByIdQuery } from "../../../../../../redux/api/category";
 import UploadFileModal from "./UploadFileModal";
 import scss from "./Review.module.scss";
+import { resolveMediaUrl } from "@/utils/media";
 
 const ratingOptions = [
   { value: 1, label: "Плохой" },
@@ -41,7 +42,7 @@ const normalizePhotos = (rawValue: unknown): string[] => {
 
   if (Array.isArray(rawValue)) {
     return rawValue
-      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .map((item) => (typeof item === "string" ? resolveMediaUrl(item.trim()) : ""))
       .filter(Boolean);
   }
 
@@ -59,22 +60,22 @@ const normalizePhotos = (rawValue: unknown): string[] => {
       const parsed = JSON.parse(value);
       if (Array.isArray(parsed)) {
         return parsed
-          .map((item) => (typeof item === "string" ? item.trim() : ""))
+          .map((item) => (typeof item === "string" ? resolveMediaUrl(item.trim()) : ""))
           .filter(Boolean);
       }
     } catch {
-      return [value];
+      return [resolveMediaUrl(value)];
     }
   }
 
   if (value.includes(",")) {
     return value
       .split(",")
-      .map((item) => item.trim())
+      .map((item) => resolveMediaUrl(item.trim()))
       .filter(Boolean);
   }
 
-  return [value];
+  return [resolveMediaUrl(value)];
 };
 
 const Review = () => {

@@ -4,6 +4,7 @@ import { IoCloseOutline } from "react-icons/io5";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import Image from "next/image";
 import { useGetPayQuery } from "../../../../../redux/api/product";
+import { resolveMediaUrl } from "@/utils/media";
 
 interface ModalConsulProps {
   type: "form" | "success";
@@ -62,7 +63,7 @@ const ModalConsul: React.FC<ModalConsulProps> = ({ type, onClose }) => {
                   <Image
                     width={300}
                     height={300}
-                    src={imgError[idx] ? "/fallback-image.jpg" : item.pay_img}
+                    src={imgError[idx] ? "/fallback-image.jpg" : resolveMediaUrl(item.pay_img)}
                     alt={`scanner-${idx}`}
                     onError={() => handleImageError(idx)}
                     priority

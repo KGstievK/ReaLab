@@ -1,11 +1,27 @@
 namespace ICATEGORY {
   type getAllClothesRes = AllClothes[];
-  type getAllClothesReq = void;
+  type getAllClothesReq =
+    | {
+        limit?: number;
+        search?: string;
+        category?: string;
+        size?: string;
+        color?: string;
+        section?: "new" | "popular" | "sale";
+        min_price?: number;
+        max_price?: number;
+        exclude_id?: number;
+      }
+    | void;
 
   type getClothesByIdRes = SingleProductData;
   type getClothesByIdReq = number;
 
-  type getCategoryRes = category[];
+  type getCategoryRes = Array<
+    category & {
+      count?: number;
+    }
+  >;
   type getCategoryReq = void;
 
   type postToFavoreRes = PostToFavoriteRes[];

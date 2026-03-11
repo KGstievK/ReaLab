@@ -20,6 +20,7 @@ import ColorsClothes from "../../ui/colors/Colors";
 import Sizes from "./sizes/Sizes";
 import Review from "./Review/Review";
 import SinglePageRecommendations from "./recommendations/SinglePageRecommendations";
+import { resolveMediaUrl } from "@/utils/media";
 
 const sizes = ["XXS", "XS", "S", "M", "L", "XL", "XXL"];
 
@@ -188,7 +189,7 @@ const SinglePageSection: FC = () => {
           <div className={scss.images}>
             <div className={scss.mainImg}>
               <Image
-                src={selectedPhoto || "/fallback-image.png"}
+                src={resolveMediaUrl(selectedPhoto) || "/fallback-image.png"}
                 alt={clothes_name}
                 width={6000}
                 height={5000}
@@ -208,7 +209,7 @@ const SinglePageSection: FC = () => {
                   }}
                 >
                   <Image
-                    src={item.photo}
+                    src={resolveMediaUrl(item.photo)}
                     alt={`Фото ${item.id}`}
                     width={2500}
                     height={2500}
@@ -340,4 +341,3 @@ const SinglePageSection: FC = () => {
 };
 
 export default SinglePageSection;
-
