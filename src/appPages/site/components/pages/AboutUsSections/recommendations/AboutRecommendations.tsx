@@ -23,6 +23,7 @@ import { resolveMediaUrl } from "@/utils/media";
 
 interface ClothesItem {
   id: number;
+  category_name: string;
   promo_category: Array<{
     promo_category: string;
   }>;
@@ -276,7 +277,7 @@ const AboutRecommendations = () => {
 
                 <div className={scss.cardInfo}>
                   <div className={scss.cardMeta}>
-                    <p>Product Category</p>
+                    <p>{item.category_name}</p>
                     <ColorsClothes clothesImg={item.clothes_img.slice(0, 3)} />
                   </div>
 

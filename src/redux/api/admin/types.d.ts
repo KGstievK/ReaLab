@@ -1,4 +1,21 @@
 namespace IADMIN {
+  type AdminAboutBlock = {
+    id: number | null;
+    title: string;
+    text: string;
+    img: string;
+    sort_order: number;
+  };
+
+  type AdminAboutPage = {
+    id: number | null;
+    title: string;
+    made: string;
+    logo: string;
+    updated_at: string | null;
+    blocks: AdminAboutBlock[];
+  };
+
   type GetDashboardReq =
     | {
         range?: AdminDateRange;
@@ -113,6 +130,31 @@ namespace IADMIN {
     data: AdminHomeTitlePayload;
   };
   type PatchHomeTitleRes = AdminHomeTitle;
+
+  type GetAboutPageReq = void;
+  type GetAboutPageRes = AdminAboutPage;
+
+  type PatchAboutPageReq = {
+    data: {
+      title?: string;
+      made?: string;
+      logo?: string;
+      blocks?: Array<{
+        title: string;
+        text: string;
+        img: string;
+        sort_order: number;
+      }>;
+    };
+  };
+  type PatchAboutPageRes = AdminAboutPage;
+
+  type UploadAboutImageReq = {
+    file: File;
+  };
+  type UploadAboutImageRes = {
+    image: string;
+  };
 
   type GetActivityReq = {
     page?: number;

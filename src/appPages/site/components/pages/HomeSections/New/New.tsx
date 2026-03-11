@@ -172,7 +172,7 @@ const New = () => {
 
               <div className={scss.blockText}>
                 <div className={scss.productCategory}>
-                  <h4>PRODUCT CATEGORY</h4>
+                  <h4>{item.category_name}</h4>
                   <div className={scss.colors}>
                     <ColorsClothes clothesImg={item.clothes_img.slice(0, 3)} />
                   </div>

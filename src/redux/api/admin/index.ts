@@ -189,6 +189,42 @@ const api = index.injectEndpoints({
       invalidatesTags: ["admin"],
     }),
 
+    getAdminAboutPage: build.query<IADMIN.GetAboutPageRes, IADMIN.GetAboutPageReq>({
+      query: () => ({
+        url: "/admin/content/about/",
+        method: "GET",
+      }),
+      providesTags: ["admin"],
+    }),
+
+    patchAdminAboutPage: build.mutation<
+      IADMIN.PatchAboutPageRes,
+      IADMIN.PatchAboutPageReq
+    >({
+      query: ({ data }) => ({
+        url: "/admin/content/about/",
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["admin"],
+    }),
+
+    uploadAdminAboutImage: build.mutation<
+      IADMIN.UploadAboutImageRes,
+      IADMIN.UploadAboutImageReq
+    >({
+      query: ({ file }) => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        return {
+          url: "/admin/content/about/image/",
+          method: "POST",
+          body: formData,
+        };
+      },
+    }),
+
     getAdminActivity: build.query<IADMIN.GetActivityRes, IADMIN.GetActivityReq>({
       query: (params) => ({
         url: "/admin/activity/",
@@ -229,6 +265,9 @@ export const {
   usePatchAdminContentMutation,
   useGetAdminHomeTitleQuery,
   usePatchAdminHomeTitleMutation,
+  useGetAdminAboutPageQuery,
+  usePatchAdminAboutPageMutation,
+  useUploadAdminAboutImageMutation,
   useGetAdminActivityQuery,
   useGetAdminFinanceSummaryQuery,
 } = api;

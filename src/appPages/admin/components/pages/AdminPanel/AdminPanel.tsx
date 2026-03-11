@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { ChangeEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
   FiActivity,
   FiBarChart2,
@@ -16,6 +16,7 @@ import {
 } from "react-icons/fi";
 import {
   useGetAdminActivityQuery,
+  useGetAdminAboutPageQuery,
   useGetAdminCategoriesQuery,
   useGetAdminContentQuery,
   useGetAdminDashboardQuery,
@@ -25,11 +26,13 @@ import {
   useGetAdminProductsQuery,
   useGetAdminUsersQuery,
   useDeleteAdminProductMutation,
+  usePatchAdminAboutPageMutation,
   usePatchAdminHomeTitleMutation,
   usePatchAdminProductMutation,
   usePatchAdminOrderStatusMutation,
   usePostAdminProductMutation,
   usePostAdminProductImagesMutation,
+  useUploadAdminAboutImageMutation,
 } from "../../../../../redux/api/admin";
 import { resolveMediaUrl } from "../../../../../utils/media";
 import scss from "./AdminPanel.module.scss";
@@ -65,6 +68,20 @@ type HomeTitleFormState = {
   clothes1_id: string;
   clothes2_id: string;
   clothes3_id: string;
+};
+
+type AboutBlockFormState = {
+  title: string;
+  text: string;
+  img: string;
+  sort_order: string;
+};
+
+type AboutPageFormState = {
+  title: string;
+  made: string;
+  logo: string;
+  blocks: AboutBlockFormState[];
 };
 
 const parseCsv = (value: string): string[] =>
@@ -164,6 +181,24 @@ const createEmptyHomeTitleForm = (): HomeTitleFormState => ({
   clothes1_id: "",
   clothes2_id: "",
   clothes3_id: "",
+});
+
+const createEmptyAboutBlockForm = (sortOrder: number): AboutBlockFormState => ({
+  title: "",
+  text: "",
+  img: "",
+  sort_order: String(sortOrder),
+});
+
+const createEmptyAboutPageForm = (): AboutPageFormState => ({
+  title: "",
+  made: "",
+  logo: "",
+  blocks: [
+    createEmptyAboutBlockForm(1),
+    createEmptyAboutBlockForm(2),
+    createEmptyAboutBlockForm(3),
+  ],
 });
 
 const productToForm = (product: AdminProduct): ProductFormState => {
@@ -712,6 +747,14 @@ const AdminPanel = () => {
   const [homeTitleForm, setHomeTitleForm] = useState<HomeTitleFormState>(
     createEmptyHomeTitleForm(),
   );
+  const [aboutPageForm, setAboutPageForm] = useState<AboutPageFormState>(
+    createEmptyAboutPageForm(),
+  );
+  const [aboutUploadingHero, setAboutUploadingHero] = useState(false);
+  const [aboutUploadingBlockIndex, setAboutUploadingBlockIndex] = useState<number | null>(null);
+  const productImageInputRef = useRef<HTMLInputElement | null>(null);
+  const aboutHeroInputRef = useRef<HTMLInputElement | null>(null);
+  const aboutBlockInputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   const dashboardQuery = useGetAdminDashboardQuery(
     { range },
@@ -739,6 +782,9 @@ const AdminPanel = () => {
   const homeTitleQuery = useGetAdminHomeTitleQuery(undefined, {
     skip: activeTab !== "content",
   });
+  const aboutPageQuery = useGetAdminAboutPageQuery(undefined, {
+    skip: activeTab !== "content",
+  });
   const categoriesQuery = useGetAdminCategoriesQuery(undefined, {
     skip: activeTab !== "products" && activeTab !== "discounts" && !isProductModalOpen,
   });
@@ -763,6 +809,9 @@ const AdminPanel = () => {
     usePatchAdminOrderStatusMutation();
   const [patchAdminHomeTitleMutation, { isLoading: isSavingHomeTitle }] =
     usePatchAdminHomeTitleMutation();
+  const [patchAdminAboutPageMutation, { isLoading: isSavingAboutPage }] =
+    usePatchAdminAboutPageMutation();
+  const [uploadAdminAboutImageMutation] = useUploadAdminAboutImageMutation();
 
   const isSavingProduct =
     isCreatingProduct || isUpdatingProduct || isUploadingProductImages;
@@ -844,6 +893,27 @@ const AdminPanel = () => {
   }, [homeTitleQuery.data]);
 
   useEffect(() => {
+    if (!aboutPageQuery.data) {
+      return;
+    }
+
+    setAboutPageForm({
+      title: aboutPageQuery.data.title || "",
+      made: aboutPageQuery.data.made || "",
+      logo: aboutPageQuery.data.logo || "",
+      blocks:
+        aboutPageQuery.data.blocks.length > 0
+          ? aboutPageQuery.data.blocks.map((block, index) => ({
+              title: block.title || "",
+              text: block.text || "",
+              img: block.img || "",
+              sort_order: String(block.sort_order || index + 1),
+            }))
+          : createEmptyAboutPageForm().blocks,
+    });
+  }, [aboutPageQuery.data]);
+
+  useEffect(() => {
     if (activeTab !== "discounts") {
       return;
     }
@@ -865,7 +935,10 @@ const AdminPanel = () => {
         : activeTab === "orders"
           ? ordersQuery.error
           : activeTab === "content"
-            ? contentQuery.error || homeTitleQuery.error || contentProductsQuery.error
+            ? contentQuery.error ||
+              homeTitleQuery.error ||
+              aboutPageQuery.error ||
+              contentProductsQuery.error
             : activeTab === "users"
               ? usersQuery.error
               : activityQuery.error) as { status?: unknown } | undefined;
@@ -1107,6 +1180,239 @@ const AdminPanel = () => {
           "Не удалось обновить главный баннер.",
         ),
       });
+    }
+  };
+
+  const handleAboutPageFieldChange = (
+    field: keyof Omit<AboutPageFormState, "blocks">,
+    value: string,
+  ) => {
+    setAboutPageForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleAboutBlockFieldChange = (
+    index: number,
+    field: keyof AboutBlockFormState,
+    value: string,
+  ) => {
+    setAboutPageForm((prev) => ({
+      ...prev,
+      blocks: prev.blocks.map((block, blockIndex) =>
+        blockIndex === index
+          ? {
+              ...block,
+              [field]: value,
+            }
+          : block,
+      ),
+    }));
+  };
+
+  const handleAddAboutBlock = () => {
+    setAboutPageForm((prev) => ({
+      ...prev,
+      blocks: [...prev.blocks, createEmptyAboutBlockForm(prev.blocks.length + 1)],
+    }));
+  };
+
+  const handleRemoveAboutBlock = (index: number) => {
+    setAboutPageForm((prev) => {
+      if (prev.blocks.length <= 1) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        blocks: prev.blocks
+          .filter((_, blockIndex) => blockIndex !== index)
+          .map((block, blockIndex) => ({
+            ...block,
+            sort_order: String(blockIndex + 1),
+          })),
+      };
+    });
+  };
+
+  const handleAboutPageSave = async () => {
+    const title = aboutPageForm.title.trim();
+    const made = aboutPageForm.made.trim();
+    const logo = aboutPageForm.logo.trim();
+    const blocks = aboutPageForm.blocks
+      .map((block, index) => ({
+        title: block.title.trim(),
+        text: block.text.trim(),
+        img: block.img.trim(),
+        sort_order: Number(block.sort_order) > 0 ? Number(block.sort_order) : index + 1,
+      }))
+      .sort((left, right) => left.sort_order - right.sort_order);
+
+    if (!title || !made) {
+      setMessage({
+        type: "error",
+        text: "Для страницы «О нас» заполните заголовок и подзаголовок.",
+      });
+      return;
+    }
+
+    if (!blocks.length || blocks.some((block) => !block.title || !block.text)) {
+      setMessage({
+        type: "error",
+        text: "У каждого блока страницы «О нас» должны быть заголовок и текст.",
+      });
+      return;
+    }
+
+    setMessage(null);
+
+    try {
+      const saved = await patchAdminAboutPageMutation({
+        data: {
+          title,
+          made,
+          logo,
+          blocks,
+        },
+      }).unwrap();
+
+      setAboutPageForm({
+        title: saved.title,
+        made: saved.made,
+        logo: saved.logo,
+        blocks: saved.blocks.map((block, index) => ({
+          title: block.title,
+          text: block.text,
+          img: block.img,
+          sort_order: String(block.sort_order || index + 1),
+        })),
+      });
+
+      setMessage({
+        type: "success",
+        text: "Страница «О нас» успешно обновлена.",
+      });
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: getApiErrorMessage(error, "Не удалось сохранить страницу «О нас»."),
+      });
+    }
+  };
+
+  const handleAboutBlockImageUpload = async (
+    index: number,
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    const extension = file.name.includes(".")
+      ? file.name.split(".").pop()?.toLowerCase() || ""
+      : "";
+
+    if (!file.type.startsWith("image/")) {
+      setMessage({
+        type: "error",
+        text: `${file.name}: файл не является изображением.`,
+      });
+      return;
+    }
+
+    if (!extension || !ALLOWED_PRODUCT_IMAGE_EXTENSIONS.has(extension)) {
+      setMessage({
+        type: "error",
+        text: `${file.name}: неподдерживаемый формат. Используйте svg, jpg, jpeg, png, webp, gif, jfif, avif.`,
+      });
+      return;
+    }
+
+    if (file.size > MAX_PRODUCT_IMAGE_SIZE_BYTES) {
+      setMessage({
+        type: "error",
+        text: `${file.name}: файл больше ${MAX_PRODUCT_IMAGE_SIZE_MB} МБ.`,
+      });
+      return;
+    }
+
+    setMessage(null);
+    setAboutUploadingBlockIndex(index);
+
+    try {
+      const uploaded = await uploadAdminAboutImageMutation({ file }).unwrap();
+      handleAboutBlockFieldChange(index, "img", uploaded.image);
+      setMessage({
+        type: "success",
+        text: `Изображение для блока ${index + 1} загружено.`,
+      });
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: getApiErrorMessage(error, "Не удалось загрузить изображение блока."),
+      });
+    } finally {
+      setAboutUploadingBlockIndex(null);
+    }
+  };
+
+  const handleAboutHeroImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    const extension = file.name.includes(".")
+      ? file.name.split(".").pop()?.toLowerCase() || ""
+      : "";
+
+    if (!file.type.startsWith("image/")) {
+      setMessage({
+        type: "error",
+        text: `${file.name}: файл не является изображением.`,
+      });
+      return;
+    }
+
+    if (!extension || !ALLOWED_PRODUCT_IMAGE_EXTENSIONS.has(extension)) {
+      setMessage({
+        type: "error",
+        text: `${file.name}: неподдерживаемый формат. Используйте svg, jpg, jpeg, png, webp, gif, jfif, avif.`,
+      });
+      return;
+    }
+
+    if (file.size > MAX_PRODUCT_IMAGE_SIZE_BYTES) {
+      setMessage({
+        type: "error",
+        text: `${file.name}: файл больше ${MAX_PRODUCT_IMAGE_SIZE_MB} МБ.`,
+      });
+      return;
+    }
+
+    setMessage(null);
+    setAboutUploadingHero(true);
+
+    try {
+      const uploaded = await uploadAdminAboutImageMutation({ file }).unwrap();
+      handleAboutPageFieldChange("logo", uploaded.image);
+      setMessage({
+        type: "success",
+        text: "Hero-изображение страницы «О нас» загружено.",
+      });
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: getApiErrorMessage(error, "Не удалось загрузить hero-изображение."),
+      });
+    } finally {
+      setAboutUploadingHero(false);
     }
   };
 
@@ -1829,6 +2135,184 @@ const AdminPanel = () => {
                     </select>
                   </label>
                 </article>
+              </div>
+
+              <article className={scss.contentEditor}>
+                <div className={scss.panelHead}>
+                  <div>
+                    <h3>Страница «О нас»</h3>
+                    <p className={scss.panelNote}>
+                      Управление главным заголовком, логотипом и всеми блоками страницы.
+                    </p>
+                  </div>
+                  <div className={scss.rowActions}>
+                    <button
+                      type="button"
+                      className={scss.secondaryAction}
+                      onClick={handleAddAboutBlock}
+                    >
+                      <FiPlus />
+                      Добавить блок
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleAboutPageSave()}
+                      disabled={isSavingAboutPage}
+                    >
+                      {isSavingAboutPage ? "Сохранение..." : "Сохранить страницу"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className={scss.fieldGrid}>
+                  <label className={scss.formField}>
+                    <span>Подзаголовок</span>
+                    <input
+                      value={aboutPageForm.made}
+                      onChange={(event) =>
+                        handleAboutPageFieldChange("made", event.target.value)
+                      }
+                      placeholder="MADE IN KYRGYZSTAN"
+                    />
+                  </label>
+                  <label className={scss.formField}>
+                    <span>Главный заголовок</span>
+                    <input
+                      value={aboutPageForm.title}
+                      onChange={(event) =>
+                        handleAboutPageFieldChange("title", event.target.value)
+                      }
+                      placeholder="Мы олицетворяем элегантность и скромность"
+                    />
+                  </label>
+                </div>
+
+                <div className={scss.uploadBox}>
+                  <label className={scss.formField}>
+                    <span>Логотип / изображение hero</span>
+                    <input
+                      ref={aboutHeroInputRef}
+                      className={scss.visuallyHiddenInput}
+                      type="file"
+                      accept="image/*,.svg,.jpg,.jpeg,.png,.webp,.gif,.jfif,.avif"
+                      onChange={(event) => void handleAboutHeroImageUpload(event)}
+                      disabled={aboutUploadingHero}
+                    />
+                    <button
+                      type="button"
+                      className={scss.fileInput}
+                      onClick={() => aboutHeroInputRef.current?.click()}
+                      disabled={aboutUploadingHero}
+                    >
+                      {aboutUploadingHero ? "Загрузка..." : "Выбрать файл"}
+                    </button>
+                  </label>
+                  <small>
+                    {aboutUploadingHero
+                      ? "Загрузка hero-изображения..."
+                      : `Загрузите изображение hero. Поддерживаются svg, jpg, jpeg, png, webp, gif, jfif, avif. Максимум ${MAX_PRODUCT_IMAGE_SIZE_MB} МБ.`}
+                  </small>
+                </div>
+
+                {aboutPageForm.logo.trim() && (
+                  <div className={scss.mediaPreview}>
+                    <img src={resolveMediaUrl(aboutPageForm.logo)} alt="Превью логотипа О нас" />
+                  </div>
+                )}
+
+                <div className={scss.aboutBlocks}>
+                  {aboutPageForm.blocks.map((block, index) => (
+                    <article key={`about-block-${index}`} className={scss.aboutBlockCard}>
+                      <div className={scss.panelHead}>
+                        <h3>Блок {index + 1}</h3>
+                        <button
+                          type="button"
+                          className={scss.secondaryAction}
+                          onClick={() => handleRemoveAboutBlock(index)}
+                          disabled={aboutPageForm.blocks.length <= 1}
+                        >
+                          Удалить
+                        </button>
+                      </div>
+
+                      <div className={scss.fieldGrid}>
+                        <label className={scss.formField}>
+                          <span>Заголовок блока</span>
+                          <input
+                            value={block.title}
+                            onChange={(event) =>
+                              handleAboutBlockFieldChange(index, "title", event.target.value)
+                            }
+                            placeholder="О бренде"
+                          />
+                        </label>
+                        <label className={scss.formField}>
+                          <span>Порядок</span>
+                          <input
+                            type="number"
+                            min={1}
+                            value={block.sort_order}
+                            onChange={(event) =>
+                              handleAboutBlockFieldChange(index, "sort_order", event.target.value)
+                            }
+                          />
+                        </label>
+                      </div>
+
+                      <div className={scss.uploadBox}>
+                        <label className={scss.formField}>
+                          <span>Загрузка фото блока</span>
+                          <input
+                            ref={(node) => {
+                              aboutBlockInputRefs.current[index] = node;
+                            }}
+                            className={scss.visuallyHiddenInput}
+                            type="file"
+                            accept="image/*,.svg,.jpg,.jpeg,.png,.webp,.gif,.jfif,.avif"
+                            onChange={(event) => void handleAboutBlockImageUpload(index, event)}
+                            disabled={aboutUploadingBlockIndex === index}
+                          />
+                          <button
+                            type="button"
+                            className={scss.fileInput}
+                            onClick={() => aboutBlockInputRefs.current[index]?.click()}
+                            disabled={aboutUploadingBlockIndex === index}
+                          >
+                            {aboutUploadingBlockIndex === index ? "Загрузка..." : "Выбрать файл"}
+                          </button>
+                        </label>
+                        <small>
+                          {aboutUploadingBlockIndex === index
+                            ? "Загрузка изображения..."
+                            : `Загрузите изображение блока. Поддерживаются svg, jpg, jpeg, png, webp, gif, jfif, avif. Максимум ${MAX_PRODUCT_IMAGE_SIZE_MB} МБ.`}
+                        </small>
+                      </div>
+
+                      {block.img.trim() && (
+                        <div className={scss.mediaPreview}>
+                          <img
+                            src={resolveMediaUrl(block.img)}
+                            alt={`Превью блока ${index + 1}`}
+                          />
+                        </div>
+                      )}
+
+                      <label className={scss.formField}>
+                        <span>Текст блока</span>
+                        <textarea
+                          value={block.text}
+                          onChange={(event) =>
+                            handleAboutBlockFieldChange(index, "text", event.target.value)
+                          }
+                          placeholder="Описание блока"
+                        />
+                      </label>
+                    </article>
+                  ))}
+                </div>
+              </article>
+
+              <div className={scss.cards}>
                 {sections.map((item) => (
                   <article key={item.id}>
                     <h3>{item.section_name}</h3>
@@ -2303,12 +2787,20 @@ const AdminPanel = () => {
                         <label className={scss.formField}>
                           <span>Изображения товара</span>
                           <input
-                            className={scss.fileInput}
+                            ref={productImageInputRef}
+                            className={scss.visuallyHiddenInput}
                             type="file"
                             accept="image/*,.svg,.jpg,.jpeg,.png,.webp,.gif,.jfif,.avif"
                             multiple
                             onChange={handleProductImageFilesChange}
                           />
+                          <button
+                            type="button"
+                            className={scss.fileInput}
+                            onClick={() => productImageInputRef.current?.click()}
+                          >
+                            Выбрать файлы
+                          </button>
                         </label>
                         <small>
                           Загрузите файлы, чтобы заменить текущие фото. До 10 изображений, максимум

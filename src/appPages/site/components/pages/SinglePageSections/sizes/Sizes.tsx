@@ -1,4 +1,4 @@
-import { FC } from "react";
+﻿import { FC } from "react";
 import scss from "./sizes.module.scss";
 
 const Sizes: FC<{

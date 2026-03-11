@@ -23,7 +23,7 @@ const Header = ({ isMobileHidden = false }: HeaderProps) => {
     { link: "/new", name: "Новинки" },
     { link: "/catalog", name: "Категории" },
     { link: "/about", name: "О нас" },
-    { link: "/contacts", name: "Контакты" },
+    // { link: "/contacts", name: "Контакты" },
   ];
 
   const safeFromPath = pathname && pathname.startsWith("/") ? pathname : "/";

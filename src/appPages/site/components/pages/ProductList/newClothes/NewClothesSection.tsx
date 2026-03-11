@@ -97,7 +97,7 @@ const NewClothesSection = () => {
         }).unwrap();
       }
     } catch (error) {
-      console.error("Favori iЕџlemi baЕџarД±sД±z:", error);
+      console.error("Не удалось изменить избранное:", error);
     }
   };
 
@@ -110,9 +110,9 @@ const NewClothesSection = () => {
       <div className="container">
         <div className={scss.header}>
           <Image src={backIcon} alt="icon " width={22} height={22} />
-          <Link href="/">Р“Р»Р°РІРЅР°СЏ</Link>/<Link href="/new">РќРѕРІРёРЅРєРё</Link>
+          <Link href="/">Главная</Link>/<Link href="/new">Новинки</Link>
         </div>
-        <h1 className={scss.title}>РќРѕРІРёРЅРєРё</h1>
+        <h1 className={scss.title}>Новинки</h1>
         <div className={scss.content}>
           <div className={scss.cards}>
             {newArrivals?.map((item) => (
@@ -167,7 +167,7 @@ const NewClothesSection = () => {
                 </div>
                 <div className={scss.blockText}>
                   <div className={scss.productCategory}>
-                    <h4>Product Category</h4>
+                    <h4>{item.category_name}</h4>
                     <div className={scss.colors}>
                       <ColorsClothes
                         clothesImg={item.clothes_img.slice(0, 3)}
@@ -177,9 +177,9 @@ const NewClothesSection = () => {
                   <h2>{item.clothes_name}</h2>
                   <div className={scss.price}>
                     <span>
-                      {Math.round(item.discount_price).toString()} cРѕРј
+                      {Math.round(item.discount_price).toString()} сом
                     </span>
-                    <del>{Math.round(item.price)} cРѕРј</del>
+                    <del>{Math.round(item.price)} сом</del>
                   </div>
                 </div>
               </div>

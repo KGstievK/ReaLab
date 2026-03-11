@@ -159,7 +159,7 @@ interface category {
 interface Review {
   author: {
     name: string;
-    avatar: string; // Р”РѕРїСѓСЃС‚РёРј, РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ С„РѕС‚Рѕ Р°РІС‚РѕСЂР°
+    avatar: string; // При необходимости можно добавить фото автора
   };
   text: string;
   stars: number;
@@ -185,7 +185,7 @@ interface Textile {
 interface IOrderPost {
   order_user: number;
   cart_id: number;
-  delivery: "РєСѓСЂСЊРµСЂ" | "СЃР°РјРѕРІС‹Р·РѕРІ";
+  delivery: "курьер" | "самовывоз";
   first_name: string;
   phone_number: string;
   city: string;
@@ -193,11 +193,11 @@ interface IOrderPost {
 }
 
 type OrderStatus =
-  | "OР±СЂР°Р±РѕС‚РєР°"
-  | "Р·Р°РєР°Р· СЃРѕР±РёСЂР°РµС‚СЃСЏ"
-  | "РІ РїСЂРѕС†РµСЃСЃРµ  РґРѕСЃС‚Р°РІРєРё"
-  | "Р”РѕСЃС‚Р°РІР»РµРЅ"
-  | "РћС‚РјРµРЅРµРЅ";
+  | "Заказ размещен"
+  | "Собирается"
+  | "В пути"
+  | "Доставлен"
+  | "Отменен";
 
 interface IOrder {
   id: number;

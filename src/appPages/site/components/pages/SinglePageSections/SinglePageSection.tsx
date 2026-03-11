@@ -106,7 +106,8 @@ const SinglePageSection: FC = () => {
     }
 
     if (!getStoredAccessToken()) {
-      const safePath = pathname && pathname.startsWith("/") ? pathname : `/${id.single}`;
+      const safePath =
+        pathname && pathname.startsWith("/") ? pathname : `/${id.single}`;
       router.push(buildSignInHref(safePath, safePath));
       return;
     }
@@ -150,6 +151,7 @@ const SinglePageSection: FC = () => {
 
   const {
     clothes_name,
+    category,
     clothes_description,
     price,
     discount_price,
@@ -227,7 +229,7 @@ const SinglePageSection: FC = () => {
             <input type="hidden" {...register("size", { required: true })} />
 
             <div className={scss.headLine}>
-              <h3>PRODUCT CATEGORY</h3>
+              <h3>{category.map((item) => item.category_name)}</h3>
               <div className={scss.mark}>
                 <Image src={star} alt="Рейтинг" width={24} height={24} />
                 <h6>{ratingValue}</h6>
@@ -237,10 +239,9 @@ const SinglePageSection: FC = () => {
             <h1>{clothes_name}</h1>
 
             <div className={scss.price}>
-              <del>{previousPrice} с</del>
-              <h4>{currentPrice} с</h4>
+              <del>{previousPrice} Сом</del>
+              <h4>{currentPrice} Сом</h4>
             </div>
-
 
             <div className={scss.textile}>
               <h5>Ткань:</h5>
@@ -316,7 +317,7 @@ const SinglePageSection: FC = () => {
                 </div>
 
                 <button type="submit" className={scss.cart}>
-                  В корзинку
+                  В корзину
                   <Image src={bagSvg} alt="Корзина" width={20} height={20} />
                 </button>
               </div>

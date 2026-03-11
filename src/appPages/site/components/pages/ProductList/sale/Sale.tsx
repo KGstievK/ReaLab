@@ -97,7 +97,7 @@ const SalePage = () => {
         }).unwrap();
       }
     } catch (error) {
-      console.error("Favori iЕџlemi baЕџarД±sД±z:", error);
+      console.error("Не удалось изменить избранное:", error);
     }
   };
 
@@ -110,9 +110,9 @@ const SalePage = () => {
       <div className="container">
         <div className={scss.header}>
           <Image src={backIcon} alt="icon " width={22} height={22} />
-          <Link href="/">Р“Р»Р°РІРЅР°СЏ</Link>/<Link href="/sale">РЎРєРёРґРєРё</Link>
+          <Link href="/">Главная</Link>/<Link href="/sale">Скидки</Link>
         </div>
-        <h1 className={scss.title}>РЎРєРёРґРєРё</h1>
+        <h1 className={scss.title}>Скидки</h1>
         <div className={scss.content}>
           <div className={scss.cards}>
             {newArrivals?.map((item) => (
@@ -177,9 +177,9 @@ const SalePage = () => {
                   <h2>{item.clothes_name}</h2>
                   <div className={scss.price}>
                     <span>
-                      {Math.round(item.discount_price).toString()} cРѕРј
+                      {Math.round(item.discount_price).toString()} сом
                     </span>
-                    <del>{Math.round(item.price)} cРѕРј</del>
+                    <del>{Math.round(item.price)} сом</del>
                   </div>
                 </div>
               </div>

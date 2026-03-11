@@ -207,7 +207,7 @@ const SinglePageRecommendations: FC<RecommendationProps> = ({
   return (
     <section className={scss.recommendations}>
       <div className={scss.header}>
-        <h2>Р РµРєРѕРјРµРЅРґСѓРµРјС‹Рµ С‚РѕРІР°СЂС‹</h2>
+        <h2>Рекомендуемые товары</h2>
       </div>
 
       <div className={scss.cards}>
@@ -259,15 +259,16 @@ const SinglePageRecommendations: FC<RecommendationProps> = ({
 
             <div className={scss.cardInfo}>
               <div className={scss.metaRow}>
-                <p>PRODUCT CATEGORY</p>
+                <p>{item.category_name}</p>
+                {/* <p>PRODUCT CATEGORY</p> */}
                 <ColorsClothes clothesImg={item.clothes_img.slice(0, 3)} size="sm" />
               </div>
 
               <h3>{item.clothes_name}</h3>
 
               <div className={scss.price}>
-                <span>{Math.round(item.discount_price)}СЃРѕРј</span>
-                <del>{Math.round(item.price)}СЃРѕРј</del>
+                <span>{Math.round(item.discount_price)} сом</span>
+                <del>{Math.round(item.price)} сом</del>
               </div>
             </div>
           </article>
