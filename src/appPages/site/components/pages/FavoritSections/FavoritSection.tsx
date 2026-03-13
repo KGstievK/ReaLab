@@ -12,6 +12,7 @@ import {
 } from "../../../../../redux/api/category";
 import scss from "./FavoritSection.module.scss";
 import { resolveMediaUrl } from "@/utils/media";
+import { buildProductHref } from "@/utils/productRoute";
 
 interface FavoriteItem {
   id: number;
@@ -117,7 +118,7 @@ const Favorite = () => {
       <article
         key={item.id}
         className={scss.card}
-        onClick={() => router.push(`/${item.clothes.id}`)}
+        onClick={() => router.push(buildProductHref(item.clothes))}
       >
         <div className={scss.imageWrap}>
           <div className={scss.cardTop}>
@@ -149,7 +150,7 @@ const Favorite = () => {
             className={scss.cartButton}
             onClick={(event) => {
               event.stopPropagation();
-              router.push(`/${item.clothes.id}`);
+              router.push(buildProductHref(item.clothes));
             }}
             aria-label="Открыть товар"
           >

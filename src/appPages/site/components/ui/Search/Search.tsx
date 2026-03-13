@@ -1,12 +1,18 @@
 ﻿import Image from "next/image";
-import scss from "./Search.module.scss";
-import search from "@/assets/icons/Search.svg";
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
-import { useGetAllClothesQuery } from "../../../../../redux/api/category";
 import { usePathname, useRouter } from "next/navigation";
+import search from "@/assets/icons/Search.svg";
 import { resolveMediaUrl } from "@/utils/media";
+import { buildProductHref } from "@/utils/productRoute";
+import { useSearchCatalogQuery } from "../../../../../redux/api/search";
+import scss from "./Search.module.scss";
 
-const SEARCH_PLACEHOLDER = `${String.fromCharCode(1055, 1086, 1080, 1089, 1082)}...`;
+const SEARCH_PLACEHOLDER = "Поиск...";
+
+type SearchProductLink = {
+  id: number;
+  clothes_name: string;
+};
 
 const Search = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -16,10 +22,10 @@ const Search = () => {
   const normalizedQuery = query.trim().toLowerCase();
   const hasQuery = normalizedQuery.length > 0;
 
-  const { data = [] } = useGetAllClothesQuery(
+  const { data } = useSearchCatalogQuery(
     hasQuery
       ? {
-          search: normalizedQuery,
+          q: normalizedQuery,
           limit: 8,
         }
       : undefined,
@@ -30,12 +36,21 @@ const Search = () => {
   const pathname = usePathname();
   const searchRef = useRef<HTMLDivElement>(null);
 
-  const filteredData = useMemo(() => (hasQuery ? data : []), [data, hasQuery]);
+  const productResults = useMemo(() => (hasQuery ? data?.products || [] : []), [data, hasQuery]);
+  const categoryResults = data?.categories || [];
 
-  const shouldShowResults = isOpen && hasQuery && filteredData.length > 0;
+  const shouldShowResults = isOpen && hasQuery && (productResults.length > 0 || categoryResults.length > 0);
 
-  const handleProductClick = (id: number) => {
-    router.push(`/${id}/`);
+  const handleProductClick = (product: SearchProductLink) => {
+    router.push(buildProductHref(product));
+    setQuery("");
+    if (!isMobileView) {
+      setIsOpen(false);
+    }
+  };
+
+  const handleCategoryClick = (categoryName: string) => {
+    router.push(`/catalog?category=${encodeURIComponent(categoryName)}`);
     setQuery("");
     if (!isMobileView) {
       setIsOpen(false);
@@ -120,11 +135,11 @@ const Search = () => {
 
       {shouldShowResults && (
         <div className={`${scss.SearchResults} ${scss.resultsVisible}`}>
-          {filteredData.map((item) => (
+          {productResults.map((item) => (
             <div
               key={item.id}
               className={scss.SearchItem}
-              onClick={() => handleProductClick(item.id)}
+              onClick={() => handleProductClick({ id: item.id, clothes_name: item.clothes_name })}
             >
               {Array.isArray(item.clothes_img) && item.clothes_img.length > 0 && (
                 <Image
@@ -136,10 +151,28 @@ const Search = () => {
               )}
               <div className={scss.infoSearch}>
                 <p>{item.clothes_name}</p>
-                <p>${item.price}</p>
+                <p>{item.price}с</p>
               </div>
             </div>
           ))}
+
+          {categoryResults.length > 0 && (
+            <div className={scss.SearchSection}>
+              <span className={scss.SearchSectionTitle}>Категории</span>
+              <div className={scss.SearchSuggestionList}>
+                {categoryResults.map((category) => (
+                  <button
+                    key={category.category_name}
+                    type="button"
+                    className={scss.SearchSuggestion}
+                    onClick={() => handleCategoryClick(category.category_name)}
+                  >
+                    {category.category_name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

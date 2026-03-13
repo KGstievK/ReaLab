@@ -20,6 +20,7 @@ import star from "@/assets/icons/Star.svg";
 import ColorsClothes from "../../../ui/colors/Colors";
 import scss from "./New.module.scss";
 import { resolveMediaUrl } from "@/utils/media";
+import { buildProductHref } from "@/utils/productRoute";
 
 interface ClothesItem {
   id: number;
@@ -122,7 +123,7 @@ const New = () => {
             <article
               key={item.id}
               className={scss.card}
-              onClick={() => router.push(`/${item.id}`)}
+              onClick={() => router.push(buildProductHref(item))}
             >
               <div className={scss.blockImg}>
                 <div className={scss.like}>
@@ -163,7 +164,7 @@ const New = () => {
                   className={scss.cartBtn}
                   onClick={(event) => {
                     event.stopPropagation();
-                    router.push(`/${item.id}`);
+                    router.push(buildProductHref(item));
                   }}
                 >
                   <Image src={bagIcon} alt="go" />

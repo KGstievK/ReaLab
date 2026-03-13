@@ -190,6 +190,9 @@ interface IOrderPost {
   phone_number: string;
   city: string;
   address: string;
+  country?: string;
+  payment_method?: "mbank_redirect" | "finca_qr" | "manual";
+  save_address?: boolean;
 }
 
 type OrderStatus =
@@ -201,6 +204,7 @@ type OrderStatus =
 
 interface IOrder {
   id: number;
+  order_number?: string;
   cart: {
     id: number;
     user: number;
@@ -217,12 +221,14 @@ interface IOrder {
         }>;
       };
       size: string;
-      color: number;
+      color: number | string;
       quantity: number;
       price_clothes: string;
       total_price: string;
       color_id: number;
       clothes_id: number;
+      variant_id?: number | null;
+      sku?: string | null;
       just_price: string;
     }>;
   };
@@ -233,6 +239,31 @@ interface IOrder {
   phone_number: string;
   city: string;
   address: string;
+  payment?: {
+    status: string;
+    method: string;
+    provider: string;
+    amount: string;
+    currency: string;
+  } | null;
+  shipment?: {
+    status: string;
+    delivery_method: string;
+    price: string;
+    currency: string;
+    carrier: string | null;
+    service_name: string | null;
+    tracking_number: string | null;
+    city: string;
+    address: string;
+  } | null;
+  shipping_address?: {
+    id: number;
+    recipient_name: string;
+    phone_number: string;
+    city: string;
+    address: string;
+  } | null;
 }
 interface Pay {
   whatsapp: string;
@@ -283,6 +314,7 @@ interface SingleProductData {
 
 interface getOrderitem {
   id: number;
+  order_number?: string;
   cart: {
     id: number;
     user: number;
@@ -298,12 +330,14 @@ interface getOrderitem {
         }>;
       };
       size: string;
-      color: number;
+      color: number | string;
       quantity: number;
       price_clothes: string;
       total_price: string;
       color_id: number;
       clothes_id: number;
+      variant_id?: number | null;
+      sku?: string | null;
       just_price: string;
     }>;
   };
@@ -520,6 +554,37 @@ interface AdminOrder {
   status: AdminOrderStatus;
   payment_status: AdminPaymentStatus;
   delivery_method: AdminDeliveryMethod;
+  shipping_address?: {
+    id: number;
+    recipient_name: string;
+    phone_number: string;
+    city: string;
+    address: string;
+    country: string;
+    postal_code: string;
+  } | null;
+  payment?: {
+    status: AdminPaymentStatus;
+    method: string;
+    provider: string;
+    amount: number;
+    currency: string;
+    external_ref: string | null;
+    paid_at: string | null;
+  } | null;
+  shipment?: {
+    status: string;
+    delivery_method: AdminDeliveryMethod;
+    price: number;
+    currency: string;
+    carrier: string | null;
+    service_name: string | null;
+    tracking_number: string | null;
+    city: string;
+    address: string;
+    recipient_name: string;
+    phone_number: string;
+  } | null;
   subtotal: number;
   delivery_price: number;
   discount_amount: number;

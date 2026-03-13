@@ -200,6 +200,247 @@
       cursor: pointer;
     }
   }
+
+  .savedAddress {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 18px;
+    border: 1px solid #e5bfbd;
+    border-radius: 10px;
+    background: #fffaf5;
+
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h3 {
+      color: #0c0c0c;
+      font-family: "Inter", sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    p {
+      color: #717171;
+      font-family: "Inter", sans-serif;
+      font-size: 14px;
+      font-weight: 300;
+      line-height: 1.5;
+    }
+  }
+
+  .addressBook {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .addressBookHeader,
+  .addressFormHeader,
+  .addressCardHead {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .addressBookHeader,
+  .addressFormHeader {
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h2,
+    h3 {
+      color: #0c0c0c;
+      font-family: "Inter", sans-serif;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    h2 {
+      font-size: 20px;
+    }
+
+    h3 {
+      font-size: 18px;
+    }
+
+    p {
+      margin-top: 4px;
+      color: #717171;
+      font-family: "Inter", sans-serif;
+      font-size: 14px;
+      font-weight: 300;
+      line-height: 1.5;
+    }
+  }
+
+  .secondaryButton,
+  .secondarySubmit {
+    min-width: 180px;
+    height: 46px;
+    padding: 0 18px;
+    border: 1px solid #a73539;
+    border-radius: 10px;
+    background: #fff;
+    color: #a73539;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .secondarySubmit {
+    background: #a73539;
+    color: #fff;
+  }
+
+  .addressList {
+    display: grid;
+    gap: 14px;
+  }
+
+  .addressEmpty,
+  .addressCard,
+  .addressForm {
+    border: 1px solid #e5bfbd;
+    border-radius: 12px;
+    background: #fffaf5;
+  }
+
+  .addressEmpty {
+    padding: 18px;
+    color: #717171;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  .addressCard {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h3 {
+      color: #0c0c0c;
+      font-family: "Inter", sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    p {
+      color: #717171;
+      font-family: "Inter", sans-serif;
+      font-size: 14px;
+      font-weight: 300;
+      line-height: 1.5;
+    }
+  }
+
+  .defaultBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #f1e1dd;
+    color: #a73539;
+    font-family: "Inter", sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .addressActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .iconButton,
+  .linkButton {
+    border: none;
+    background: transparent;
+    color: #a73539;
+    padding: 0;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .iconButton {
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .addressForm {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .addressGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+
+    .field input {
+      padding-right: 12px;
+    }
+  }
+
+  .fullWidth {
+    grid-column: 1 / -1;
+  }
+
+  .checkboxRow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #4d4d4d;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+
+    input {
+      width: 16px;
+      height: 16px;
+      accent-color: #a73539;
+    }
+  }
+
+  .addressError {
+    margin: 0;
+    color: #a73539;
+    font-family: "Inter", sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.4;
+  }
 }
 
 @media (max-width: 960px) and (min-width: 751px) {
@@ -269,6 +510,37 @@
     .submit {
       height: 56px;
       font-size: 18px;
+    }
+
+    .savedAddress {
+      padding: 14px;
+    }
+
+    .addressBook {
+      margin-top: 18px;
+    }
+
+    .addressBookHeader,
+    .addressFormHeader,
+    .addressCardHead {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .secondaryButton,
+    .secondarySubmit {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .addressCard,
+    .addressForm,
+    .addressEmpty {
+      padding: 14px;
+    }
+
+    .addressGrid {
+      grid-template-columns: 1fr;
     }
   }
 }

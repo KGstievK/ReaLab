@@ -1,13 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
-:root {
-  --background: #ffffff;
-  --active: #562c2c;
-  --main-color: #a73539;
-  --footer: #202020;
-  --silver: #26262672;
-  --input: #e5bfbd66;
-}
+@use "../styles/tokens";
+@use "../styles/typography";
 
 html,
 body {
@@ -31,7 +23,9 @@ body {
   max-width: 100%;
   width: 100%;
   margin: 0 auto;
-  font-family: "Playfair Display", sans-serif;
+  background: var(--color-page);
+  color: var(--color-text);
+  font-family: var(--font-ui);
   overflow-x: hidden;
   min-width: 320px;
   min-height: 100vh;
@@ -48,7 +42,7 @@ body {
 
 a {
   color: inherit;
-  font-family: "inter", sans-serif;
+  font-family: var(--font-ui);
   font-weight: 500;
   text-decoration: none;
 }
@@ -71,12 +65,12 @@ li {
 
 input {
   padding: 15px 10px;
-  font-family: "Playfair Display", sans-serif;
+  font-family: var(--font-ui);
   font-size: 18px;
   outline: none;
   border-radius: 8px;
-  background-color: transparent;
-  border: 2px solid #d3d3d3;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
 }
 
 button {
@@ -132,14 +126,14 @@ button.cart {
   }
 }
 h1.title {
-  font-family: "Playfair Display";
-  font-size: clamp(24px, 3vw, 48px);
-  font-weight: 500;
-  line-height: clamp(31px, 3vw, 62px);
+  font-family: var(--font-display);
+  font-size: var(--font-size-h1);
+  font-weight: 600;
+  line-height: var(--line-height-heading);
   color: var(--main-color);
 }
 .container {
-  width: min(100%, 1440px);
+  width: min(100%, var(--content-max));
   margin: 0 auto;
   padding: 0 clamp(12px, 2vw, 24px);
 }

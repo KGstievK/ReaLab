@@ -98,10 +98,12 @@ export const SessionProvider: FC<SessionProviderProps> = ({ children }) => {
     const isProtectedPage = isProtectedPath(pathname);
     const isAdminPage = normalizedPath.startsWith("/admin");
     const profileRole = profile?.[0]?.role;
+    const profilePermissions = profile?.[0]?.permissions ?? [];
     const isAdminUser =
       profileRole === "admin" ||
       profileRole === "manager" ||
-      profileRole === "owner";
+      profileRole === "owner" ||
+      profilePermissions.includes("admin.access");
 
     if (isAuthPage && status === "fulfilled") {
       if (typeof window !== "undefined") {

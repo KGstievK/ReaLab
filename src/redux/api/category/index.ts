@@ -80,6 +80,19 @@ const api = index.injectEndpoints({
       providesTags: ["category"],
     }),
 
+    getCatalogFeed: build.query<
+      ICATEGORY.getCatalogFeedRes,
+      ICATEGORY.getCatalogFeedReq
+    >({
+      query: (params) => ({
+        url: "/",
+        method: "GET",
+        params,
+      }),
+      keepUnusedDataFor: 30,
+      providesTags: ["category"],
+    }),
+
     getClothesById: build.query<
       ICATEGORY.getClothesByIdRes,
       ICATEGORY.getClothesByIdReq
@@ -201,6 +214,7 @@ const api = index.injectEndpoints({
 export const {
   useGetAllCategoryQuery,
   useGetAllClothesQuery,
+  useGetCatalogFeedQuery,
   useGetClothesByIdQuery,
   usePostToFavoriteMutation,
   useGetToFavoriteQuery,

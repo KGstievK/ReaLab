@@ -21,7 +21,7 @@ type TimelineStatus =
 
 interface OrderItem {
   id?: number;
-  color: number;
+  color: number | string;
   clothes: {
     clothes_img: Array<{
       id: number;
@@ -33,6 +33,7 @@ interface OrderItem {
 
 interface OrderCard {
   id: number;
+  order_number?: string;
   date: string;
   order_status: string;
   cart: {
@@ -108,6 +109,18 @@ const formatDate = (raw: string) => {
 
 const normalize = (value: string) => value.trim().toLowerCase();
 
+const resolveOrderItemImage = (item: OrderItem) => {
+  const selected = item.clothes.clothes_img.find((img) => {
+    if (typeof item.color === "number") {
+      return img.id === item.color;
+    }
+
+    return normalize(img.color) === normalize(item.color);
+  });
+
+  return resolveMediaUrl(selected?.photo || item.clothes.clothes_img[0]?.photo) || "/fallback-image.png";
+};
+
 const normalizeOrderStatus = (status: string): TimelineStatus => {
   const normalized = normalize(status);
 
@@ -143,13 +156,7 @@ const isDeliveredStatus = (status: string) => normalizeOrderStatus(status) === "
 
 const getOrderImages = (order: OrderCard) =>
   order.cart.cart_items
-    .map((item) => {
-      const selected = item.clothes.clothes_img.find((img) => img.id === item.color);
-      return (
-        resolveMediaUrl(selected?.photo || item.clothes.clothes_img[0]?.photo) ||
-        "/fallback-image.png"
-      );
-    })
+    .map((item) => resolveOrderItemImage(item))
     .filter(Boolean);
 
 const History = () => {
@@ -234,6 +241,8 @@ const History = () => {
       </div>
     );
   };
+
+  const getOrderDisplayNumber = (order: OrderCard) => order.order_number || `#${order.id}`;
 
   const renderStatusPanel = () => {
     if (!selectedOrder) {
@@ -349,7 +358,7 @@ const History = () => {
               <div className={styles.orderMeta}>
                 <div className={styles.metaItem}>
                   <span>{"Номер заказа"}</span>
-                  <strong>#{order.id}</strong>
+                  <strong>{getOrderDisplayNumber(order)}</strong>
                 </div>
 
                 <div className={styles.metaItem}>

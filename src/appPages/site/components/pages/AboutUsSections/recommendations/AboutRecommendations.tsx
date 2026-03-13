@@ -20,6 +20,7 @@ import {
 import { useGetMeQuery } from "../../../../../../redux/api/auth";
 import { queueFavoriteIntent } from "../../../../../../utils/authIntent";
 import { resolveMediaUrl } from "@/utils/media";
+import { buildProductHref } from "@/utils/productRoute";
 
 interface ClothesItem {
   id: number;
@@ -224,7 +225,7 @@ const AboutRecommendations = () => {
                   if (target.closest("button, a")) {
                     return;
                   }
-                  router.push(`/${item.id}`);
+                  router.push(buildProductHref(item));
                 }}
               >
                 <div className={scss.imageWrap}>
@@ -267,7 +268,7 @@ const AboutRecommendations = () => {
                     className={scss.cartButton}
                     onClick={(event) => {
                       event.stopPropagation();
-                      router.push(`/${item.id}`);
+                      router.push(buildProductHref(item));
                     }}
                     aria-label="Открыть товар"
                   >

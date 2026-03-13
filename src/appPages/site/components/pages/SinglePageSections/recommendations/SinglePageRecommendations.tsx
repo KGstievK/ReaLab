@@ -18,6 +18,7 @@ import {
 import { useGetMeQuery } from "../../../../../../redux/api/auth";
 import { queueFavoriteIntent } from "../../../../../../utils/authIntent";
 import { resolveMediaUrl } from "@/utils/media";
+import { buildProductHref } from "@/utils/productRoute";
 
 interface PromoCategoryItem {
   promo_category: string;
@@ -215,7 +216,7 @@ const SinglePageRecommendations: FC<RecommendationProps> = ({
           <article
             key={item.id}
             className={scss.card}
-            onClick={() => router.push(`/${item.id}`)}
+            onClick={() => router.push(buildProductHref(item))}
           >
             <div className={scss.cardImage}>
               <div className={scss.cardTop}>

@@ -1,0 +1,15 @@
+@mixin container {
+  width: min(100%, var(--content-max));
+  margin: 0 auto;
+  padding-inline: clamp(12px, 2vw, 24px);
+}
+
+@mixin focus-ring {
+  outline: 2px solid rgba(110, 75, 71, 0.28);
+  outline-offset: 2px;
+}
+
+@mixin section-padding($top: var(--space-8), $bottom: var(--space-8)) {
+  padding-top: $top;
+  padding-bottom: $bottom;
+}

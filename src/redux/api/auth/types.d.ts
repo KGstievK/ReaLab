@@ -1,15 +1,72 @@
 namespace AUTH {
+  type ProfileAddress = {
+    id: number;
+    label: string;
+    recipient_name: string;
+    phone_number: string;
+    country: string;
+    city: string;
+    address: string;
+    postal_code: string;
+    is_default: boolean;
+  };
+
   type GetResponse = {
     id: number;
     username: string;
     role: "customer" | "manager" | "admin" | "owner";
+    permissions?: string[];
+    assigned_roles?: string[];
     first_name: string;
     last_name: string;
     email: string;
     address: string;
     number: string;
+    addresses?: ProfileAddress[];
+    default_address?: ProfileAddress | null;
   }[];
   type GetRequest = void;
+
+  type GetProfileAddressesResponse = ProfileAddress[];
+  type GetProfileAddressesRequest = void;
+
+  type PostProfileAddressRequest = {
+    label?: string;
+    recipient_name: string;
+    phone_number: string;
+    country?: string;
+    city: string;
+    address: string;
+    postal_code?: string;
+    is_default?: boolean;
+  };
+  type PostProfileAddressResponse = ProfileAddress;
+
+  type PatchProfileAddressRequest = {
+    id: number;
+    label?: string;
+    recipient_name?: string;
+    phone_number?: string;
+    country?: string;
+    city?: string;
+    address?: string;
+    postal_code?: string;
+    is_default?: boolean;
+  };
+  type PatchProfileAddressResponse = ProfileAddress;
+
+  type DeleteProfileAddressRequest = {
+    id: number;
+  };
+  type DeleteProfileAddressResponse = {
+    success: boolean;
+    id: number;
+  };
+
+  type SetDefaultProfileAddressRequest = {
+    id: number;
+  };
+  type SetDefaultProfileAddressResponse = ProfileAddress;
 
   type PutMeResponse = {};
   type PutMeRequest = {

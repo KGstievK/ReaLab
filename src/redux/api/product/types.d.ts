@@ -1,4 +1,4 @@
-namespace PRODUCT {
+﻿namespace PRODUCT {
   type getBasketRes = cart[];
   type getBasketReq = void;
 
@@ -38,4 +38,22 @@ namespace PRODUCT {
 
   type getPayRes = Pay;
   type getPayReq = void;
+
+  type getShippingQuoteRes = {
+    delivery_method: "courier" | "pickup";
+    price: number;
+    currency: string;
+    carrier: string;
+    service_name: string;
+    eta_label: string;
+    city: string;
+    country: string;
+    is_estimated: boolean;
+  };
+  type getShippingQuoteReq = {
+    delivery: "курьер" | "самовывоз";
+    city?: string;
+    country?: string;
+  };
 }
+

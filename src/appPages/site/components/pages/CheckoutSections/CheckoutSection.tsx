@@ -13,6 +13,7 @@ import { useGetMeQuery } from "../../../../../redux/api/auth";
 import {
   useGetCartQuery,
   useGetPayQuery,
+  useGetShippingQuoteQuery,
   usePostOrderMutation,
 } from "../../../../../redux/api/product";
 import PaymentResultModal from "./PaymentResultModal";
@@ -68,9 +69,10 @@ type FormErrors = Partial<Record<keyof FormData, string>> & {
   payment?: string;
 };
 
+type SavedAddressValue = number | "manual";
+
 type ResultState = "success" | "error" | null;
 
-const DELIVERY_PRICE = 200;
 const DISCOUNT_PRICE = 0;
 
 const TEXT = {
@@ -92,6 +94,7 @@ const TEXT = {
   phone: "НОМЕР ТЕЛЕФОНА",
   city: "ГОРОД",
   address: "АДРЕС",
+  savedAddress: "СОХРАНЁННЫЙ АДРЕС",
   namePlaceholder: "Айгерим",
   addressPlaceholder:
     "ABC 12A, Бишкек, Кыргызстан",
@@ -101,13 +104,15 @@ const TEXT = {
   enterAddress: "Введите адрес",
   chooseDelivery: "Выберите способ получения",
   choosePayment: "Выберите способ оплаты",
+  saveAddress: "Сохранить этот адрес в профиле",
   qrUnavailable: "QR-код временно недоступен",
   pickup: "Самовывоз",
-  pickupApi: "самовызов",
+  pickupApi: "самовывоз",
   pickupEta: "1-2 рабочих дня",
   courier: "Доставка",
   courierEta: "за час",
   returnToCart: "Вернуть в корзину",
+  manualAddress: "Ввести вручную",
   notSpecified: "Не указан",
   subtotal: "Итог",
   delivery: "Доставка",
@@ -146,6 +151,9 @@ const CheckoutSection = () => {
   const [resultState, setResultState] = useState<ResultState>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [selectedAddressId, setSelectedAddressId] =
+    useState<SavedAddressValue>("manual");
+  const [saveAddress, setSaveAddress] = useState(false);
 
   const [phoneTouched, setPhoneTouched] = useState(false);
   const [formData, setFormData] = useState<FormData>({
@@ -173,31 +181,102 @@ const CheckoutSection = () => {
   }, [cart]);
 
   const basketData = normalizedCart?.cart_items ?? [];
+  const currentUser = Array.isArray(meData) ? meData[0] : undefined;
+  const savedAddresses = currentUser?.addresses ?? [];
+  const defaultAddress =
+    currentUser?.default_address ??
+    savedAddresses.find((item) => item.is_default) ??
+    null;
+  const selectedSavedAddress =
+    selectedAddressId === "manual"
+      ? null
+      : savedAddresses.find((item) => item.id === selectedAddressId) ?? null;
+  const checkoutCountry =
+    selectedSavedAddress?.country ||
+    defaultAddress?.country ||
+    "Kyrgyzstan";
 
   useEffect(() => {
-    const currentUser = Array.isArray(meData) ? meData[0] : undefined;
     if (!currentUser) {
       return;
     }
 
     setFormData((prev) => ({
       ...prev,
-      firstName: prev.firstName || currentUser.first_name || "",
-      phoneNumber: prev.phoneNumber || currentUser.number || "",
-      address: prev.address || currentUser.address || "",
+      firstName:
+        prev.firstName ||
+        defaultAddress?.recipient_name ||
+        currentUser.first_name ||
+        "",
+      phoneNumber:
+        prev.phoneNumber ||
+        defaultAddress?.phone_number ||
+        currentUser.number ||
+        "",
+      city: prev.city || defaultAddress?.city || TEXT.cityBishkek,
+      address:
+        prev.address ||
+        defaultAddress?.address ||
+        currentUser.address ||
+        "",
     }));
 
+    setSelectedAddressId((prev) => (prev === "manual" && defaultAddress?.id ? defaultAddress.id : prev));
     setPhoneTouched(false);
-  }, [meData]);
+  }, [currentUser, defaultAddress?.address, defaultAddress?.city, defaultAddress?.id, defaultAddress?.phone_number, defaultAddress?.recipient_name]);
+
+  const handleSavedAddressChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const value = event.target.value;
+    if (value === "manual") {
+      setSelectedAddressId("manual");
+      return;
+    }
+
+    const nextId = Number(value);
+    const selectedAddress = savedAddresses.find((item) => item.id === nextId);
+    if (!selectedAddress) {
+      setSelectedAddressId("manual");
+      return;
+    }
+
+    setSelectedAddressId(nextId);
+    setSaveAddress(false);
+    setFormData((prev) => ({
+      ...prev,
+      firstName: selectedAddress.recipient_name || prev.firstName,
+      phoneNumber: selectedAddress.phone_number || prev.phoneNumber,
+      city: selectedAddress.city || prev.city,
+      address: selectedAddress.address || prev.address,
+    }));
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next.city;
+      delete next.address;
+      delete next.firstName;
+      delete next.phoneNumber;
+      return next;
+    });
+  };
 
   const subtotalByItems = basketData.reduce(
     (sum, item) => sum + toNumber(item.total_price),
     0,
   );
   const subtotal = toNumber(normalizedCart?.total_price) || subtotalByItems;
-  const deliveryPrice = deliveryMethod === "courier" ? DELIVERY_PRICE : 0;
+  const shippingRequest = {
+    delivery: deliveryMethod === "pickup" ? TEXT.pickupApi : "курьер",
+    city: formData.city,
+    country: checkoutCountry,
+  } as const;
+  const { data: shippingQuote } = useGetShippingQuoteQuery(shippingRequest);
+  const deliveryPrice = toNumber(shippingQuote?.price);
   const discountPrice = basketData.length > 0 ? DISCOUNT_PRICE : 0;
   const totalToPay = Math.max(subtotal + deliveryPrice - discountPrice, 0);
+  const deliveryEtaLabel =
+    shippingQuote?.eta_label ||
+    (deliveryMethod === "pickup" ? TEXT.pickupEta : TEXT.courierEta);
 
   const pageTitle =
     step === 2
@@ -293,6 +372,9 @@ const CheckoutSection = () => {
       phone_number: formData.phoneNumber,
       city: formData.city,
       address: formData.address,
+      country: checkoutCountry,
+      payment_method: paymentMethod,
+      save_address: selectedAddressId === "manual" ? saveAddress : false,
     };
 
     try {
@@ -516,6 +598,25 @@ const CheckoutSection = () => {
                     </label>
 
                     <label>
+                      {TEXT.savedAddress}
+                      <div className={scss.cityField}>
+                        <select
+                          value={selectedAddressId === "manual" ? "manual" : String(selectedAddressId)}
+                          onChange={handleSavedAddressChange}
+                        >
+                          <option value="manual">{TEXT.manualAddress}</option>
+                          {savedAddresses.map((address) => (
+                            <option key={address.id} value={String(address.id)}>
+                              {address.label || address.address}
+                            </option>
+                          ))}
+                        </select>
+
+                        <FiChevronDown />
+                      </div>
+                    </label>
+
+                    <label>
                       {TEXT.city}
                       <div className={scss.cityField}>
                         <select value={formData.city} onChange={handleChange("city")}>
@@ -539,6 +640,17 @@ const CheckoutSection = () => {
                       />
                       {errors.address && <p role="alert">{errors.address}</p>}
                     </label>
+
+                    {currentUser && selectedAddressId === "manual" && (
+                      <label className={scss.checkboxRow}>
+                        <input
+                          type="checkbox"
+                          checked={saveAddress}
+                          onChange={(event) => setSaveAddress(event.target.checked)}
+                        />
+                        <span>{TEXT.saveAddress}</span>
+                      </label>
+                    )}
                   </div>
                 )}
 
@@ -556,7 +668,7 @@ const CheckoutSection = () => {
                       <span className={scss.radio} />
                       <div>
                         <h5>{TEXT.pickup}</h5>
-                        <p>{TEXT.pickupEta}</p>
+                        <p>{deliveryMethod === "pickup" ? deliveryEtaLabel : TEXT.pickupEta}</p>
                       </div>
                     </button>
 
@@ -570,9 +682,9 @@ const CheckoutSection = () => {
                       <span className={scss.radio} />
                       <div>
                         <h5>{TEXT.courier}</h5>
-                        <p>{TEXT.courierEta}</p>
+                        <p>{deliveryMethod === "courier" ? deliveryEtaLabel : TEXT.courierEta}</p>
                       </div>
-                      <strong>{formatSom(DELIVERY_PRICE)}</strong>
+                      <strong>{formatSom(deliveryPrice)}</strong>
                     </button>
 
                     {errors.delivery && (

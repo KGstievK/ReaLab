@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useGetFirstSectionQuery } from "../../../../../../redux/api/category";
 import { resolveMediaUrl } from "@/utils/media";
+import { buildProductHref } from "@/utils/productRoute";
 
 const Welcome = () => {
   const router = useRouter();
@@ -24,17 +25,17 @@ const Welcome = () => {
     {
       id: 0,
       image: resolveMediaUrl(data[0].clothes1?.clothes_img?.[0]?.photo ?? ""),
-      link: data[0].clothes1?.id ? `/${data[0].clothes1.id}` : "/",
+      link: data[0].clothes1?.id ? buildProductHref(data[0].clothes1) : "/",
     },
     {
       id: 1,
       image: resolveMediaUrl(data[0].clothes2?.clothes_img?.[0]?.photo ?? ""),
-      link: data[0].clothes2?.id ? `/${data[0].clothes2.id}` : "/",
+      link: data[0].clothes2?.id ? buildProductHref(data[0].clothes2) : "/",
     },
     {
       id: 2,
       image: resolveMediaUrl(data[0].clothes3?.clothes_img?.[0]?.photo ?? ""),
-      link: data[0].clothes3?.id ? `/${data[0].clothes3.id}` : "/",
+      link: data[0].clothes3?.id ? buildProductHref(data[0].clothes3) : "/",
     },
   ];
 

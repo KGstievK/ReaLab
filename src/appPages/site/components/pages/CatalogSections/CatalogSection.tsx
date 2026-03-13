@@ -1,5 +1,6 @@
-"use client";
+﻿"use client";
 
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import backIcon from "@/assets/icons/backIcon.svg";
@@ -11,16 +12,18 @@ const CatalogSection = () => {
     <section className={scss.CatalogSection}>
       <div className="container">
         <div className={scss.header}>
-          <Image src={backIcon} alt="Back" width={22} height={22} />
+          <Image src={backIcon} alt="Назад" width={22} height={22} />
           <Link href="/">Главная</Link>
           <span>/</span>
-          <Link href="/catalog">Категории</Link>
+          <Link href="/catalog">Каталог</Link>
         </div>
 
-        <h1 className={scss.title}>Категории</h1>
+        <h1 className={scss.title}>Каталог</h1>
 
         <div className={scss.content}>
-          <SideBar />
+          <Suspense fallback={null}>
+            <SideBar />
+          </Suspense>
         </div>
       </div>
     </section>

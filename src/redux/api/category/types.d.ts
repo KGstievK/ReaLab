@@ -1,5 +1,12 @@
 namespace ICATEGORY {
   type getAllClothesRes = AllClothes[];
+  type getCatalogFeedRes = {
+    items: AllClothes[];
+    page: number;
+    page_size: number;
+    total: number;
+    has_next: boolean;
+  };
   type getAllClothesReq =
     | {
         page?: number;
@@ -13,8 +20,13 @@ namespace ICATEGORY {
         min_price?: number;
         max_price?: number;
         exclude_id?: number;
+        sort?: "newest" | "price_asc" | "price_desc" | "rating_desc";
+        with_meta?: boolean;
       }
     | void;
+  type getCatalogFeedReq = Exclude<getAllClothesReq, void> & {
+    with_meta: true;
+  };
 
   type getClothesByIdRes = SingleProductData;
   type getClothesByIdReq = number;

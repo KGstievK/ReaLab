@@ -161,3 +161,43 @@
     }
   }
 }
+
+.Search .SearchResults .SearchSection {
+  padding: 12px 10px 14px;
+  border-top: 1px solid #efefef;
+}
+
+.Search .SearchResults .SearchSectionTitle {
+  display: block;
+  margin-bottom: 8px;
+  color: #6f625e;
+  font-size: 11px;
+  line-height: 16px;
+  font-family: "Manrope", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.Search .SearchResults .SearchSuggestionList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.Search .SearchResults .SearchSuggestion {
+  border: 1px solid #d8cac0;
+  background: #fff;
+  color: #201a19;
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 13px;
+  line-height: 18px;
+  font-family: "Manrope", sans-serif;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.Search .SearchResults .SearchSuggestion:hover {
+  background: #f8f1ed;
+  border-color: #b28b76;
+}

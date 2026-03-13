@@ -61,6 +61,58 @@ const api = index.injectEndpoints({
       }),
       invalidatesTags: ["auth"],
     }),
+    getProfileAddresses: build.query<
+      AUTH.GetProfileAddressesResponse,
+      AUTH.GetProfileAddressesRequest
+    >({
+      query: () => ({
+        url: "/profile/addresses/",
+        method: "GET",
+      }),
+      providesTags: ["auth"],
+    }),
+    postProfileAddress: build.mutation<
+      AUTH.PostProfileAddressResponse,
+      AUTH.PostProfileAddressRequest
+    >({
+      query: (data) => ({
+        url: "/profile/addresses/",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["auth"],
+    }),
+    patchProfileAddress: build.mutation<
+      AUTH.PatchProfileAddressResponse,
+      AUTH.PatchProfileAddressRequest
+    >({
+      query: ({ id, ...data }) => ({
+        url: `/profile/addresses/${id}/`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["auth"],
+    }),
+    deleteProfileAddress: build.mutation<
+      AUTH.DeleteProfileAddressResponse,
+      AUTH.DeleteProfileAddressRequest
+    >({
+      query: ({ id }) => ({
+        url: `/profile/addresses/${id}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["auth"],
+    }),
+    setDefaultProfileAddress: build.mutation<
+      AUTH.SetDefaultProfileAddressResponse,
+      AUTH.SetDefaultProfileAddressRequest
+    >({
+      query: ({ id }) => ({
+        url: `/profile/addresses/${id}/default/`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["auth"],
+    }),
     patchRefreshToken: build.mutation<
       AUTH.PatchRefreshResponse,
       AUTH.PatchRefreshRequest
@@ -109,7 +161,12 @@ const api = index.injectEndpoints({
 
 export const {
   useGetMeQuery,
+  useGetProfileAddressesQuery,
   usePutMeMutation,
+  usePostProfileAddressMutation,
+  usePatchProfileAddressMutation,
+  useDeleteProfileAddressMutation,
+  useSetDefaultProfileAddressMutation,
   usePostLoginMutation,
   usePostRegistrationMutation,
   usePostLogoutMutation,

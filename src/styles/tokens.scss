@@ -1,0 +1,41 @@
+:root {
+  --color-brand: #6e4b47;
+  --color-accent: #b28b76;
+  --color-text: #201a19;
+  --color-subtext: #6f625e;
+  --color-line: #d8cac0;
+  --color-page: #f6f1eb;
+  --color-surface: #ffffff;
+  --color-section: #f1e7de;
+  --color-success: #5f7b67;
+  --color-warning: #a07a46;
+  --color-error: #9a4e4a;
+
+  --font-display: "Cormorant Garamond", "Playfair Display", serif;
+  --font-ui: "Manrope", "Outfit", "Inter", sans-serif;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-pill: 999px;
+
+  --content-max: 1360px;
+  --shadow-soft: 0 10px 30px rgba(32, 26, 25, 0.06);
+
+  /* Compatibility aliases for the current codebase. */
+  --background: var(--color-surface);
+  --active: var(--color-brand);
+  --main-color: var(--color-brand);
+  --footer: var(--color-text);
+  --silver: rgba(111, 98, 94, 0.45);
+  --input: rgba(241, 231, 222, 0.8);
+}

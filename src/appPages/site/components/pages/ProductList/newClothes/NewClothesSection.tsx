@@ -17,6 +17,7 @@ import Link from "next/link";
 import backIcon from "@/assets/icons/backIcon.svg";
 import { queueFavoriteIntent } from "../../../../../../utils/authIntent";
 import { resolveMediaUrl } from "@/utils/media";
+import { buildProductHref } from "@/utils/productRoute";
 
 interface ClothesCategoryItem {
   clothes_category: Array<{
@@ -119,7 +120,7 @@ const NewClothesSection = () => {
               <div
                 key={item.id}
                 className={scss.card}
-                onClick={() => router.push(`/${item.id}`)}
+                onClick={() => router.push(buildProductHref(item))}
               >
                 <div className={scss.blockImg}>
                   <div className={scss.like}>

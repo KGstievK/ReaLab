@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { FC, useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import arrow from "@/assets/icons/Vector (Stroke).svg";
 import filterImg from "@/assets/icons/Filter.svg";
 import { useGetAllCategoryQuery } from "../../../../../../redux/api/category";
@@ -21,15 +22,44 @@ const SIZE_OPTIONS = ["XXS", "XS", "S", "M", "L", "XL", "XXL"];
 
 const COLOR_OPTIONS = ["Чёрный", "Белый", "Айвори", "Зелёный", "Красный", "Коричневый"];
 
+const SORT_OPTIONS = [
+  { value: "newest", label: "Сначала новые" },
+  { value: "price_asc", label: "Сначала дешевле" },
+  { value: "price_desc", label: "Сначала дороже" },
+  { value: "rating_desc", label: "По рейтингу" },
+] as const;
+
+type CatalogSortValue = (typeof SORT_OPTIONS)[number]["value"];
+
+const normalizeSortValue = (value: string | null | undefined): CatalogSortValue =>
+  SORT_OPTIONS.some((item) => item.value === value) ? (value as CatalogSortValue) : "newest";
+
+const readCatalogFilters = (searchParams: ReturnType<typeof useSearchParams>) => ({
+  category: searchParams.get("category")?.trim() || "",
+  size: searchParams.get("size")?.trim() || "",
+  color: searchParams.get("color")?.trim() || "",
+  min: searchParams.get("min_price")?.trim() || "",
+  max: searchParams.get("max_price")?.trim() || "",
+  sort: normalizeSortValue(searchParams.get("sort")?.trim()),
+  page: Math.max(1, Number(searchParams.get("page") || "1") || 1),
+});
+
 const SideBar: FC = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { data: categoryData } = useGetAllCategoryQuery();
 
-  const [category, setCategory] = useState("");
-  const [selectedSize, setSelectedSize] = useState<string>("");
-  const [selectedColor, setSelectedColor] = useState<string>("");
+  const filtersFromUrl = useMemo(() => readCatalogFilters(searchParams), [searchParams]);
+
+  const [category, setCategory] = useState(filtersFromUrl.category);
+  const [selectedSize, setSelectedSize] = useState<string>(filtersFromUrl.size);
+  const [selectedColor, setSelectedColor] = useState<string>(filtersFromUrl.color);
+  const [sort, setSort] = useState<CatalogSortValue>(filtersFromUrl.sort);
+  const [page, setPage] = useState(filtersFromUrl.page);
   const [priceRange, setPriceRange] = useState<{ min: string; max: string }>({
-    min: "",
-    max: "",
+    min: filtersFromUrl.min,
+    max: filtersFromUrl.max,
   });
 
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -61,6 +91,24 @@ const SideBar: FC = () => {
       setCategory("");
     }
   }, [category, categoryOptions]);
+
+  useEffect(() => {
+    setCategory((prev) => (prev === filtersFromUrl.category ? prev : filtersFromUrl.category));
+    setSelectedSize((prev) => (prev === filtersFromUrl.size ? prev : filtersFromUrl.size));
+    setSelectedColor((prev) => (prev === filtersFromUrl.color ? prev : filtersFromUrl.color));
+    setSort((prev) => (prev === filtersFromUrl.sort ? prev : filtersFromUrl.sort));
+    setPage((prev) => (prev === filtersFromUrl.page ? prev : filtersFromUrl.page));
+    setPriceRange((prev) => {
+      if (prev.min === filtersFromUrl.min && prev.max === filtersFromUrl.max) {
+        return prev;
+      }
+
+      return {
+        min: filtersFromUrl.min,
+        max: filtersFromUrl.max,
+      };
+    });
+  }, [filtersFromUrl]);
 
   const maxSliderValue = 20000;
 
@@ -100,6 +148,66 @@ const SideBar: FC = () => {
     return () => mediaQuery.removeEventListener("change", listener);
   }, []);
 
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      const nextParams = new URLSearchParams(searchParams.toString());
+
+      if (category) {
+        nextParams.set("category", category);
+      } else {
+        nextParams.delete("category");
+      }
+
+      if (selectedSize) {
+        nextParams.set("size", selectedSize);
+      } else {
+        nextParams.delete("size");
+      }
+
+      if (selectedColor) {
+        nextParams.set("color", selectedColor);
+      } else {
+        nextParams.delete("color");
+      }
+
+      if (priceRange.min) {
+        nextParams.set("min_price", priceRange.min);
+      } else {
+        nextParams.delete("min_price");
+      }
+
+      if (priceRange.max) {
+        nextParams.set("max_price", priceRange.max);
+      } else {
+        nextParams.delete("max_price");
+      }
+
+      if (sort !== "newest") {
+        nextParams.set("sort", sort);
+      } else {
+        nextParams.delete("sort");
+      }
+
+      if (page > 1) {
+        nextParams.set("page", String(page));
+      } else {
+        nextParams.delete("page");
+      }
+
+      const currentQuery = searchParams.toString();
+      const nextQuery = nextParams.toString();
+      if (currentQuery === nextQuery) {
+        return;
+      }
+
+      router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {
+        scroll: false,
+      });
+    }, 250);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [category, selectedColor, selectedSize, priceRange.min, priceRange.max, sort, page, pathname, router, searchParams]);
+
   const toggleSection = (section: SectionKeys) => {
     setOpenSections((prev) => ({
       ...prev,
@@ -108,14 +216,17 @@ const SideBar: FC = () => {
   };
 
   const handleCategoryChange = (value: string) => {
+    setPage(1);
     setCategory((prev) => (prev === value ? "" : value));
   };
 
   const handleSizeChange = (size: string) => {
+    setPage(1);
     setSelectedSize((prev) => (prev === size ? "" : size));
   };
 
   const handleColorChange = (color: string) => {
+    setPage(1);
     setSelectedColor((prev) => (prev === color ? "" : color));
   };
 
@@ -126,6 +237,7 @@ const SideBar: FC = () => {
     const rawValue = event.target.value.replace(/\D/g, "");
 
     if (!rawValue) {
+      setPage(1);
       setPriceRange((prev) => ({
         ...prev,
         [type]: "",
@@ -134,6 +246,7 @@ const SideBar: FC = () => {
     }
 
     const numericValue = Number(rawValue);
+    setPage(1);
 
     setPriceRange((prev) => {
       const currentMin = Number(prev.min);
@@ -156,6 +269,7 @@ const SideBar: FC = () => {
     setSelectedSize("");
     setSelectedColor("");
     setPriceRange({ min: "", max: "" });
+    setPage(1);
   };
 
   const minSliderValue = useMemo(() => {
@@ -185,6 +299,7 @@ const SideBar: FC = () => {
 
   const handleMinRangeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const nextMin = Math.min(Number(event.target.value), maxPriceValue);
+    setPage(1);
     setPriceRange((prev) => ({
       ...prev,
       min: String(nextMin),
@@ -193,10 +308,17 @@ const SideBar: FC = () => {
 
   const handleMaxRangeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const nextMax = Math.max(Number(event.target.value), minSliderValue);
+    setPage(1);
     setPriceRange((prev) => ({
       ...prev,
       max: String(nextMax),
     }));
+  };
+
+  const handleSortChange = (nextSort: string) => {
+    const normalizedSort = normalizeSortValue(nextSort);
+    setPage(1);
+    setSort(normalizedSort);
   };
 
   const renderFilterBody = () => (
@@ -322,7 +444,7 @@ const SideBar: FC = () => {
 
       <div className={scss.clearFilter}>
         <button type="button" onClick={clearFilters}>
-          Очистить x
+          Очистить ×
         </button>
       </div>
     </>
@@ -352,6 +474,10 @@ const SideBar: FC = () => {
         value={category}
         size={selectedSize}
         color={selectedColor}
+        sort={sort}
+        page={page}
+        onPageChange={setPage}
+        onSortChange={handleSortChange}
         priceRange={[
           parseInt(priceRange.min, 10) || 0,
           parseInt(priceRange.max, 10) || Number.MAX_SAFE_INTEGER,
@@ -392,4 +518,3 @@ const SideBar: FC = () => {
 };
 
 export default SideBar;
-

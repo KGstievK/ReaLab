@@ -1,0 +1,16 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@100..900&display=swap");
+
+:root {
+  --font-size-hero: clamp(42px, 5vw, 56px);
+  --font-size-h1: clamp(32px, 4vw, 44px);
+  --font-size-h2: clamp(28px, 3vw, 32px);
+  --font-size-h3: 24px;
+  --font-size-body: 16px;
+  --font-size-small: 14px;
+  --font-size-caption: 12px;
+
+  --line-height-hero: 1.15;
+  --line-height-heading: 1.2;
+  --line-height-body: 1.6;
+  --line-height-compact: 1.45;
+}

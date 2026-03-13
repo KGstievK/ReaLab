@@ -270,6 +270,17 @@ const api = index.injectEndpoints({
       }),
       keepUnusedDataFor: 300,
     }),
+    getShippingQuote: build.query<
+      PRODUCT.getShippingQuoteRes,
+      PRODUCT.getShippingQuoteReq
+    >({
+      query: (params) => ({
+        url: `/shipping/quote/`,
+        method: `GET`,
+        params,
+      }),
+      keepUnusedDataFor: 60,
+    }),
   }),
 });
 
@@ -287,5 +298,6 @@ export const {
   useGetAboutUsQuery,
   usePostOrderMutation,
   useGetOrderQuery,
-  useGetPayQuery
+  useGetPayQuery,
+  useGetShippingQuoteQuery,
 } = api;

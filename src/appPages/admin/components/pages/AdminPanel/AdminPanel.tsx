@@ -5,15 +5,41 @@ import {
   FiActivity,
   FiBarChart2,
   FiBox,
-  FiEdit2,
   FiFileText,
   FiPercent,
   FiPlus,
   FiShoppingBag,
-  FiTrash2,
   FiUsers,
-  FiX,
 } from "react-icons/fi";
+import { AdminActivitySection } from "./sections/AdminActivitySection";
+import { AdminContentSection } from "./sections/AdminContentSection";
+import { AdminDashboardSection } from "./sections/AdminDashboardSection";
+import { AdminDiscountsSection } from "./sections/AdminDiscountsSection";
+import { AdminOrdersSection } from "./sections/AdminOrdersSection";
+import { AdminProductsSection } from "./sections/AdminProductsSection";
+import { AdminUsersSection } from "./sections/AdminUsersSection";
+import { AdminOrderDetailsModal } from "./sections/AdminOrderDetailsModal";
+import { AdminProductModal } from "./sections/AdminProductModal";
+import {
+  AboutBlockFormState,
+  AboutPageFormState,
+  AdminTab,
+  HomeTitleFormState,
+  ProductFormState,
+  ProductModalMode,
+} from "./AdminPanel.types";
+import {
+  ADMIN_PERMISSIONS,
+  type AdminPermission,
+  getDiscountPercent,
+  getEffectiveProductPrice,
+  getNextOrderStatus,
+  hasPermission,
+  normalizeWorkflowStatus,
+  RANGE_LABELS,
+  RANGE_OPTIONS,
+  STATUS_LABELS,
+} from "./AdminPanel.shared";
 import {
   useGetAdminActivityQuery,
   useGetAdminAboutPageQuery,
@@ -34,55 +60,8 @@ import {
   usePostAdminProductImagesMutation,
   useUploadAdminAboutImageMutation,
 } from "../../../../../redux/api/admin";
-import { resolveMediaUrl } from "../../../../../utils/media";
+import { useGetMeQuery } from "../../../../../redux/api/auth";
 import scss from "./AdminPanel.module.scss";
-
-type AdminTab =
-  | "dashboard"
-  | "products"
-  | "discounts"
-  | "orders"
-  | "content"
-  | "users"
-  | "activity";
-
-type ProductModalMode = "create" | "edit" | "delete";
-
-type ProductFormState = {
-  name: string;
-  description: string;
-  category_id: string;
-  textile_name: string;
-  active: boolean;
-  base_price: string;
-  cost_price: string;
-  discount_price: string;
-  sizes: string;
-  colors: string;
-  promo_categories: string;
-};
-
-type HomeTitleFormState = {
-  made: string;
-  title: string;
-  clothes1_id: string;
-  clothes2_id: string;
-  clothes3_id: string;
-};
-
-type AboutBlockFormState = {
-  title: string;
-  text: string;
-  img: string;
-  sort_order: string;
-};
-
-type AboutPageFormState = {
-  title: string;
-  made: string;
-  logo: string;
-  blocks: AboutBlockFormState[];
-};
 
 const parseCsv = (value: string): string[] =>
   Array.from(
@@ -221,113 +200,50 @@ const productToForm = (product: AdminProduct): ProductFormState => {
   };
 };
 
-const getEffectiveProductPrice = (product: AdminProduct): number =>
-  product.discount_price !== null && product.discount_price < product.base_price
-    ? product.discount_price
-    : product.base_price;
-
-const getDiscountPercent = (product: AdminProduct): number => {
-  if (!product.discount_price || product.discount_price >= product.base_price || product.base_price <= 0) {
-    return 0;
-  }
-
-  return Number(
-    (((product.base_price - product.discount_price) / product.base_price) * 100).toFixed(1),
-  );
-};
-
-const NAV_ITEMS: Array<{ key: AdminTab; label: string; icon: ReactNode }> = [
-  { key: "dashboard", label: "Аналитика", icon: <FiBarChart2 /> },
-  { key: "products", label: "Товары", icon: <FiShoppingBag /> },
-  { key: "discounts", label: "Скидки", icon: <FiPercent /> },
-  { key: "orders", label: "Заказы", icon: <FiFileText /> },
-  { key: "content", label: "Контент", icon: <FiBox /> },
-  { key: "users", label: "Пользователи", icon: <FiUsers /> },
-  { key: "activity", label: "События", icon: <FiActivity /> },
+const NAV_ITEMS: Array<{ key: AdminTab; label: string; icon: ReactNode; permission: AdminPermission }> = [
+  {
+    key: "dashboard",
+    label: "Аналитика",
+    icon: <FiBarChart2 />,
+    permission: ADMIN_PERMISSIONS.DASHBOARD_VIEW,
+  },
+  {
+    key: "products",
+    label: "Товары",
+    icon: <FiShoppingBag />,
+    permission: ADMIN_PERMISSIONS.PRODUCTS_VIEW,
+  },
+  {
+    key: "discounts",
+    label: "Скидки",
+    icon: <FiPercent />,
+    permission: ADMIN_PERMISSIONS.DISCOUNTS_VIEW,
+  },
+  {
+    key: "orders",
+    label: "Заказы",
+    icon: <FiFileText />,
+    permission: ADMIN_PERMISSIONS.ORDERS_VIEW,
+  },
+  {
+    key: "content",
+    label: "Контент",
+    icon: <FiBox />,
+    permission: ADMIN_PERMISSIONS.CONTENT_VIEW,
+  },
+  {
+    key: "users",
+    label: "Пользователи",
+    icon: <FiUsers />,
+    permission: ADMIN_PERMISSIONS.USERS_VIEW,
+  },
+  {
+    key: "activity",
+    label: "События",
+    icon: <FiActivity />,
+    permission: ADMIN_PERMISSIONS.ACTIVITY_VIEW,
+  },
 ];
-
-const STATUS_LABELS: Record<AdminOrderStatus, string> = {
-  placed: "Заказ размещен",
-  processing: "Собирается",
-  packaging: "Собирается",
-  shipping: "В пути",
-  delivered: "Доставлен",
-  cancelled: "Отменен",
-  returned: "Возврат",
-};
-
-const ORDER_WORKFLOW: AdminOrderStatus[] = [
-  "placed",
-  "processing",
-  "shipping",
-  "delivered",
-];
-
-const normalizeWorkflowStatus = (status: AdminOrderStatus): AdminOrderStatus =>
-  status === "packaging" ? "processing" : status;
-
-const getNextOrderStatus = (status: AdminOrderStatus): AdminOrderStatus | null => {
-  const normalized = normalizeWorkflowStatus(status);
-  const currentIndex = ORDER_WORKFLOW.indexOf(normalized);
-  if (currentIndex < 0 || currentIndex >= ORDER_WORKFLOW.length - 1) {
-    return null;
-  }
-
-  return ORDER_WORKFLOW[currentIndex + 1];
-};
-
-const PAYMENT_STATUS_LABELS: Record<AdminPaymentStatus, string> = {
-  pending: "Ожидает оплаты",
-  paid: "Оплачен",
-  failed: "Ошибка оплаты",
-  refunded: "Возврат",
-};
-
-const DELIVERY_METHOD_LABELS: Record<AdminDeliveryMethod, string> = {
-  courier: "Курьер",
-  pickup: "Самовывоз",
-};
-
-const ROLE_LABELS: Record<string, string> = {
-  ADMIN: "Администратор",
-  MANAGER: "Менеджер",
-  OWNER: "Владелец",
-  CUSTOMER: "Покупатель",
-  USER: "Пользователь",
-  admin: "Администратор",
-  manager: "Менеджер",
-  owner: "Владелец",
-  customer: "Покупатель",
-  user: "Пользователь",
-};
-
-const formatRoleLabel = (role: string): string => ROLE_LABELS[role] || role;
-
-const RANGE_LABELS: Record<AdminDateRange, string> = {
-  today: "Сегодня",
-  week: "Неделя",
-  month: "Месяц",
-  quarter: "Квартал",
-  year: "Год",
-  custom: "Произвольный период",
-};
-
-const RANGE_OPTIONS: AdminDateRange[] = [
-  "today",
-  "week",
-  "month",
-  "quarter",
-  "year",
-];
-
-const formatMoney = (value: number) =>
-  `${new Intl.NumberFormat("ru-RU").format(value)} с`;
-const formatDate = (value: string) =>
-  new Date(value).toLocaleDateString("ru-RU", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
 
 const MOCK_ORDERS: AdminOrder[] = [
   {
@@ -755,6 +671,22 @@ const AdminPanel = () => {
   const productImageInputRef = useRef<HTMLInputElement | null>(null);
   const aboutHeroInputRef = useRef<HTMLInputElement | null>(null);
   const aboutBlockInputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const { data: meData } = useGetMeQuery();
+  const currentUser = meData?.[0];
+  const currentPermissions = currentUser?.permissions ?? [];
+  const canAccessAdmin =
+    currentUser?.role === "owner" ||
+    currentUser?.role === "admin" ||
+    currentUser?.role === "manager" ||
+    hasPermission(currentPermissions, ADMIN_PERMISSIONS.ADMIN_ACCESS);
+  const canManageProducts = hasPermission(currentPermissions, ADMIN_PERMISSIONS.PRODUCTS_MANAGE);
+  const canDeleteProducts = hasPermission(currentPermissions, ADMIN_PERMISSIONS.PRODUCTS_DELETE);
+  const canManageDiscounts = hasPermission(currentPermissions, ADMIN_PERMISSIONS.DISCOUNTS_MANAGE);
+  const canManageOrders = hasPermission(currentPermissions, ADMIN_PERMISSIONS.ORDERS_MANAGE);
+  const canManageContent = hasPermission(currentPermissions, ADMIN_PERMISSIONS.CONTENT_MANAGE);
+  const visibleNavItems = currentUser
+    ? NAV_ITEMS.filter((item) => hasPermission(currentPermissions, item.permission))
+    : NAV_ITEMS;
 
   const dashboardQuery = useGetAdminDashboardQuery(
     { range },
@@ -946,7 +878,21 @@ const AdminPanel = () => {
     typeof activeQueryError?.status === "number"
       ? activeQueryError.status
       : null;
-  const isAccessDenied = activeErrorStatus === 401 || activeErrorStatus === 403;
+  const isAccessDenied =
+    activeErrorStatus === 401 ||
+    activeErrorStatus === 403 ||
+    Boolean(currentUser && !canAccessAdmin);
+
+  useEffect(() => {
+    if (!visibleNavItems.length) {
+      return;
+    }
+
+    if (!visibleNavItems.some((item) => item.key === activeTab)) {
+      setActiveTab(visibleNavItems[0].key);
+      setSearch("");
+    }
+  }, [activeTab, visibleNavItems]);
 
   const maxRevenue = Math.max(
     ...dashboard.revenue_series.map((item) => item.revenue),
@@ -1057,6 +1003,9 @@ const AdminPanel = () => {
   };
 
   const openCreateProductModal = () => {
+    if (!canManageProducts) {
+      return;
+    }
     setProductModalMode("create");
     setSelectedProduct(null);
     setProductForm(createEmptyProductForm(defaultCategoryId));
@@ -1065,6 +1014,9 @@ const AdminPanel = () => {
   };
 
   const openEditProductModal = (product: AdminProduct) => {
+    if (!canManageProducts) {
+      return;
+    }
     setProductModalMode("edit");
     setSelectedProduct(product);
     setProductForm(productToForm(product));
@@ -1073,6 +1025,9 @@ const AdminPanel = () => {
   };
 
   const openDeleteProductModal = (product: AdminProduct) => {
+    if (!canDeleteProducts) {
+      return;
+    }
     setProductModalMode("delete");
     setSelectedProduct(product);
     setProductForm(productToForm(product));
@@ -1109,6 +1064,9 @@ const AdminPanel = () => {
   };
 
   const handleDiscountDraftChange = (productId: number, value: string) => {
+    if (!canManageDiscounts) {
+      return;
+    }
     setDiscountDrafts((prev) => ({
       ...prev,
       [productId]: value,
@@ -1116,11 +1074,17 @@ const AdminPanel = () => {
   };
 
   const applyDiscountPreset = (product: AdminProduct, percent: number) => {
+    if (!canManageDiscounts) {
+      return;
+    }
     const nextPrice = product.base_price * (1 - percent / 100);
     handleDiscountDraftChange(product.id, String(Math.max(Number(nextPrice.toFixed(2)), 0)));
   };
 
   const resetDiscountDraft = (productId: number) => {
+    if (!canManageDiscounts) {
+      return;
+    }
     handleDiscountDraftChange(productId, "");
   };
 
@@ -1135,6 +1099,9 @@ const AdminPanel = () => {
   };
 
   const handleHomeTitleSave = async () => {
+    if (!canManageContent) {
+      return;
+    }
     setMessage(null);
 
     if (!homeTitleForm.made.trim() || !homeTitleForm.title.trim()) {
@@ -1212,6 +1179,9 @@ const AdminPanel = () => {
   };
 
   const handleAddAboutBlock = () => {
+    if (!canManageContent) {
+      return;
+    }
     setAboutPageForm((prev) => ({
       ...prev,
       blocks: [...prev.blocks, createEmptyAboutBlockForm(prev.blocks.length + 1)],
@@ -1219,6 +1189,9 @@ const AdminPanel = () => {
   };
 
   const handleRemoveAboutBlock = (index: number) => {
+    if (!canManageContent) {
+      return;
+    }
     setAboutPageForm((prev) => {
       if (prev.blocks.length <= 1) {
         return prev;
@@ -1237,6 +1210,9 @@ const AdminPanel = () => {
   };
 
   const handleAboutPageSave = async () => {
+    if (!canManageContent) {
+      return;
+    }
     const title = aboutPageForm.title.trim();
     const made = aboutPageForm.made.trim();
     const logo = aboutPageForm.logo.trim();
@@ -1305,6 +1281,10 @@ const AdminPanel = () => {
     index: number,
     event: ChangeEvent<HTMLInputElement>,
   ) => {
+    if (!canManageContent) {
+      event.target.value = "";
+      return;
+    }
     const file = event.target.files?.[0];
     event.target.value = "";
 
@@ -1361,6 +1341,10 @@ const AdminPanel = () => {
   };
 
   const handleAboutHeroImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    if (!canManageContent) {
+      event.target.value = "";
+      return;
+    }
     const file = event.target.files?.[0];
     event.target.value = "";
 
@@ -1417,6 +1401,9 @@ const AdminPanel = () => {
   };
 
   const handleProductSave = async () => {
+    if (!canManageProducts) {
+      return;
+    }
     setMessage(null);
     const sizes = parseCsv(productForm.sizes);
     const colors = parseCsv(productForm.colors);
@@ -1533,6 +1520,9 @@ const AdminPanel = () => {
   };
 
   const handleDiscountSave = async (product: AdminProduct) => {
+    if (!canManageDiscounts) {
+      return;
+    }
     const rawValue = discountDrafts[product.id]?.trim() ?? "";
     const discountPrice = rawValue.length ? Number(rawValue) : null;
 
@@ -1578,6 +1568,9 @@ const AdminPanel = () => {
   };
 
   const handleProductDelete = async () => {
+    if (!canDeleteProducts) {
+      return;
+    }
     if (!selectedProduct) {
       return;
     }
@@ -1602,6 +1595,9 @@ const AdminPanel = () => {
     id: number,
     status: AdminOrderStatus,
   ) => {
+    if (!canManageOrders) {
+      return;
+    }
     setMessage(null);
     try {
       const updatedOrder = await patchAdminOrderStatusMutation({ id, status }).unwrap();
@@ -1642,7 +1638,7 @@ const AdminPanel = () => {
         <aside className={scss.sidebar}>
           <h2>Jumana Админ</h2>
           <ul>
-            {NAV_ITEMS.map((item) => (
+            {visibleNavItems.map((item) => (
               <li key={item.key}>
                 <button
                   type="button"
@@ -1696,1181 +1692,104 @@ const AdminPanel = () => {
           )}
 
           {activeTab === "dashboard" && (
-            <div className={scss.dashboard}>
-              <div className={scss.kpis}>
-                {dashboard.kpis.map((kpi) => (
-                  <article key={kpi.id}>
-                    <span>{kpi.label}</span>
-                    <h3>
-                      {kpi.id === "revenue"
-                        ? formatMoney(kpi.value)
-                        : kpi.value}
-                    </h3>
-                    <p>
-                      {kpi.delta_percent > 0 ? "+" : ""}
-                      {kpi.delta_percent}%
-                    </p>
-                  </article>
-                ))}
-              </div>
-
-              <div className={scss.gridTwo}>
-                <article className={scss.card}>
-                  <h3>Доход по дням</h3>
-                  <div className={scss.chart}>
-                    {dashboard.revenue_series.map((item) => (
-                      <div key={item.date} className={scss.barItem}>
-                        <div
-                          className={scss.bar}
-                          style={{
-                            height: `${Math.max((item.revenue / maxRevenue) * 100, 8)}%`,
-                          }}
-                        />
-                        <small>{formatDate(item.date).slice(0, 5)}</small>
-                      </div>
-                    ))}
-                  </div>
-                </article>
-
-                <article className={scss.card}>
-                  <h3>Финансы</h3>
-                  <ul>
-                    <li>
-                      <span>Товарная выручка</span>
-                      <strong>{formatMoney(financeSummary.product_revenue)}</strong>
-                    </li>
-                    <li>
-                      <span>Доставка</span>
-                      <strong>{formatMoney(financeSummary.delivery_income)}</strong>
-                    </li>
-                    <li>
-                      <span>Скидки</span>
-                      <strong>{formatMoney(financeSummary.discount_total)}</strong>
-                    </li>
-                    <li>
-                      <span>Валовая выручка</span>
-                      <strong>{formatMoney(financeSummary.gross_revenue)}</strong>
-                    </li>
-                    <li>
-                      <span>Себестоимость</span>
-                      <strong>{formatMoney(financeSummary.cost_of_goods_sold)}</strong>
-                    </li>
-                    <li>
-                      <span>Возвраты</span>
-                      <strong>{formatMoney(financeSummary.refund_total)}</strong>
-                    </li>
-                    <li>
-                      <span>Чистая выручка</span>
-                      <strong>{formatMoney(financeSummary.net_revenue)}</strong>
-                    </li>
-                    <li>
-                      <span>Прибыль</span>
-                      <strong>{formatMoney(financeSummary.profit)}</strong>
-                    </li>
-                  </ul>
-                  <p className={scss.formulaHint}>
-                    Прибыль = (товары + доставка - скидки) - себестоимость
-                  </p>
-                </article>
-              </div>            </div>
+            <AdminDashboardSection
+              dashboard={dashboard}
+              financeSummary={financeSummary}
+              maxRevenue={maxRevenue}
+            />
           )}
 
           {activeTab === "products" && (
-            <div className={scss.panel}>
-              <div className={scss.panelHead}>
-                <h2>Товары</h2>
-                <button
-                  type="button"
-                  onClick={openCreateProductModal}
-                >
-                  <FiPlus />
-                  Добавить
-                </button>
-              </div>
-              <div className={scss.tableWrap}>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Название</th>
-                      <th>Категория</th>
-                      <th>Остаток</th>
-                      <th>Продано</th>
-                      <th>Статус</th>
-                      <th>Действия</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredProducts.length ? (
-                      filteredProducts.map((item) => (
-                        <tr key={item.id}>
-                          <td>{item.id}</td>
-                          <td>{item.name}</td>
-                          <td>{item.category_name}</td>
-                          <td>{item.total_stock}</td>
-                          <td>{item.sold_items}</td>
-                          <td>{item.active ? "Активен" : "Черновик"}</td>
-                          <td>
-                            <div className={scss.rowActions}>
-                              <button
-                                type="button"
-                                className={scss.iconButton}
-                                onClick={() => openEditProductModal(item)}
-                                aria-label={`Редактировать ${item.name}`}
-                              >
-                                <FiEdit2 />
-                              </button>
-                              <button
-                                type="button"
-                                className={`${scss.iconButton} ${scss.dangerIcon}`}
-                                onClick={() => openDeleteProductModal(item)}
-                                aria-label={`Удалить ${item.name}`}
-                              >
-                                <FiTrash2 />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={7}>Товары не найдены.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <AdminProductsSection
+              filteredProducts={filteredProducts}
+              canManageProducts={canManageProducts}
+              canDeleteProducts={canDeleteProducts}
+              onCreateProduct={openCreateProductModal}
+              onEditProduct={openEditProductModal}
+              onDeleteProduct={openDeleteProductModal}
+            />
           )}
 
           {activeTab === "discounts" && (
-            <div className={scss.panel}>
-              <div className={scss.panelHead}>
-                <div>
-                  <h2>Скидки</h2>
-                  <p className={scss.panelNote}>
-                    Управляйте скидками отдельно от остального каталога и сразу видьте маржу
-                    относительно себестоимости.
-                  </p>
-                </div>
-              </div>
-
-              <div className={scss.discountSummary}>
-                <article>
-                  <span>Всего товаров</span>
-                  <strong>{discountSummary.total_products}</strong>
-                </article>
-                <article>
-                  <span>Со скидкой</span>
-                  <strong>{discountSummary.discounted_products}</strong>
-                </article>
-                <article>
-                  <span>Средняя скидка</span>
-                  <strong>{discountSummary.average_discount_percent}%</strong>
-                </article>
-                <article>
-                  <span>Ниже себестоимости</span>
-                  <strong>{discountSummary.risky_products}</strong>
-                </article>
-              </div>
-
-              <div className={scss.tableWrap}>
-                <table className={scss.discountTable}>
-                  <thead>
-                    <tr>
-                      <th>Товар</th>
-                      <th>Категория</th>
-                      <th>Базовая цена</th>
-                      <th>Себестоимость</th>
-                      <th>Текущая цена</th>
-                      <th>Скидка</th>
-                      <th>Маржа</th>
-                      <th>Управление</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredProducts.length ? (
-                      filteredProducts.map((item) => {
-                        const effectivePrice = getEffectiveProductPrice(item);
-                        const margin = Number((effectivePrice - item.cost_price).toFixed(2));
-
-                        return (
-                          <tr key={item.id}>
-                            <td>
-                              <div className={scss.discountProduct}>
-                                <strong>{item.name}</strong>
-                                <span>#{item.id}</span>
-                              </div>
-                            </td>
-                            <td>{item.category_name}</td>
-                            <td>{formatMoney(item.base_price)}</td>
-                            <td>{formatMoney(item.cost_price)}</td>
-                            <td>{formatMoney(effectivePrice)}</td>
-                            <td>
-                              <div className={scss.discountCell}>
-                                <input
-                                  type="number"
-                                  min={0}
-                                  value={discountDrafts[item.id] ?? ""}
-                                  onChange={(event) =>
-                                    handleDiscountDraftChange(item.id, event.target.value)
-                                  }
-                                  placeholder="Без скидки"
-                                />
-                                <div className={scss.discountPresets}>
-                                  {[5, 10, 15, 20, 30].map((percent) => (
-                                    <button
-                                      key={`${item.id}-${percent}`}
-                                      type="button"
-                                      className={scss.presetButton}
-                                      onClick={() => applyDiscountPreset(item, percent)}
-                                    >
-                                      -{percent}%
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            </td>
-                            <td>
-                              <div
-                                className={`${scss.marginValue} ${
-                                  margin < 0 ? scss.negativeValue : scss.positiveValue
-                                }`}
-                              >
-                                {formatMoney(margin)}
-                              </div>
-                            </td>
-                            <td>
-                              <div className={scss.rowActions}>
-                                <button
-                                  type="button"
-                                  className={scss.secondaryAction}
-                                  onClick={() => resetDiscountDraft(item.id)}
-                                >
-                                  Сбросить
-                                </button>
-                                <button
-                                  type="button"
-                                  className={scss.action}
-                                  onClick={() => void handleDiscountSave(item)}
-                                  disabled={discountSavingId === item.id}
-                                >
-                                  {discountSavingId === item.id ? "Сохранение..." : "Сохранить"}
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    ) : (
-                      <tr>
-                        <td colSpan={8}>Товары не найдены.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <AdminDiscountsSection
+              filteredProducts={filteredProducts}
+              canManageDiscounts={canManageDiscounts}
+              discountSummary={discountSummary}
+              discountDrafts={discountDrafts}
+              discountSavingId={discountSavingId}
+              onDiscountDraftChange={handleDiscountDraftChange}
+              onApplyDiscountPreset={applyDiscountPreset}
+              onResetDiscountDraft={resetDiscountDraft}
+              onSaveDiscount={handleDiscountSave}
+            />
           )}
 
           {activeTab === "orders" && (
-            <div className={scss.panel}>
-              <h2>Заказы</h2>
-              <div className={scss.tableWrap}>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Номер</th>
-                      <th>Клиент</th>
-                      <th>Дата</th>
-                      <th>Статус</th>
-                      <th>Сумма</th>
-                      <th>Действие</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredOrders.length ? (
-                      filteredOrders.map((item) => (
-                        <tr
-                          key={item.id}
-                          className={scss.clickableRow}
-                          onClick={() => openOrderDetailsModal(item)}
-                        >
-                          <td>{item.order_number}</td>
-                          <td>{item.customer_name}</td>
-                          <td>{formatDate(item.created_at)}</td>
-                          <td>{STATUS_LABELS[item.status]}</td>
-                          <td>{formatMoney(item.total_amount)}</td>
-                          <td>
-                            <div className={scss.rowActions}>
-                              <button
-                                type="button"
-                                className={scss.secondaryAction}
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  openOrderDetailsModal(item);
-                                }}
-                              >
-                                {"Подробнее"}
-                              </button>
-                              {(() => {
-                                const nextStatus = getNextOrderStatus(item.status);
-                                if (!nextStatus) {
-                                  return <span>{"Готово"}</span>;
-                                }
-
-                                return (
-                                  <button
-                                    type="button"
-                                    className={scss.action}
-                                    disabled={isUpdatingOrderStatus}
-                                    onClick={(event) => {
-                                      event.stopPropagation();
-                                      void handleOrderStatusChange(item.id, nextStatus);
-                                    }}
-                                  >
-                                    {STATUS_LABELS[nextStatus]}
-                                  </button>
-                                );
-                              })()}
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={6}>Заказы не найдены.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <AdminOrdersSection
+              filteredOrders={filteredOrders}
+              canManageOrders={canManageOrders}
+              isUpdatingOrderStatus={isUpdatingOrderStatus}
+              onOpenOrderDetails={openOrderDetailsModal}
+              onChangeOrderStatus={handleOrderStatusChange}
+            />
           )}
           {activeTab === "content" && (
-            <div className={scss.panel}>
-              <h2>Контент</h2>
-              <div className={scss.cards}>
-                <article>
-                  <div className={scss.panelHead}>
-                    <h3>Главный баннер</h3>
-                    <button
-                      type="button"
-                      onClick={() => void handleHomeTitleSave()}
-                      disabled={isSavingHomeTitle}
-                    >
-                      {isSavingHomeTitle ? "Сохранение..." : "Сохранить баннер"}
-                    </button>
-                  </div>
-                  <div className={scss.fieldGrid}>
-                    <label className={scss.formField}>
-                      <span>Подзаголовок</span>
-                      <input
-                        value={homeTitleForm.made}
-                        onChange={(event) =>
-                          handleHomeTitleFieldChange("made", event.target.value)
-                        }
-                        placeholder="MADE IN KYRGYZSTAN"
-                      />
-                    </label>
-                    <label className={scss.formField}>
-                      <span>Заголовок</span>
-                      <input
-                        value={homeTitleForm.title}
-                        onChange={(event) =>
-                          handleHomeTitleFieldChange("title", event.target.value)
-                        }
-                        placeholder="Заголовок главного баннера"
-                      />
-                    </label>
-                  </div>
-                  <div className={scss.fieldGrid}>
-                    <label className={scss.formField}>
-                      <span>Товар 1</span>
-                      <select
-                        value={homeTitleForm.clothes1_id}
-                        onChange={(event) =>
-                          handleHomeTitleFieldChange("clothes1_id", event.target.value)
-                        }
-                      >
-                        <option value="">Выберите товар</option>
-                        {contentProducts.results.map((product) => (
-                          <option key={`home-title-1-${product.id}`} value={String(product.id)}>
-                            #{product.id} {product.name}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className={scss.formField}>
-                      <span>Товар 2</span>
-                      <select
-                        value={homeTitleForm.clothes2_id}
-                        onChange={(event) =>
-                          handleHomeTitleFieldChange("clothes2_id", event.target.value)
-                        }
-                      >
-                        <option value="">Выберите товар</option>
-                        {contentProducts.results.map((product) => (
-                          <option key={`home-title-2-${product.id}`} value={String(product.id)}>
-                            #{product.id} {product.name}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  </div>
-                  <label className={scss.formField}>
-                    <span>Товар 3</span>
-                    <select
-                      value={homeTitleForm.clothes3_id}
-                      onChange={(event) =>
-                        handleHomeTitleFieldChange("clothes3_id", event.target.value)
-                      }
-                    >
-                      <option value="">Выберите товар</option>
-                      {contentProducts.results.map((product) => (
-                        <option key={`home-title-3-${product.id}`} value={String(product.id)}>
-                          #{product.id} {product.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                </article>
-              </div>
-
-              <article className={scss.contentEditor}>
-                <div className={scss.panelHead}>
-                  <div>
-                    <h3>Страница «О нас»</h3>
-                    <p className={scss.panelNote}>
-                      Управление главным заголовком, логотипом и всеми блоками страницы.
-                    </p>
-                  </div>
-                  <div className={scss.rowActions}>
-                    <button
-                      type="button"
-                      className={scss.secondaryAction}
-                      onClick={handleAddAboutBlock}
-                    >
-                      <FiPlus />
-                      Добавить блок
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => void handleAboutPageSave()}
-                      disabled={isSavingAboutPage}
-                    >
-                      {isSavingAboutPage ? "Сохранение..." : "Сохранить страницу"}
-                    </button>
-                  </div>
-                </div>
-
-                <div className={scss.fieldGrid}>
-                  <label className={scss.formField}>
-                    <span>Подзаголовок</span>
-                    <input
-                      value={aboutPageForm.made}
-                      onChange={(event) =>
-                        handleAboutPageFieldChange("made", event.target.value)
-                      }
-                      placeholder="MADE IN KYRGYZSTAN"
-                    />
-                  </label>
-                  <label className={scss.formField}>
-                    <span>Главный заголовок</span>
-                    <input
-                      value={aboutPageForm.title}
-                      onChange={(event) =>
-                        handleAboutPageFieldChange("title", event.target.value)
-                      }
-                      placeholder="Мы олицетворяем элегантность и скромность"
-                    />
-                  </label>
-                </div>
-
-                <div className={scss.uploadBox}>
-                  <label className={scss.formField}>
-                    <span>Логотип / изображение hero</span>
-                    <input
-                      ref={aboutHeroInputRef}
-                      className={scss.visuallyHiddenInput}
-                      type="file"
-                      accept="image/*,.svg,.jpg,.jpeg,.png,.webp,.gif,.jfif,.avif"
-                      onChange={(event) => void handleAboutHeroImageUpload(event)}
-                      disabled={aboutUploadingHero}
-                    />
-                    <button
-                      type="button"
-                      className={scss.fileInput}
-                      onClick={() => aboutHeroInputRef.current?.click()}
-                      disabled={aboutUploadingHero}
-                    >
-                      {aboutUploadingHero ? "Загрузка..." : "Выбрать файл"}
-                    </button>
-                  </label>
-                  <small>
-                    {aboutUploadingHero
-                      ? "Загрузка hero-изображения..."
-                      : `Загрузите изображение hero. Поддерживаются svg, jpg, jpeg, png, webp, gif, jfif, avif. Максимум ${MAX_PRODUCT_IMAGE_SIZE_MB} МБ.`}
-                  </small>
-                </div>
-
-                {aboutPageForm.logo.trim() && (
-                  <div className={scss.mediaPreview}>
-                    <img src={resolveMediaUrl(aboutPageForm.logo)} alt="Превью логотипа О нас" />
-                  </div>
-                )}
-
-                <div className={scss.aboutBlocks}>
-                  {aboutPageForm.blocks.map((block, index) => (
-                    <article key={`about-block-${index}`} className={scss.aboutBlockCard}>
-                      <div className={scss.panelHead}>
-                        <h3>Блок {index + 1}</h3>
-                        <button
-                          type="button"
-                          className={scss.secondaryAction}
-                          onClick={() => handleRemoveAboutBlock(index)}
-                          disabled={aboutPageForm.blocks.length <= 1}
-                        >
-                          Удалить
-                        </button>
-                      </div>
-
-                      <div className={scss.fieldGrid}>
-                        <label className={scss.formField}>
-                          <span>Заголовок блока</span>
-                          <input
-                            value={block.title}
-                            onChange={(event) =>
-                              handleAboutBlockFieldChange(index, "title", event.target.value)
-                            }
-                            placeholder="О бренде"
-                          />
-                        </label>
-                        <label className={scss.formField}>
-                          <span>Порядок</span>
-                          <input
-                            type="number"
-                            min={1}
-                            value={block.sort_order}
-                            onChange={(event) =>
-                              handleAboutBlockFieldChange(index, "sort_order", event.target.value)
-                            }
-                          />
-                        </label>
-                      </div>
-
-                      <div className={scss.uploadBox}>
-                        <label className={scss.formField}>
-                          <span>Загрузка фото блока</span>
-                          <input
-                            ref={(node) => {
-                              aboutBlockInputRefs.current[index] = node;
-                            }}
-                            className={scss.visuallyHiddenInput}
-                            type="file"
-                            accept="image/*,.svg,.jpg,.jpeg,.png,.webp,.gif,.jfif,.avif"
-                            onChange={(event) => void handleAboutBlockImageUpload(index, event)}
-                            disabled={aboutUploadingBlockIndex === index}
-                          />
-                          <button
-                            type="button"
-                            className={scss.fileInput}
-                            onClick={() => aboutBlockInputRefs.current[index]?.click()}
-                            disabled={aboutUploadingBlockIndex === index}
-                          >
-                            {aboutUploadingBlockIndex === index ? "Загрузка..." : "Выбрать файл"}
-                          </button>
-                        </label>
-                        <small>
-                          {aboutUploadingBlockIndex === index
-                            ? "Загрузка изображения..."
-                            : `Загрузите изображение блока. Поддерживаются svg, jpg, jpeg, png, webp, gif, jfif, avif. Максимум ${MAX_PRODUCT_IMAGE_SIZE_MB} МБ.`}
-                        </small>
-                      </div>
-
-                      {block.img.trim() && (
-                        <div className={scss.mediaPreview}>
-                          <img
-                            src={resolveMediaUrl(block.img)}
-                            alt={`Превью блока ${index + 1}`}
-                          />
-                        </div>
-                      )}
-
-                      <label className={scss.formField}>
-                        <span>Текст блока</span>
-                        <textarea
-                          value={block.text}
-                          onChange={(event) =>
-                            handleAboutBlockFieldChange(index, "text", event.target.value)
-                          }
-                          placeholder="Описание блока"
-                        />
-                      </label>
-                    </article>
-                  ))}
-                </div>
-              </article>
-
-              <div className={scss.cards}>
-                {sections.map((item) => (
-                  <article key={item.id}>
-                    <h3>{item.section_name}</h3>
-                    <p>Код: {item.section_code}</p>
-                    <p>Блоков: {item.blocks.length}</p>
-                    <p>Обновлено: {formatDate(item.updated_at)}</p>
-                  </article>
-                ))}
-              </div>
-            </div>
+            <AdminContentSection
+              contentProducts={contentProducts}
+              sections={sections}
+              canManageContent={canManageContent}
+              homeTitleForm={homeTitleForm}
+              aboutPageForm={aboutPageForm}
+              isSavingHomeTitle={isSavingHomeTitle}
+              isSavingAboutPage={isSavingAboutPage}
+              aboutUploadingHero={aboutUploadingHero}
+              aboutUploadingBlockIndex={aboutUploadingBlockIndex}
+              aboutHeroInputRef={aboutHeroInputRef}
+              aboutBlockInputRefs={aboutBlockInputRefs}
+              maxProductImageSizeMb={MAX_PRODUCT_IMAGE_SIZE_MB}
+              onHomeTitleFieldChange={handleHomeTitleFieldChange}
+              onHomeTitleSave={handleHomeTitleSave}
+              onAboutPageFieldChange={handleAboutPageFieldChange}
+              onAboutBlockFieldChange={handleAboutBlockFieldChange}
+              onAddAboutBlock={handleAddAboutBlock}
+              onRemoveAboutBlock={handleRemoveAboutBlock}
+              onAboutPageSave={handleAboutPageSave}
+              onAboutHeroImageUpload={handleAboutHeroImageUpload}
+              onAboutBlockImageUpload={handleAboutBlockImageUpload}
+            />
           )}
 
-          {activeTab === "users" && (
-            <div className={scss.panel}>
-              <h2>Пользователи</h2>
-              <div className={scss.tableWrap}>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Имя</th>
-                      <th>Почта</th>
-                      <th>Роль</th>
-                      <th>Заказы</th>
-                      <th>Потрачено</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {users.results.map((item) => (
-                      <tr key={item.id}>
-                        <td>{item.id}</td>
-                        <td>
-                          {item.first_name} {item.last_name}
-                        </td>
-                        <td>{item.email}</td>
-                        <td>{formatRoleLabel(item.role)}</td>
-                        <td>{item.total_orders}</td>
-                        <td>{formatMoney(item.total_spent)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+          {activeTab === "users" && <AdminUsersSection users={users} />}
 
-          {activeTab === "activity" && (
-            <div className={scss.panel}>
-              <h2>События</h2>
-              <ul className={scss.activity}>
-                {activities.results.map((item) => (
-                  <li key={item.id}>
-                    <div>
-                      <strong>{item.entity_label}</strong>
-                      <span>{formatDate(item.created_at)}</span>
-                    </div>
-                    <p>{item.message}</p>
-                    <small>
-                      {item.actor.name} В· {formatRoleLabel(item.actor.role)}
-                    </small>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {activeTab === "activity" && <AdminActivitySection activities={activities} />}
 
-          {selectedOrder && (
-            <div
-              className={scss.modalOverlay}
-              onClick={(event) => {
-                if (event.currentTarget === event.target) {
-                  closeOrderDetailsModal();
-                }
-              }}
-            >
-              <div className={`${scss.modal} ${scss.orderModal}`}>
-                <div className={scss.modalHeader}>
-                  <div className={scss.orderModalHeader}>
-                    <p>{"Детали заказа"}</p>
-                    <h3>{selectedOrder.order_number}</h3>
-                  </div>
-                  <button
-                    type="button"
-                    className={scss.closeButton}
-                    onClick={closeOrderDetailsModal}
-                    aria-label="Закрыть детали заказа"
-                  >
-                    <FiX />
-                  </button>
-                </div>
-
-                <div className={scss.modalBody}>
-                  <div className={scss.orderDetailsGrid}>
-                    <article className={scss.orderDetailCard}>
-                      <h4>{"Клиент"}</h4>
-                      <dl className={scss.orderMetaList}>
-                        <div>
-                          <dt>{"Имя"}</dt>
-                          <dd>{selectedOrder.customer_name}</dd>
-                        </div>
-                        <div>
-                          <dt>{"Телефон"}</dt>
-                          <dd>{selectedOrder.customer_phone}</dd>
-                        </div>
-                        <div>
-                          <dt>{"ID клиента"}</dt>
-                          <dd>#{selectedOrder.customer_id}</dd>
-                        </div>
-                      </dl>
-                    </article>
-
-                    <article className={scss.orderDetailCard}>
-                      <h4>{"Статус и доставка"}</h4>
-                      <dl className={scss.orderMetaList}>
-                        <div>
-                          <dt>{"Статус заказа"}</dt>
-                          <dd>{STATUS_LABELS[selectedOrder.status]}</dd>
-                        </div>
-                        <div>
-                          <dt>{"Оплата"}</dt>
-                          <dd>{PAYMENT_STATUS_LABELS[selectedOrder.payment_status]}</dd>
-                        </div>
-                        <div>
-                          <dt>{"Способ доставки"}</dt>
-                          <dd>{DELIVERY_METHOD_LABELS[selectedOrder.delivery_method]}</dd>
-                        </div>
-                        <div>
-                          <dt>{"Создан"}</dt>
-                          <dd>{formatDate(selectedOrder.created_at)}</dd>
-                        </div>
-                        <div>
-                          <dt>{"Обновлен"}</dt>
-                          <dd>{formatDate(selectedOrder.updated_at)}</dd>
-                        </div>
-                      </dl>
-                    </article>
-
-                    <article className={scss.orderDetailCard}>
-                      <div className={scss.orderSectionHead}>
-                        <h4>{"Управление статусом"}</h4>
-                        <span>{STATUS_LABELS[normalizeWorkflowStatus(selectedOrder.status)]}</span>
-                      </div>
-
-                      {selectedOrder.status === "cancelled" || selectedOrder.status === "returned" ? (
-                        <p className={scss.statusHint}>
-                          {"Для отмененных и возвращённых заказов поэтапный переход отключен."}
-                        </p>
-                      ) : (
-                        <>
-                          <div className={scss.statusFlow}>
-                            {ORDER_WORKFLOW.map((status, index) => {
-                              const currentIndex = ORDER_WORKFLOW.indexOf(
-                                normalizeWorkflowStatus(selectedOrder.status),
-                              );
-                              const isActive = normalizeWorkflowStatus(selectedOrder.status) === status;
-                              const isCompleted = currentIndex > index;
-                              const isNext = currentIndex + 1 === index;
-
-                              return (
-                                <button
-                                  key={status}
-                                  type="button"
-                                  className={`${scss.statusStep} ${
-                                    isActive
-                                      ? scss.statusStepActive
-                                      : isCompleted
-                                        ? scss.statusStepCompleted
-                                        : ""
-                                  }`}
-                                  disabled={!isNext || isUpdatingOrderStatus}
-                                  onClick={() => void handleOrderStatusChange(selectedOrder.id, status)}
-                                >
-                                  {STATUS_LABELS[status]}
-                                </button>
-                              );
-                            })}
-                          </div>
-                          <p className={scss.statusHint}>
-                            {"Доступен только следующий этап: размещен → собирается → в пути → доставлен."}
-                          </p>
-                        </>
-                      )}
-                    </article>
-
-                    {selectedOrder.delivery_method === "courier" && selectedOrder.address.trim() && (
-                      <article className={scss.orderDetailCard}>
-                        <h4>{"Адрес доставки"}</h4>
-                        <dl className={scss.orderMetaList}>
-                          <div>
-                            <dt>{"Город"}</dt>
-                            <dd>{selectedOrder.city || "-"}</dd>
-                          </div>
-                          <div className={scss.orderMetaWide}>
-                            <dt>{"Адрес"}</dt>
-                            <dd>{selectedOrder.address}</dd>
-                          </div>
-                        </dl>
-                      </article>
-                    )}
-                  </div>
-
-                  <article className={scss.orderDetailCard}>
-                    <div className={scss.orderSectionHead}>
-                      <h4>{"Состав заказа"}</h4>
-                      <span>
-                        {selectedOrder.items.length} {"товаров"}
-                      </span>
-                    </div>
-
-                    <div className={scss.orderItemsList}>
-                      {selectedOrder.items.map((item, index) => (
-                        <div
-                          key={`${selectedOrder.id}-${item.product_id}-${index}`}
-                          className={scss.orderItemRow}
-                        >
-                          <div className={scss.orderItemPreview}>
-                            {item.image_url ? (
-                              <img
-                                src={resolveMediaUrl(item.image_url)}
-                                alt={item.color || item.product_name}
-                              />
-                            ) : (
-                              <div className={scss.orderItemPlaceholder}>
-                                {"Нет фото"}
-                              </div>
-                            )}
-                          </div>
-                          <div className={scss.orderItemInfo}>
-                            <strong>{item.product_name}</strong>
-                            <span>{"Цвет"}: {item.color || "-"}</span>
-                            <span>{"Размер"}: {item.size || "-"}</span>
-                          </div>
-                          <div className={scss.orderItemMeta}>
-                            <span>{item.quantity} {"шт."}</span>
-                            <span>{formatMoney(item.unit_price)}</span>
-                            <strong>{formatMoney(item.total_price)}</strong>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </article>
-
-                  <article className={scss.orderDetailCard}>
-                    <h4>{"Итоги"}</h4>
-                    <ul className={scss.orderTotals}>
-                      <li>
-                        <span>{"Товары"}</span>
-                        <strong>{formatMoney(selectedOrder.subtotal)}</strong>
-                      </li>
-                      <li>
-                        <span>{"Доставка"}</span>
-                        <strong>{formatMoney(selectedOrder.delivery_price)}</strong>
-                      </li>
-                      <li>
-                        <span>{"Скидка"}</span>
-                        <strong>{formatMoney(selectedOrder.discount_amount)}</strong>
-                      </li>
-                      <li className={scss.orderTotalFinal}>
-                        <span>{"Итог к оплате"}</span>
-                        <strong>{formatMoney(selectedOrder.total_amount)}</strong>
-                      </li>
-                    </ul>
-                  </article>
-                </div>
-
-                <div className={scss.modalActions}>
-                  <button
-                    type="button"
-                    className={scss.secondary}
-                    onClick={closeOrderDetailsModal}
-                  >
-                    {"Закрыть"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-          {isProductModalOpen && (
-            <div
-              className={scss.modalOverlay}
-              onClick={(event) => {
-                if (event.currentTarget === event.target) {
-                  closeProductModal();
-                }
-              }}
-            >
-              <div className={scss.modal}>
-                <div className={scss.modalHeader}>
-                  <h3>
-                    {productModalMode === "create"
-                      ? "Создать товар"
-                      : productModalMode === "edit"
-                        ? `Редактировать товар #${selectedProduct?.id ?? ""}`
-                        : `Удалить товар #${selectedProduct?.id ?? ""}`}
-                  </h3>
-                  <button
-                    type="button"
-                    className={scss.closeButton}
-                    onClick={closeProductModal}
-                    aria-label="Закрыть окно"
-                    disabled={isProductMutationLoading}
-                  >
-                    <FiX />
-                  </button>
-                </div>
-
-                {productModalMode === "delete" ? (
-                  <div className={scss.deleteBox}>
-                    <p>
-                      Вы действительно хотите удалить
-                      <strong> {selectedProduct?.name}</strong>?
-                    </p>
-                    <div className={scss.modalActions}>
-                      <button
-                        type="button"
-                        className={scss.secondary}
-                        onClick={closeProductModal}
-                        disabled={isProductMutationLoading}
-                      >
-                        Отмена
-                      </button>
-                      <button
-                        type="button"
-                        className={scss.danger}
-                        onClick={() => void handleProductDelete()}
-                        disabled={isDeletingProduct}
-                      >
-                        {isDeletingProduct ? "Удаление..." : "Удалить"}
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className={scss.modalBody}>
-                      <label className={scss.formField}>
-                        <span>Название</span>
-                        <input
-                          value={productForm.name}
-                          onChange={(event) =>
-                            handleProductFieldChange("name", event.target.value)
-                          }
-                          placeholder="Название товара"
-                        />
-                      </label>
-
-                      <label className={scss.formField}>
-                        <span>Описание</span>
-                        <textarea
-                          value={productForm.description}
-                          onChange={(event) =>
-                            handleProductFieldChange("description", event.target.value)
-                          }
-                          rows={4}
-                          placeholder="Краткое описание товара"
-                        />
-                      </label>
-
-                      <div className={scss.fieldGrid}>
-                        <label className={scss.formField}>
-                          <span>Категория</span>
-                          <select
-                            value={productForm.category_id}
-                            onChange={(event) =>
-                              handleProductFieldChange("category_id", event.target.value)
-                            }
-                          >
-                            {categories.length ? (
-                              categories.map((category) => (
-                                <option key={category.id} value={String(category.id)}>
-                                  {category.category_name}
-                                </option>
-                              ))
-                            ) : (
-                              <option value={String(defaultCategoryId)}>
-                                Категории не загружены
-                              </option>
-                            )}
-                          </select>
-                        </label>
-
-                        <label className={scss.formField}>
-                          <span>Ткань</span>
-                          <input
-                            value={productForm.textile_name}
-                            onChange={(event) =>
-                              handleProductFieldChange("textile_name", event.target.value)
-                            }
-                            placeholder="Например: Тафта"
-                          />
-                        </label>
-                      </div>
-
-                      <div className={scss.fieldGrid}>
-                        <label className={scss.formField}>
-                          <span>Базовая цена</span>
-                          <input
-                            type="number"
-                            min={1}
-                            value={productForm.base_price}
-                            onChange={(event) =>
-                              handleProductFieldChange("base_price", event.target.value)
-                            }
-                          />
-                        </label>
-
-                        <label className={scss.formField}>
-                          <span>Себестоимость</span>
-                          <input
-                            type="number"
-                            min={0}
-                            value={productForm.cost_price}
-                            onChange={(event) =>
-                              handleProductFieldChange("cost_price", event.target.value)
-                            }
-                            placeholder="Используется для расчета прибыли"
-                          />
-                        </label>
-
-                        <label className={scss.formField}>
-                          <span>Цена со скидкой</span>
-                          <input
-                            type="number"
-                            min={0}
-                            value={productForm.discount_price}
-                            onChange={(event) =>
-                              handleProductFieldChange("discount_price", event.target.value)
-                            }
-                            placeholder="Необязательно"
-                          />
-                        </label>
-                      </div>
-
-                      <div className={scss.fieldGrid}>
-                        <label className={scss.formField}>
-                          <span>Размеры через запятую</span>
-                          <input
-                            value={productForm.sizes}
-                            onChange={(event) =>
-                              handleProductFieldChange("sizes", event.target.value)
-                            }
-                            placeholder="S, M, L"
-                          />
-                        </label>
-
-                        <label className={scss.formField}>
-                          <span>Цвета через запятую</span>
-                          <input
-                            value={productForm.colors}
-                            onChange={(event) =>
-                              handleProductFieldChange("colors", event.target.value)
-                            }
-                            placeholder="Черный, Бежевый"
-                          />
-                        </label>
-                      </div>
-
-                      <label className={scss.formField}>
-                        <span>Промо-категории через запятую</span>
-                        <input
-                          value={productForm.promo_categories}
-                          onChange={(event) =>
-                            handleProductFieldChange(
-                              "promo_categories",
-                              event.target.value,
-                            )
-                          }
-                          placeholder="популярные, тренд"
-                        />
-                      </label>
-
-                      <div className={scss.uploadBox}>
-                        <label className={scss.formField}>
-                          <span>Изображения товара</span>
-                          <input
-                            ref={productImageInputRef}
-                            className={scss.visuallyHiddenInput}
-                            type="file"
-                            accept="image/*,.svg,.jpg,.jpeg,.png,.webp,.gif,.jfif,.avif"
-                            multiple
-                            onChange={handleProductImageFilesChange}
-                          />
-                          <button
-                            type="button"
-                            className={scss.fileInput}
-                            onClick={() => productImageInputRef.current?.click()}
-                          >
-                            Выбрать файлы
-                          </button>
-                        </label>
-                        <small>
-                          Загрузите файлы, чтобы заменить текущие фото. До 10 изображений, максимум
-                          7 МБ каждое.
-                        </small>
-                      </div>
-
-                      {productImagePreviews.length > 0 && (
-                        <div className={scss.previewGrid}>
-                          {productImagePreviews.map((preview, index) => (
-                            <div className={scss.previewItem} key={`${preview}-${index}`}>
-                              <img src={preview} alt={`preview-${index + 1}`} />
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {productModalMode === "edit" &&
-                        productImagePreviews.length === 0 &&
-                        (selectedProduct?.images?.length || 0) > 0 && (
-                          <div className={scss.previewGrid}>
-                            {selectedProduct?.images.map((image) => (
-                              <div className={scss.previewItem} key={image.id}>
-                                <img
-                                  src={resolveMediaUrl(image.photo)}
-                                  alt={image.color || "изображение товара"}
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                      <label className={scss.inlineCheck}>
-                        <input
-                          type="checkbox"
-                          checked={productForm.active}
-                          onChange={(event) =>
-                            handleProductFieldChange("active", event.target.checked)
-                          }
-                        />
-                        <span>Опубликовать товар</span>
-                      </label>
-                    </div>
-
-                    <div className={scss.modalActions}>
-                      <button
-                        type="button"
-                        className={scss.secondary}
-                        onClick={closeProductModal}
-                        disabled={isProductMutationLoading}
-                      >
-                        Отмена
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => void handleProductSave()}
-                        disabled={isSavingProduct}
-                      >
-                        {isSavingProduct
-                          ? "Сохранение..."
-                          : productModalMode === "create"
-                            ? "Создать"
-                            : "Сохранить"}
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
+          <AdminOrderDetailsModal
+            selectedOrder={selectedOrder}
+            canManageOrders={canManageOrders}
+            isUpdatingOrderStatus={isUpdatingOrderStatus}
+            onClose={closeOrderDetailsModal}
+            onChangeOrderStatus={handleOrderStatusChange}
+          />
+          <AdminProductModal
+            isOpen={isProductModalOpen}
+            productModalMode={productModalMode}
+            selectedProduct={selectedProduct}
+            categories={categories}
+            defaultCategoryId={defaultCategoryId}
+            productForm={productForm}
+            productImagePreviews={productImagePreviews}
+            productImageInputRef={productImageInputRef}
+            canManageProducts={canManageProducts}
+            canDeleteProducts={canDeleteProducts}
+            isProductMutationLoading={isProductMutationLoading}
+            isDeletingProduct={isDeletingProduct}
+            isSavingProduct={isSavingProduct}
+            onClose={closeProductModal}
+            onDelete={handleProductDelete}
+            onSave={handleProductSave}
+            onFieldChange={handleProductFieldChange}
+            onImageFilesChange={handleProductImageFilesChange}
+          />
         </div>
       </div>
     </section>

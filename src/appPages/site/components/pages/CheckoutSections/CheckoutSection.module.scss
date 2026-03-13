@@ -557,6 +557,33 @@
     text-transform: none;
   }
 
+  .checkboxRow {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    gap: 10px;
+    margin-top: -4px;
+    color: #4f4f4f !important;
+    font-family: "Inter", sans-serif;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 20px !important;
+    text-transform: none !important;
+
+    input {
+      width: 16px !important;
+      height: 16px !important;
+      margin: 0;
+      accent-color: #a73539;
+      flex-shrink: 0;
+    }
+
+    span {
+      color: #4f4f4f !important;
+      text-transform: none !important;
+    }
+  }
+
   .bottomActions {
     margin-top: 2px;
     display: flex;
@@ -915,6 +942,11 @@
         font-size: 13px;
         line-height: 18px;
       }
+    }
+
+    .checkboxRow {
+      font-size: 13px !important;
+      line-height: 18px !important;
     }
 
     .cardDataRow,
