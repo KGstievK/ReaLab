@@ -107,9 +107,9 @@ const New = () => {
       <div className="container">
         <div className={scss.headerRow}>
           <h2>Новинки</h2>
-          <Link href="/new" className={scss.desktopMore}>
+          <button onClick={() => router.push("/new")} type="button" className={scss.desktopMore}>
             Посмотреть все <Image src={arrow} alt="arrow" />
-          </Link>
+          </button>
         </div>
 
         <ul className={scss.tags}>

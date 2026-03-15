@@ -3,11 +3,7 @@
 import Image from "next/image";
 import Mbank from "@/assets/images/Mbank.svg";
 import scss from "./CheckoutSection.module.scss";
-import {
-  PAYMENT_METHOD_OPTIONS,
-  PaymentMethod,
-  isQrPaymentMethod,
-} from "./paymentMethods";
+import { PaymentMethod, PaymentMethodOption, isQrPaymentMethod } from "./paymentMethods";
 
 export type CheckoutQrItem = {
   pay_img: string;
@@ -17,6 +13,7 @@ export type CheckoutQrItem = {
 
 type CheckoutPaymentStepProps = {
   paymentMethod: PaymentMethod;
+  paymentMethods: PaymentMethodOption[];
   onChangeMethod: (method: PaymentMethod) => void;
   qrItems: CheckoutQrItem[];
   qrWhatsapp?: string;
@@ -25,25 +22,22 @@ type CheckoutPaymentStepProps = {
 
 const CheckoutPaymentStep = ({
   paymentMethod,
+  paymentMethods,
   onChangeMethod,
   qrItems,
   qrWhatsapp,
   error,
 }: CheckoutPaymentStepProps) => {
   const selectedMethod =
-    PAYMENT_METHOD_OPTIONS.find((item) => item.id === paymentMethod) ??
-    PAYMENT_METHOD_OPTIONS[0];
+    paymentMethods.find((item) => item.id === paymentMethod) ??
+    paymentMethods[0];
 
   return (
     <div className={scss.section}>
-      <h2>
-        {
-          "ОПЛАТИТЬ ЧЕРЕЗ:"
-        }
-      </h2>
+      <h2>ОПЛАТИТЬ ЧЕРЕЗ:</h2>
 
       <div className={scss.paymentMethods}>
-        {PAYMENT_METHOD_OPTIONS.map((method) => (
+        {paymentMethods.map((method) => (
           <button
             key={method.id}
             type="button"
@@ -68,18 +62,16 @@ const CheckoutPaymentStep = ({
         ))}
       </div>
 
-      <div className={scss.paymentInfoCard}>
-        <h4>{selectedMethod.label}</h4>
-        <p>{selectedMethod.description}</p>
-      </div>
+      {selectedMethod ? (
+        <div className={scss.paymentInfoCard}>
+          <h4>{selectedMethod.label}</h4>
+          <p>{selectedMethod.description}</p>
+        </div>
+      ) : null}
 
-      {isQrPaymentMethod(paymentMethod) && (
+      {selectedMethod && isQrPaymentMethod(paymentMethod, paymentMethods) && (
         <div className={scss.qrBlock}>
-          <p>
-            {
-              "Оплатите по QR-коду и подтвердите оплату."
-            }
-          </p>
+          <p>Оплатите по QR-коду и подтвердите оплату.</p>
 
           <div className={scss.qrGrid}>
             {qrItems.map((item, index) => (
@@ -98,7 +90,7 @@ const CheckoutPaymentStep = ({
 
           {qrWhatsapp && (
             <a href={qrWhatsapp} target="_blank" rel="noreferrer">
-              {"Отправить чек в WhatsApp"}
+              Отправить чек в WhatsApp
             </a>
           )}
         </div>
@@ -110,5 +102,3 @@ const CheckoutPaymentStep = ({
 };
 
 export default CheckoutPaymentStep;
-
-

@@ -1,5 +1,12 @@
+import { createNoIndexMetadata } from "@/utils/seo";
 import { notFound, redirect } from "next/navigation";
 import { extractProductIdFromSlug } from "@/utils/productRoute";
+
+export const metadata = createNoIndexMetadata(
+  "Перенаправление товара",
+  "Технический alias-маршрут карточки товара Jumana.",
+  "/product",
+);
 
 type ProductAliasPageProps = {
   params: Promise<{

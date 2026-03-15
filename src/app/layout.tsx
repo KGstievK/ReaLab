@@ -1,7 +1,8 @@
-import type { Metadata, Viewport } from "next";
+﻿import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.scss";
 import LayoutClient from "./layout.client";
+import { SITE_URL } from "@/utils/seo";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -16,9 +17,22 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Jumana",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Jumana",
+    template: "%s | Jumana",
+  },
   description:
-    "Интернет-магазин Jumana: скромная женская одежда, платья, туники, хиджабы и платки.",
+    "Jumana — интернет-магазин скромной женской одежды: платья, туники, комплекты, хиджабы и аксессуары в эстетике premium modest fashion.",
+  openGraph: {
+    title: "Jumana",
+    description:
+      "Скромная женская одежда Jumana: современный modest fashion, мягкая премиальность и аккуратная эстетика.",
+    url: SITE_URL,
+    siteName: "Jumana",
+    locale: "ru_RU",
+    type: "website",
+  },
 };
 
 export const viewport: Viewport = {

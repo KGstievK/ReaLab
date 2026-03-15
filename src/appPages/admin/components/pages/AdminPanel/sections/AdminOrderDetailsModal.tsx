@@ -14,6 +14,24 @@ import {
   STATUS_LABELS,
 } from "../AdminPanel.shared";
 
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  mbank_redirect: "MBank",
+  finca_qr: "FINCA Bank",
+  manual: "Ручная обработка",
+};
+
+const formatPaymentMethod = (method?: string | null, provider?: string | null) => {
+  if (method && PAYMENT_METHOD_LABELS[method]) {
+    return PAYMENT_METHOD_LABELS[method];
+  }
+
+  if (provider) {
+    return provider;
+  }
+
+  return "-";
+};
+
 type AdminOrderDetailsModalProps = {
   selectedOrder: AdminOrder | null;
   canManageOrders: boolean;
@@ -166,7 +184,12 @@ export const AdminOrderDetailsModal = ({
                   </div>
                   <div>
                     <dt>Метод</dt>
-                    <dd>{selectedOrder.payment.method || "-"}</dd>
+                    <dd>
+                      {formatPaymentMethod(
+                        selectedOrder.payment.method,
+                        selectedOrder.payment.provider,
+                      )}
+                    </dd>
                   </div>
                   <div>
                     <dt>Провайдер</dt>
@@ -175,6 +198,10 @@ export const AdminOrderDetailsModal = ({
                   <div>
                     <dt>Сумма</dt>
                     <dd>{formatMoney(selectedOrder.payment.amount)}</dd>
+                  </div>
+                  <div className={scss.orderMetaWide}>
+                    <dt>Код сессии / внешний ref</dt>
+                    <dd>{selectedOrder.payment.external_ref || "-"}</dd>
                   </div>
                 </dl>
               </article>

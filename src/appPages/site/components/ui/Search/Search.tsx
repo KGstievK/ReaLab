@@ -4,10 +4,12 @@ import { usePathname, useRouter } from "next/navigation";
 import search from "@/assets/icons/Search.svg";
 import { resolveMediaUrl } from "@/utils/media";
 import { buildProductHref } from "@/utils/productRoute";
+import { extractApiErrorInfo, getRateLimitAwareMessage } from "@/utils/apiError";
 import { useSearchCatalogQuery } from "../../../../../redux/api/search";
 import scss from "./Search.module.scss";
 
 const SEARCH_PLACEHOLDER = "Поиск...";
+const SEARCH_DEBOUNCE_MS = 250;
 
 type SearchProductLink = {
   id: number;
@@ -18,11 +20,15 @@ const Search = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isMobileView, setIsMobileView] = useState(false);
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
 
-  const normalizedQuery = query.trim().toLowerCase();
+  const typedQuery = query.trim();
+  const normalizedQuery = debouncedQuery.trim().toLowerCase();
+  const hasTypedQuery = typedQuery.length > 0;
   const hasQuery = normalizedQuery.length > 0;
+  const isDebouncing = typedQuery.toLowerCase() !== normalizedQuery;
 
-  const { data } = useSearchCatalogQuery(
+  const { data, error, isFetching } = useSearchCatalogQuery(
     hasQuery
       ? {
           q: normalizedQuery,
@@ -38,8 +44,24 @@ const Search = () => {
 
   const productResults = useMemo(() => (hasQuery ? data?.products || [] : []), [data, hasQuery]);
   const categoryResults = data?.categories || [];
+  const searchError = hasQuery && error ? extractApiErrorInfo(error, "Не удалось выполнить поиск") : null;
+  const searchErrorMessage = searchError
+    ? getRateLimitAwareMessage(
+        searchError,
+        "Слишком много поисковых запросов. Попробуйте позже.",
+      )
+    : "";
+  const shouldShowResults = isOpen && hasTypedQuery;
 
-  const shouldShowResults = isOpen && hasQuery && (productResults.length > 0 || categoryResults.length > 0);
+  useEffect(() => {
+    const timerId = window.setTimeout(() => {
+      setDebouncedQuery(query);
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [query]);
 
   const handleProductClick = (product: SearchProductLink) => {
     router.push(buildProductHref(product));
@@ -135,43 +157,63 @@ const Search = () => {
 
       {shouldShowResults && (
         <div className={`${scss.SearchResults} ${scss.resultsVisible}`}>
-          {productResults.map((item) => (
-            <div
-              key={item.id}
-              className={scss.SearchItem}
-              onClick={() => handleProductClick({ id: item.id, clothes_name: item.clothes_name })}
-            >
-              {Array.isArray(item.clothes_img) && item.clothes_img.length > 0 && (
-                <Image
-                  src={resolveMediaUrl(item.clothes_img[0].photo)}
-                  alt="product"
-                  width={100}
-                  height={100}
-                />
-              )}
-              <div className={scss.infoSearch}>
-                <p>{item.clothes_name}</p>
-                <p>{item.price}с</p>
-              </div>
-            </div>
-          ))}
+          {(isDebouncing || isFetching) && (
+            <div className={scss.SearchState}>Ищем...</div>
+          )}
 
-          {categoryResults.length > 0 && (
-            <div className={scss.SearchSection}>
-              <span className={scss.SearchSectionTitle}>Категории</span>
-              <div className={scss.SearchSuggestionList}>
-                {categoryResults.map((category) => (
-                  <button
-                    key={category.category_name}
-                    type="button"
-                    className={scss.SearchSuggestion}
-                    onClick={() => handleCategoryClick(category.category_name)}
-                  >
-                    {category.category_name}
-                  </button>
-                ))}
-              </div>
+          {!isDebouncing && !isFetching && searchErrorMessage && (
+            <div className={`${scss.SearchState} ${scss.SearchStateError}`}>
+              {searchErrorMessage}
             </div>
+          )}
+
+          {!isDebouncing && !isFetching && !searchErrorMessage && (
+            <>
+              {productResults.map((item) => (
+                <div
+                  key={item.id}
+                  className={scss.SearchItem}
+                  onClick={() =>
+                    handleProductClick({ id: item.id, clothes_name: item.clothes_name })
+                  }
+                >
+                  {Array.isArray(item.clothes_img) && item.clothes_img.length > 0 && (
+                    <Image
+                      src={resolveMediaUrl(item.clothes_img[0].photo)}
+                      alt="product"
+                      width={100}
+                      height={100}
+                    />
+                  )}
+                  <div className={scss.infoSearch}>
+                    <p>{item.clothes_name}</p>
+                    <p>{item.price}с</p>
+                  </div>
+                </div>
+              ))}
+
+              {categoryResults.length > 0 && (
+                <div className={scss.SearchSection}>
+                  <span className={scss.SearchSectionTitle}>Категории</span>
+                  <div className={scss.SearchSuggestionList}>
+                    {categoryResults.map((category) => (
+                      <button
+                        key={category.category_name}
+                        type="button"
+                        className={scss.SearchSuggestion}
+                        onClick={() => handleCategoryClick(category.category_name)}
+                      >
+                        {category.category_name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {hasQuery && productResults.length === 0 && categoryResults.length === 0 && (
+                <div className={scss.SearchState}>Ничего не найдено</div>
+              )}
+            </>
           )}
         </div>
       )}

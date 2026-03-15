@@ -118,6 +118,78 @@ const api = index.injectEndpoints({
       providesTags: ["admin"],
     }),
 
+    getAdminInventory: build.query<IADMIN.GetInventoryRes, IADMIN.GetInventoryReq>({
+      query: (params) => ({
+        url: "/admin/inventory/",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["admin"],
+    }),
+
+    getAdminInventoryMovements: build.query<
+      IADMIN.GetInventoryMovementsRes,
+      IADMIN.GetInventoryMovementsReq
+    >({
+      query: (params) => ({
+        url: "/admin/inventory/movements/",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["admin"],
+    }),
+
+    getAdminRoles: build.query<IADMIN.GetRolesRes, IADMIN.GetRolesReq>({
+      query: () => ({
+        url: "/admin/rbac/roles/",
+        method: "GET",
+      }),
+      providesTags: ["admin"],
+    }),
+
+    getAdminPermissions: build.query<IADMIN.GetPermissionsRes, IADMIN.GetPermissionsReq>({
+      query: () => ({
+        url: "/admin/rbac/permissions/",
+        method: "GET",
+      }),
+      providesTags: ["admin"],
+    }),
+
+    postAdminRole: build.mutation<IADMIN.PostRoleRes, IADMIN.PostRoleReq>({
+      query: (data) => ({
+        url: "/admin/rbac/roles/",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["admin"],
+    }),
+
+    patchAdminRole: build.mutation<IADMIN.PatchRoleRes, IADMIN.PatchRoleReq>({
+      query: ({ id, data }) => ({
+        url: `/admin/rbac/roles/${id}/`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["admin"],
+    }),
+
+    deleteAdminRole: build.mutation<IADMIN.DeleteRoleRes, IADMIN.DeleteRoleReq>({
+      query: (id) => ({
+        url: `/admin/rbac/roles/${id}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["admin"],
+    }),
+
+    patchAdminUserRoles: build.mutation<IADMIN.PatchUserRolesRes, IADMIN.PatchUserRolesReq>({
+      query: ({ id, role_keys }) => ({
+        url: `/admin/users/${id}/roles/`,
+        method: "PATCH",
+        body: { role_keys },
+      }),
+      invalidatesTags: ["admin"],
+    }),
+
     getAdminCategories: build.query<IADMIN.GetCategoriesRes, IADMIN.GetCategoriesReq>({
       query: () => ({
         url: "/admin/categories/",
@@ -234,6 +306,15 @@ const api = index.injectEndpoints({
       providesTags: ["admin"],
     }),
 
+    getAdminAudit: build.query<IADMIN.GetAuditRes, IADMIN.GetAuditReq>({
+      query: (params) => ({
+        url: "/admin/audit/",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["admin"],
+    }),
+
     getAdminFinanceSummary: build.query<IADMIN.GetFinanceRes, IADMIN.GetFinanceReq>({
       query: (params) => ({
         url: "/admin/finance/summary/",
@@ -257,6 +338,14 @@ export const {
   useGetAdminOrdersQuery,
   usePatchAdminOrderStatusMutation,
   useGetAdminUsersQuery,
+  useGetAdminInventoryQuery,
+  useGetAdminInventoryMovementsQuery,
+  useGetAdminRolesQuery,
+  useGetAdminPermissionsQuery,
+  usePostAdminRoleMutation,
+  usePatchAdminRoleMutation,
+  useDeleteAdminRoleMutation,
+  usePatchAdminUserRolesMutation,
   useGetAdminCategoriesQuery,
   usePostAdminCategoryMutation,
   usePatchAdminCategoryMutation,
@@ -269,5 +358,6 @@ export const {
   usePatchAdminAboutPageMutation,
   useUploadAdminAboutImageMutation,
   useGetAdminActivityQuery,
+  useGetAdminAuditQuery,
   useGetAdminFinanceSummaryQuery,
 } = api;

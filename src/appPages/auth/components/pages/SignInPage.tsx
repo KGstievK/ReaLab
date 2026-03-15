@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import scss from "./SignInPage.module.scss";
 import { usePostLoginMutation } from "../../../../redux/api/auth";
@@ -13,6 +13,7 @@ import google from "@/assets/icons/google.svg";
 import { useRouter, useSearchParams } from "next/navigation";
 import { saveAuthTokens } from "@/utils/authStorage";
 import { executePendingAuthIntent } from "@/utils/authIntent";
+import { extractApiErrorInfo, getRateLimitAwareMessage } from "@/utils/apiError";
 import { useDispatch } from "react-redux";
 import { api } from "@/redux/api";
 
@@ -32,6 +33,8 @@ const SignInPage: FC = () => {
     formState: { errors },
   } = useForm<AUTH.PostLoginRequest>();
   const [rememberMe, setRememberMe] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [submitTraceId, setSubmitTraceId] = useState("");
 
   const nextPath = searchParams.get("next");
   const fromPath = searchParams.get("from");
@@ -65,8 +68,8 @@ const SignInPage: FC = () => {
     return query ? `${path}?${query}` : path;
   };
 
-  const handleRememberMeChange = (e: CheckboxChangeEvent) => {
-    setRememberMe(e.target.checked);
+  const handleRememberMeChange = (event: CheckboxChangeEvent) => {
+    setRememberMe(event.target.checked);
   };
 
   const closeAuthAndRedirect = (path: string) => {
@@ -83,6 +86,9 @@ const SignInPage: FC = () => {
   };
 
   const onSubmit: SubmitHandler<LoginProps> = async (userData) => {
+    setSubmitError("");
+    setSubmitTraceId("");
+
     try {
       const response = await postLoginMutation({
         username: userData.username,
@@ -98,6 +104,14 @@ const SignInPage: FC = () => {
         intentType === "favorite_add" ? await executePendingAuthIntent() : null;
       closeAuthAndRedirect(intentPath || redirectPath);
     } catch (error) {
+      const apiError = extractApiErrorInfo(error, "Не удалось выполнить вход");
+      setSubmitError(
+        getRateLimitAwareMessage(
+          apiError,
+          "Слишком много попыток входа. Попробуйте позже.",
+        ),
+      );
+      setSubmitTraceId(apiError.traceId || "");
       console.error("Login failed:", error);
     }
   };
@@ -105,27 +119,29 @@ const SignInPage: FC = () => {
   return (
     <section className={scss.LoginPage}>
       <Link href="/" className={scss.Logo}>
-        <Image src={logo} alt="LOGO" />
+        <Image src={logo} alt="Логотип Jumana" />
       </Link>
       <h1>Войти в аккаунт</h1>
       <form onSubmit={handleSubmit(onSubmit)}>
         <input
           type="text"
-          placeholder="User Name"
+          placeholder="Логин"
           {...register("username", { required: true })}
           aria-invalid={errors.username ? "true" : "false"}
         />
         {errors.username?.type === "required" && (
-          <p role="alert">*Введите имя пользователя</p>
+          <p role="alert">*Введите логин</p>
         )}
 
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Пароль"
           {...register("password", { required: true })}
           aria-invalid={errors.password ? "true" : "false"}
         />
         {errors.password && <p role="alert">*Введите пароль</p>}
+        {submitError && <p role="alert">{submitError}</p>}
+        {submitTraceId && <p className={scss.traceHint}>ID запроса: {submitTraceId}</p>}
         <div className={scss.links}>
           <ConfigProvider
             theme={{
@@ -135,10 +151,7 @@ const SignInPage: FC = () => {
               },
             }}
           >
-            <Checkbox
-              className={scss.customCheckbox}
-              onChange={handleRememberMeChange}
-            >
+            <Checkbox className={scss.customCheckbox} onChange={handleRememberMeChange}>
               Сохранить вход
             </Checkbox>
           </ConfigProvider>

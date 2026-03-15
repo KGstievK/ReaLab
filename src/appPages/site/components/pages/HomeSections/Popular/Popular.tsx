@@ -107,9 +107,9 @@ const Popular = () => {
       <div className="container">
         <div className={scss.headerRow}>
           <h2>Популярные товары</h2>
-          <Link href="/popular" className={scss.desktopMore}>
+          <button onClick={() => router.push("/catalog")} type="button" className={scss.desktopMore}>
             Посмотреть все <Image src={arrow} alt="arrow" />
-          </Link>
+          </button>
         </div>
 
         <ul className={scss.tags}>

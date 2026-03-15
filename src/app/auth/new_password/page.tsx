@@ -1,6 +1,13 @@
 import { Suspense } from "react";
 import NewPasswordPage from "../../../appPages/auth/components/pages/NewPasswordPage";
 import AuthDesktopModal from "../../../appPages/auth/components/layout/AuthDesktopModal";
+import { createNoIndexMetadata } from "@/utils/seo";
+
+export const metadata = createNoIndexMetadata(
+  "Новый пароль",
+  "Создание нового пароля для аккаунта Jumana.",
+  "/auth/new_password",
+);
 
 const Page = () => {
   return (

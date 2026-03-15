@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import scss from "./ForgotPage.module.scss";
@@ -8,6 +8,7 @@ import backIcon from "@/assets/icons/backIcon.svg";
 import { usePostForgotPasswordMutation } from "../../../../redux/api/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { extractApiErrorInfo, getRateLimitAwareMessage } from "@/utils/apiError";
 
 type ForgotFormValues = {
   email: string;
@@ -81,18 +82,18 @@ const ForgotPage = () => {
       await postForgotPassword({ email: contact }).unwrap();
       goToVerify(contact);
     } catch (error: any) {
-      const errorMessage =
-        error?.data?.data?.email?.[0] ||
-        error?.data?.message ||
-        error?.error ||
-        null;
+      const apiError = extractApiErrorInfo(error, "Не удалось отправить код");
 
-      if (errorMessage) {
-        setSubmitError(String(errorMessage));
+      if (apiError.message) {
+        setSubmitError(
+          getRateLimitAwareMessage(
+            apiError,
+            "Слишком много запросов на сброс пароля. Попробуйте позже.",
+          ),
+        );
         return;
       }
 
-      // Allow continuing in local mode when backend is unavailable.
       goToVerify(contact);
     }
   };
@@ -103,13 +104,13 @@ const ForgotPage = () => {
         type="button"
         className={scss.backButton}
         onClick={handleBack}
-        aria-label="Back"
+        aria-label="Назад"
       >
-        <Image src={backIcon} alt="Back" width={24} height={24} />
+        <Image src={backIcon} alt="Назад" width={24} height={24} />
       </button>
-      <Image src={logo} alt="Jumana logo" className={scss.logo} priority />
+      <Image src={logo} alt="Логотип Jumana" className={scss.logo} priority />
       <h1>Забыли пароль?</h1>
-      <p>Введите свой E-mail, чтобы сбросить пароль</p>
+      <p>Введите ваш E-mail, чтобы получить код для сброса пароля</p>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <input

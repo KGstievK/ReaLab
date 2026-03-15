@@ -12,6 +12,7 @@ import logo from "@/assets/icons/logo.svg";
 import { useRouter, useSearchParams } from "next/navigation";
 import { clearAuthTokens, saveAuthTokens } from "@/utils/authStorage";
 import { executePendingAuthIntent } from "@/utils/authIntent";
+import { extractApiErrorInfo, getRateLimitAwareMessage } from "@/utils/apiError";
 import { useDispatch } from "react-redux";
 import { api } from "@/redux/api";
 
@@ -36,6 +37,7 @@ const SignUpPage: FC = () => {
 
   const [rememberMe, setRememberMe] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [submitTraceId, setSubmitTraceId] = useState("");
   const nextPath = searchParams.get("next");
   const fromPath = searchParams.get("from");
   const intentType = searchParams.get("intent");
@@ -88,6 +90,7 @@ const SignUpPage: FC = () => {
 
   const onSubmit: SubmitHandler<SignUpProps> = async (userData) => {
     setSubmitError("");
+    setSubmitTraceId("");
 
     if (userData.password !== userData.confirm_password) {
       setSubmitError("Пароли не совпадают");
@@ -114,18 +117,18 @@ const SignUpPage: FC = () => {
       clearAuthTokens();
       router.replace(authFlowPath("/auth/sign-in"));
     } catch (error: any) {
-      const backendMessage = error?.data?.message;
-      const backendError = error?.data?.error;
+      const apiError = extractApiErrorInfo(error, "Не удалось зарегистрировать пользователя");
+      const firstFieldError = Object.values(apiError.fields)[0];
 
-      if (Array.isArray(backendMessage) && backendMessage.length > 0) {
-        setSubmitError(String(backendMessage[0]));
-      } else if (typeof backendMessage === "string" && backendMessage.trim()) {
-        setSubmitError(backendMessage);
-      } else if (typeof backendError === "string" && backendError.trim()) {
-        setSubmitError(backendError);
-      } else {
-        setSubmitError("Не удалось зарегистрировать пользователя");
-      }
+      setSubmitError(
+        apiError.code === "RATE_LIMITED" || apiError.status === 429
+          ? getRateLimitAwareMessage(
+              apiError,
+              "Слишком много попыток регистрации. Попробуйте позже.",
+            )
+          : firstFieldError || apiError.message,
+      );
+      setSubmitTraceId(apiError.traceId || "");
 
       console.error("Registration failed:", error);
     }
@@ -179,6 +182,7 @@ const SignUpPage: FC = () => {
         )}
 
         {submitError && <p role="alert">{submitError}</p>}
+        {submitTraceId && <p className={scss.traceHint}>ID запроса: {submitTraceId}</p>}
 
         <ConfigProvider
           theme={{

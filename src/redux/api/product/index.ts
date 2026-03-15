@@ -270,6 +270,26 @@ const api = index.injectEndpoints({
       }),
       keepUnusedDataFor: 300,
     }),
+    getPaymentMethods: build.query<
+      PRODUCT.getPaymentMethodsRes,
+      PRODUCT.getPaymentMethodsReq
+    >({
+      query: () => ({
+        url: `/payment/methods/`,
+        method: `GET`,
+      }),
+      keepUnusedDataFor: 300,
+    }),
+    getPaymentSession: build.query<
+      PRODUCT.getPaymentSessionRes,
+      PRODUCT.getPaymentSessionReq
+    >({
+      query: (orderId) => ({
+        url: `/payment/session/${orderId}/`,
+        method: `GET`,
+      }),
+      keepUnusedDataFor: 60,
+    }),
     getShippingQuote: build.query<
       PRODUCT.getShippingQuoteRes,
       PRODUCT.getShippingQuoteReq
@@ -299,5 +319,7 @@ export const {
   usePostOrderMutation,
   useGetOrderQuery,
   useGetPayQuery,
+  useGetPaymentMethodsQuery,
+  useGetPaymentSessionQuery,
   useGetShippingQuoteQuery,
 } = api;

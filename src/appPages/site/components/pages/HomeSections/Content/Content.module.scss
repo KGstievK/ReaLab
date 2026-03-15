@@ -7,7 +7,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: url("../../../../../../assets/images/background.jpg") no-repeat center / cover;
+  background: url("../../../../../../assets/images/background.jpg") no-repeat
+    center / cover;
 
   &::before {
     content: "";
@@ -39,7 +40,8 @@
 
   .signature {
     margin: 0;
-    color: #a73539;
+    // color: var(--main-color);
+    color: var(--main-color);
     font-family: "Playfair Display", serif;
     font-size: clamp(24px, 2vw, 36px);
     font-style: italic;
@@ -48,20 +50,20 @@
   }
 
   button {
-    margin-top: 8px;
+    margin-top: 44px;
     min-width: 206px;
-    height: 48px;
-    border: none;
-    border-radius: 8px;
-    background: #a73539;
-    color: #fff;
-    font-family: "Outfit", "Inter", sans-serif;
-    font-size: 16px;
-    font-weight: 500;
-    display: inline-flex;
+    height: 53px;
+    display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    padding: 16px 74px;
+    color: var(--background);
+    background-color: #a73539;
+    border: none;
+    gap: 15px;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 22px;
   }
 }
 

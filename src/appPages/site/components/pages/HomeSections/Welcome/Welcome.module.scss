@@ -42,7 +42,8 @@
             font-family: "Playfair Display";
             font-size: clamp(36px, 5vw, 84px);
             font-weight: 400;
-            color: var(--main-color);
+            // color: var(--main-color);
+            color: #a73539;
           }
           button {
             margin-top: 44px;
@@ -53,6 +54,9 @@
             justify-content: center;
             padding: 16px 74px;
             color: var(--background);
+            // color: #a73539;
+            background-color: #a73539;
+            border: none;
             gap: 15px;
             font-size: 18px;
             font-weight: 500;
@@ -64,12 +68,14 @@
         }
         .Swiper_Image {
           height: auto;
+          // width: auto;
           position: relative;
           display: flex;
           align-items: flex-end;
           justify-content: flex-end;
           gap: 10px;
           transition: 0.3s;
+
           @media (max-width: 650px) {
             display: flex;
             align-items: flex-end;
@@ -161,6 +167,9 @@
                 top: 49%;
                 left: 70px;
                 object-fit: cover;
+                box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1);
+                border: none;
+                border-radius: 8px;
                 @media (max-width: 430px) {
                   top: 48%;
                   width: 20px;
@@ -178,6 +187,8 @@
               top: 0;
               left: 0;
               border-radius: 4px;
+              box-shadow: 4px 8px 16px rgba(0, 0, 0, 0.1);
+              border: none;
               @media (max-width: 650px) {
                 margin-bottom: 0;
               }
@@ -196,6 +207,8 @@
             z-index: 2;
             margin-bottom: 50px;
             object-fit: cover;
+            box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1);
+            border: none;
             @media (max-width: 430px) {
               margin-bottom: 0;
               z-index: 2;
@@ -203,6 +216,8 @@
             }
             &:nth-child(2) {
               border-radius: 52px 4px 4px 4px;
+              box-shadow: -2px 4px 8px rgba(0, 0, 0, 0.1);
+              border: none;
               @media (max-width: 430px) {
                 border-radius: 52px 4px 4px 4px;
               }
@@ -212,6 +227,7 @@
             }
           }
           img.hidden {
+            
             transition: opacity 0.3s ease-in-out;
           }
         }

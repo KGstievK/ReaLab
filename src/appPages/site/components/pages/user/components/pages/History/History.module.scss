@@ -191,6 +191,83 @@
     gap: 20px;
   }
 
+  .paymentSummary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .paymentSummaryCard,
+  .paymentActionCard {
+    border-radius: 4px;
+    background: #fffaf5;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    span {
+      color: #6f625e;
+      font-family: "Inter", sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 18px;
+    }
+
+    strong {
+      color: #0c0c0c;
+      font-family: "Inter", sans-serif;
+      font-size: 22px;
+      font-weight: 500;
+      line-height: 28px;
+      word-break: break-word;
+    }
+
+    small {
+      color: #717171;
+      font-family: "Inter", sans-serif;
+      font-size: 14px;
+      font-weight: 300;
+      line-height: 20px;
+    }
+  }
+
+  .paymentActions {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .paymentActionButtons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .paymentButtonPrimary,
+  .paymentButtonSecondary {
+    border-radius: 4px;
+    min-height: 48px;
+    padding: 0 18px;
+    font-family: "Inter", sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 20px;
+    cursor: pointer;
+  }
+
+  .paymentButtonPrimary {
+    border: 1px solid #a73539;
+    background: #a73539;
+    color: #fff;
+  }
+
+  .paymentButtonSecondary {
+    border: 1px solid #d9c6c8;
+    background: #fff;
+    color: #0c0c0c;
+  }
+
   .statusMetaItem,
   .metaItem {
     display: flex;
@@ -404,7 +481,8 @@
     }
 
     .statusMeta,
-    .orderMeta {
+    .orderMeta,
+    .paymentSummary {
       grid-template-columns: 1fr;
       gap: 12px;
     }
@@ -428,6 +506,15 @@
 
     .statusAction {
       font-size: 14px;
+    }
+
+    .paymentActionButtons {
+      flex-direction: column;
+    }
+
+    .paymentButtonPrimary,
+    .paymentButtonSecondary {
+      width: 100%;
     }
 
     .content {

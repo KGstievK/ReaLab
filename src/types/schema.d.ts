@@ -240,12 +240,15 @@ interface IOrder {
   city: string;
   address: string;
   payment?: {
+    id: number;
     status: string;
     method: string;
     provider: string;
     amount: string;
     currency: string;
+    external_ref: string | null;
   } | null;
+  payment_session?: PaymentSessionContract | null;
   shipment?: {
     status: string;
     delivery_method: string;
@@ -272,6 +275,36 @@ interface Pay {
     number: string;
     info: string;
   }>;
+}
+
+interface PaymentMethodOption {
+  id: "mbank_redirect" | "finca_qr" | "manual";
+  provider: string;
+  label: string;
+  description: string;
+  kind: "redirect" | "qr" | "manual";
+  currency: "KGS";
+  is_enabled: boolean;
+  sort_order: number;
+}
+
+interface PaymentSessionContract {
+  payment_id: number;
+  provider: string;
+  method: "mbank_redirect" | "finca_qr" | "manual";
+  kind: "redirect" | "qr" | "manual";
+  session_id: string;
+  reference: string;
+  order_number: string;
+  amount: string;
+  currency: "KGS";
+  status: string;
+  expires_at: string | null;
+  instructions: string[];
+  redirect_url: string | null;
+  redirect_payload: Record<string, string | null> | null;
+  qr_payload: string | null;
+  qr_reference: string | null;
 }
 
 interface SingleProductData {
@@ -530,6 +563,40 @@ interface AdminInventoryItem {
   is_low_stock: boolean;
 }
 
+interface AdminInventoryRecord {
+  id: number;
+  variant_id: number;
+  product_id: number;
+  product_name: string;
+  category_name: string;
+  sku: string;
+  size: string;
+  color: string;
+  quantity: number;
+  min_stock: number;
+  is_low_stock: boolean;
+  is_active: boolean;
+  updated_at: string;
+}
+
+interface AdminInventoryMovement {
+  id: number;
+  inventory_id: number;
+  variant_id: number;
+  product_id: number;
+  product_name: string;
+  sku: string;
+  size: string;
+  color: string;
+  type: "initial" | "manual_adjustment" | "order_reserved" | "order_released";
+  quantity_delta: number;
+  balance_after: number;
+  note: string;
+  order_id: number | null;
+  order_number: string | null;
+  created_at: string;
+}
+
 interface AdminOrderItem {
   product_id: number;
   product_name: string;
@@ -678,12 +745,46 @@ interface AdminUser {
   last_name: string;
   email: string;
   phone_number: string;
+  legacy_role: AdminRole;
   role: AdminRole;
   is_active: boolean;
   created_at: string;
   total_orders: number;
   total_spent: number;
   last_order_at: string | null;
+  assigned_roles: AdminAssignedRole[];
+  permissions: string[];
+}
+
+interface AdminPermissionItem {
+  id: number;
+  key: string;
+  name: string;
+  description: string;
+}
+
+interface AdminAssignedRole {
+  id: number;
+  key: string;
+  name: string;
+  is_system: boolean;
+}
+
+interface AdminRbacRole {
+  id: number;
+  key: string;
+  name: string;
+  description: string;
+  is_system: boolean;
+  user_count: number;
+  permissions: AdminPermissionItem[];
+}
+
+interface AdminUserRoleAssignmentResult {
+  user_id: number;
+  username: string;
+  assigned_roles: AdminAssignedRole[];
+  permissions: string[];
 }
 
 interface AdminCmsBlock {
@@ -769,6 +870,21 @@ interface AdminActivityEvent {
   created_at: string;
   actor: AdminActivityActor;
   metadata: Record<string, string | number | boolean | null>;
+}
+
+interface AdminAuditLog {
+  id: number;
+  entity: "product" | "order" | "category" | "content" | "user";
+  entity_id: number;
+  entity_label: string;
+  action: string;
+  message: string;
+  before: Record<string, unknown> | null;
+  after: Record<string, unknown> | null;
+  metadata: Record<string, unknown> | null;
+  trace_id: string | null;
+  created_at: string;
+  actor: AdminActivityActor | null;
 }
 
 interface AdminPaginatedResponse<T> {

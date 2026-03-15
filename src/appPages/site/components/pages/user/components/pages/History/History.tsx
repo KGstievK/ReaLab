@@ -19,30 +19,8 @@ type TimelineStatus =
   | "cancelled"
   | "returned";
 
-interface OrderItem {
-  id?: number;
-  color: number | string;
-  clothes: {
-    clothes_img: Array<{
-      id: number;
-      photo: string;
-      color: string;
-    }>;
-  };
-}
-
-interface OrderCard {
-  id: number;
-  order_number?: string;
-  date: string;
-  order_status: string;
-  cart: {
-    id: number;
-    user: number;
-    total_price: string | number;
-    cart_items: OrderItem[];
-  };
-}
+type OrderCard = IOrder;
+type OrderItem = IOrder["cart"]["cart_items"][number];
 
 const STATUS_LABELS: Record<TimelineStatus, string> = {
   placed: "Заказ размещен",
@@ -60,6 +38,28 @@ const STATUS_MESSAGES: Record<TimelineStatus, string> = {
   delivered: "Ваш заказ доставлен.",
   cancelled: "Ваш заказ отменен.",
   returned: "Заказ находится в статусе возврата.",
+};
+
+const PAYMENT_STATUS_LABELS: Record<string, string> = {
+  pending: "Ожидает оплаты",
+  paid: "Оплачено",
+  failed: "Ошибка оплаты",
+  refunded: "Возврат",
+};
+
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  mbank_redirect: "MBank",
+  finca_qr: "FINCA Bank",
+  manual: "Ручная обработка",
+};
+
+const SHIPMENT_STATUS_LABELS: Record<string, string> = {
+  placed: "Создан",
+  processing: "Собирается",
+  shipping: "В пути",
+  delivered: "Доставлен",
+  cancelled: "Отменен",
+  returned: "Возврат",
 };
 
 const WORKFLOW: TimelineStatus[] = ["placed", "processing", "shipping", "delivered"];
@@ -108,6 +108,38 @@ const formatDate = (raw: string) => {
 };
 
 const normalize = (value: string) => value.trim().toLowerCase();
+
+const formatPaymentStatus = (status?: string | null) =>
+  status ? PAYMENT_STATUS_LABELS[normalize(status)] || status : "Не указан";
+
+const formatPaymentMethod = (method?: string | null, provider?: string | null) => {
+  if (method && PAYMENT_METHOD_LABELS[method]) {
+    return PAYMENT_METHOD_LABELS[method];
+  }
+
+  if (provider) {
+    return provider;
+  }
+
+  return "Не указан";
+};
+
+const formatShipmentStatus = (status?: string | null, fallback?: string | null) => {
+  if (status) {
+    const normalized = normalize(status);
+    return SHIPMENT_STATUS_LABELS[normalized] || status;
+  }
+
+  return fallback || "Не указан";
+};
+
+const copyToClipboard = async (value: string) => {
+  try {
+    await navigator.clipboard.writeText(value);
+  } catch {
+    // Ignore clipboard errors in unsupported browsers.
+  }
+};
 
 const resolveOrderItemImage = (item: OrderItem) => {
   const selected = item.clothes.clothes_img.find((img) => {
@@ -251,16 +283,17 @@ const History = () => {
 
     const normalizedStatus = normalizeOrderStatus(selectedOrder.order_status);
     const currentIndex = WORKFLOW.indexOf(normalizedStatus);
+    const paymentStatus = formatPaymentStatus(selectedOrder.payment?.status);
+    const paymentMethod = formatPaymentMethod(
+      selectedOrder.payment?.method,
+      selectedOrder.payment?.provider,
+    );
 
     return (
       <div ref={statusPanelRef} className={styles.statusPanel}>
         <div className={styles.statusPanelHeader}>
           <h3>{STATUS_MESSAGES[normalizedStatus]}</h3>
-          {/* <p>
-            {
-              "Отслеживание, возврат или покупка товаров"
-            }
-          </p> */}
+          <p>Мы показываем текущий статус доставки и оплаты по выбранному заказу.</p>
         </div>
 
         <div className={styles.statusTimeline}>
@@ -286,24 +319,98 @@ const History = () => {
           })}
         </div>
 
-        <p className={styles.statusMessage}></p>
+        <p className={styles.statusMessage}>{STATUS_MESSAGES[normalizedStatus]}</p>
 
-        {/* <div className={styles.statusMeta}>
+        <div className={styles.statusMeta}>
           <div className={styles.statusMetaItem}>
-            <span>{"Дата заказа"}</span>
+            <span>Дата заказа</span>
             <strong>{formatDate(selectedOrder.date)}</strong>
           </div>
           <div className={styles.statusMetaItem}>
-            <span>{"Всего"}</span>
+            <span>Всего</span>
             <strong>{formatSom(selectedOrder.cart.total_price)}</strong>
           </div>
           <div className={styles.statusMetaItem}>
-            <span>{"Номер заказа"}</span>
-            <strong>#{selectedOrder.id}</strong>
+            <span>Номер заказа</span>
+            <strong>{getOrderDisplayNumber(selectedOrder)}</strong>
           </div>
-        </div> */}
+        </div>
 
-        {/* {renderThumbs(selectedOrder)} */}
+        <div className={styles.paymentSummary}>
+          <div className={styles.paymentSummaryCard}>
+            <span>Статус оплаты</span>
+            <strong>{paymentStatus}</strong>
+            <small>{paymentMethod}</small>
+          </div>
+
+          <div className={styles.paymentSummaryCard}>
+            <span>Статус доставки</span>
+            <strong>
+              {formatShipmentStatus(selectedOrder.shipment?.status, selectedOrder.delivery)}
+            </strong>
+            <small>
+              {selectedOrder.shipment?.service_name ||
+                selectedOrder.shipment?.carrier ||
+                "Без уточнённого сервиса"}
+            </small>
+          </div>
+        </div>
+
+        {selectedOrder.payment?.status !== "paid" && selectedOrder.payment_session ? (
+          <div className={styles.paymentActions}>
+            <div className={styles.paymentActionCard}>
+              <span>Код оплаты</span>
+              <strong>{selectedOrder.payment_session.reference}</strong>
+              <small>
+                {selectedOrder.payment_session.kind === "redirect"
+                  ? "Продолжите оплату через MBank или используйте код сессии."
+                  : selectedOrder.payment_session.kind === "qr"
+                    ? "Используйте QR-сессию FINCA для оплаты."
+                    : "Заказ ждёт ручного подтверждения оплаты."}
+              </small>
+            </div>
+
+            <div className={styles.paymentActionButtons}>
+              {selectedOrder.payment_session.kind === "redirect" &&
+              selectedOrder.payment_session.redirect_url ? (
+                <button
+                  type="button"
+                  className={styles.paymentButtonPrimary}
+                  onClick={() =>
+                    window.open(
+                      selectedOrder.payment_session?.redirect_url || "",
+                      "_blank",
+                      "noopener,noreferrer",
+                    )
+                  }
+                >
+                  Продолжить оплату
+                </button>
+              ) : null}
+
+              <button
+                type="button"
+                className={styles.paymentButtonSecondary}
+                onClick={() => void copyToClipboard(selectedOrder.payment_session?.reference || "")}
+              >
+                Скопировать код оплаты
+              </button>
+
+              {selectedOrder.payment_session.kind === "qr" &&
+              selectedOrder.payment_session.qr_payload ? (
+                <button
+                  type="button"
+                  className={styles.paymentButtonSecondary}
+                  onClick={() =>
+                    void copyToClipboard(selectedOrder.payment_session?.qr_payload || "")
+                  }
+                >
+                  Скопировать QR-сессию
+                </button>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
       </div>
     );
   };

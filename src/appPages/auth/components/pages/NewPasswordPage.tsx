@@ -12,6 +12,7 @@ import {
   usePostForgotPasswordMutation,
   usePostResetPasswordMutation,
 } from "../../../../redux/api/auth";
+import { extractApiErrorInfo, getRateLimitAwareMessage } from "@/utils/apiError";
 
 type NewPasswordFormValues = {
   newPassword: string;
@@ -115,13 +116,13 @@ const NewPasswordPage = () => {
 
       router.push(buildAuthPath("/auth/reset_success"));
     } catch (error: any) {
-      const errorMessage =
-        error?.data?.message ||
-        error?.data?.data?.new_password?.[0] ||
-        error?.error ||
-        "Не удалось изменить пароль";
-
-      setSubmitError(String(errorMessage));
+      const apiError = extractApiErrorInfo(error, "Не удалось изменить пароль");
+      setSubmitError(
+        getRateLimitAwareMessage(
+          apiError,
+          "Слишком много попыток смены пароля. Попробуйте позже.",
+        ),
+      );
     }
   };
 
@@ -137,12 +138,13 @@ const NewPasswordPage = () => {
     try {
       await postForgotPassword({ email: contact }).unwrap();
     } catch (error: any) {
-      const errorMessage =
-        error?.data?.data?.email?.[0] ||
-        error?.data?.message ||
-        error?.error ||
-        "Не удалось отправить код повторно";
-      setResendError(String(errorMessage));
+      const apiError = extractApiErrorInfo(error, "Не удалось отправить код повторно");
+      setResendError(
+        getRateLimitAwareMessage(
+          apiError,
+          "Слишком много запросов на повторную отправку кода. Попробуйте позже.",
+        ),
+      );
     }
   };
 
@@ -152,11 +154,11 @@ const NewPasswordPage = () => {
         type="button"
         className={scss.backButton}
         onClick={handleBack}
-        aria-label="Back"
+        aria-label="Назад"
       >
-        <Image src={backIcon} alt="Back" width={24} height={24} />
+        <Image src={backIcon} alt="Назад" width={24} height={24} />
       </button>
-      <Image src={logo} alt="Jumana logo" className={scss.logo} priority />
+      <Image src={logo} alt="Логотип Jumana" className={scss.logo} priority />
 
       <h1>Новый пароль</h1>
       <p>Создайте новый пароль</p>
@@ -182,7 +184,7 @@ const NewPasswordPage = () => {
         <label>
           <input
             type="password"
-            placeholder="Подтвердить пароль"
+            placeholder="Подтвердите пароль"
             autoComplete="new-password"
             {...register("confirmPassword", {
               required: "Подтвердите пароль",
@@ -190,9 +192,7 @@ const NewPasswordPage = () => {
           />
           <HiOutlineLockClosed />
         </label>
-        {errors.confirmPassword && (
-          <span>{errors.confirmPassword.message}</span>
-        )}
+        {errors.confirmPassword && <span>{errors.confirmPassword.message}</span>}
         {submitError && <span>{submitError}</span>}
 
         <button type="submit" disabled={isLoading}>

@@ -1,6 +1,13 @@
 import { Suspense } from "react";
 import ResetPasswordPage from "../../../appPages/auth/components/pages/ResetPasswordPage";
 import AuthDesktopModal from "../../../appPages/auth/components/layout/AuthDesktopModal";
+import { createNoIndexMetadata } from "@/utils/seo";
+
+export const metadata = createNoIndexMetadata(
+  "Подтверждение кода",
+  "Подтверждение кода для восстановления доступа к аккаунту Jumana.",
+  "/auth/reset_password",
+);
 
 const Page = () => {
   return (

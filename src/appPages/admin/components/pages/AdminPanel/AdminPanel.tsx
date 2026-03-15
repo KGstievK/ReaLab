@@ -15,6 +15,7 @@ import { AdminActivitySection } from "./sections/AdminActivitySection";
 import { AdminContentSection } from "./sections/AdminContentSection";
 import { AdminDashboardSection } from "./sections/AdminDashboardSection";
 import { AdminDiscountsSection } from "./sections/AdminDiscountsSection";
+import { AdminInventorySection } from "./sections/AdminInventorySection";
 import { AdminOrdersSection } from "./sections/AdminOrdersSection";
 import { AdminProductsSection } from "./sections/AdminProductsSection";
 import { AdminUsersSection } from "./sections/AdminUsersSection";
@@ -42,25 +43,35 @@ import {
 } from "./AdminPanel.shared";
 import {
   useGetAdminActivityQuery,
+  useGetAdminAuditQuery,
   useGetAdminAboutPageQuery,
   useGetAdminCategoriesQuery,
   useGetAdminContentQuery,
   useGetAdminDashboardQuery,
   useGetAdminFinanceSummaryQuery,
   useGetAdminHomeTitleQuery,
+  useGetAdminInventoryMovementsQuery,
+  useGetAdminInventoryQuery,
   useGetAdminOrdersQuery,
+  useGetAdminPermissionsQuery,
   useGetAdminProductsQuery,
+  useGetAdminRolesQuery,
   useGetAdminUsersQuery,
+  useDeleteAdminRoleMutation,
   useDeleteAdminProductMutation,
   usePatchAdminAboutPageMutation,
   usePatchAdminHomeTitleMutation,
   usePatchAdminProductMutation,
   usePatchAdminOrderStatusMutation,
+  usePatchAdminRoleMutation,
+  usePatchAdminUserRolesMutation,
+  usePostAdminRoleMutation,
   usePostAdminProductMutation,
   usePostAdminProductImagesMutation,
   useUploadAdminAboutImageMutation,
 } from "../../../../../redux/api/admin";
 import { useGetMeQuery } from "../../../../../redux/api/auth";
+import { extractApiErrorInfo, getRateLimitAwareMessage } from "@/utils/apiError";
 import scss from "./AdminPanel.module.scss";
 
 const parseCsv = (value: string): string[] =>
@@ -106,35 +117,17 @@ const hasDifferentListValues = (left: string[], right: string[]): boolean => {
   return leftNormalized.some((value, index) => value !== rightNormalized[index]);
 };
 
-const readErrorMessage = (value: unknown): string | null => {
-  if (typeof value === "string") {
-    return value;
-  }
-  if (Array.isArray(value)) {
-    const messages = value.filter((item): item is string => typeof item === "string");
-    if (messages.length) {
-      return messages.join(", ");
-    }
-  }
-
-  return null;
-};
-
-const getApiErrorMessage = (error: unknown, fallback: string): string => {
-  if (!error || typeof error !== "object") {
-    return fallback;
-  }
-
-  const data = (error as { data?: unknown }).data;
-  if (data && typeof data === "object") {
-    const nestedMessage = readErrorMessage((data as { message?: unknown }).message);
-    if (nestedMessage) {
-      return nestedMessage;
-    }
-  }
-
-  const message = readErrorMessage((error as { message?: unknown }).message);
-  return message || fallback;
+const getApiUiMessage = (
+  error: unknown,
+  fallback: string,
+  rateLimitFallback = "Слишком много действий в админке. Попробуйте позже.",
+) => {
+  const apiError = extractApiErrorInfo(error, fallback);
+  return {
+    type: "error" as const,
+    text: getRateLimitAwareMessage(apiError, rateLimitFallback),
+    traceId: apiError.traceId || undefined,
+  };
 };
 
 const toStringOrEmpty = (value: number | null | undefined): string =>
@@ -244,6 +237,32 @@ const NAV_ITEMS: Array<{ key: AdminTab; label: string; icon: ReactNode; permissi
     permission: ADMIN_PERMISSIONS.ACTIVITY_VIEW,
   },
 ];
+
+const ORDER_STATUS_FILTER_OPTIONS = Object.keys(STATUS_LABELS) as AdminOrderStatus[];
+const PAYMENT_STATUS_FILTER_OPTIONS = ["pending", "paid", "failed", "refunded"] as const;
+const DELIVERY_METHOD_FILTER_OPTIONS = ["courier", "pickup"] as const;
+const PRODUCT_PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
+const PRODUCT_SORT_OPTIONS = [
+  "-updated_at",
+  "updated_at",
+  "-created_at",
+  "created_at",
+  "name",
+  "-name",
+] as const;
+const DISCOUNT_PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
+const DISCOUNT_SORT_OPTIONS = [
+  "-updated_at",
+  "updated_at",
+  "-created_at",
+  "created_at",
+  "name",
+  "-name",
+] as const;
+const ORDER_PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
+const ORDER_SORT_OPTIONS = ["newest", "oldest", "total_desc", "total_asc", "payment_status"] as const;
+const USER_PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
+const USER_SORT_OPTIONS = ["newest", "oldest", "email_asc", "email_desc", "name_asc", "name_desc"] as const;
 
 const MOCK_ORDERS: AdminOrder[] = [
   {
@@ -508,32 +527,38 @@ const MOCK_USERS: AdminPaginatedResponse<AdminUser> = {
   next: null,
   previous: null,
   results: [
-    {
-      id: 1,
-      first_name: "Aigerim",
-      last_name: "N",
-      email: "aigerim@gmail.com",
-      phone_number: "+996555000000",
-      role: "customer",
-      is_active: true,
-      created_at: "2025-08-12T08:00:00.000Z",
-      total_orders: 8,
-      total_spent: 35200,
-      last_order_at: "2026-02-27T13:10:00.000Z",
-    },
-    {
-      id: 3,
-      first_name: "Admin",
-      last_name: "Manager",
-      email: "manager@jumana.com",
-      phone_number: "+996777001122",
-      role: "manager",
-      is_active: true,
-      created_at: "2025-01-18T09:00:00.000Z",
-      total_orders: 0,
-      total_spent: 0,
-      last_order_at: null,
-    },
+      {
+        id: 1,
+        first_name: "Aigerim",
+        last_name: "N",
+        email: "aigerim@gmail.com",
+        phone_number: "+996555000000",
+        legacy_role: "customer",
+        role: "customer",
+        is_active: true,
+        created_at: "2025-08-12T08:00:00.000Z",
+        total_orders: 8,
+        total_spent: 35200,
+        last_order_at: "2026-02-27T13:10:00.000Z",
+        assigned_roles: [],
+        permissions: [],
+      },
+      {
+        id: 3,
+        first_name: "Admin",
+        last_name: "Manager",
+        email: "manager@jumana.com",
+        phone_number: "+996777001122",
+        legacy_role: "manager",
+        role: "manager",
+        is_active: true,
+        created_at: "2025-01-18T09:00:00.000Z",
+        total_orders: 0,
+        total_spent: 0,
+        last_order_at: null,
+        assigned_roles: [],
+        permissions: [],
+      },
   ],
 };
 
@@ -644,9 +669,72 @@ const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
   const [range, setRange] = useState<AdminDateRange>("month");
   const [search, setSearch] = useState("");
+  const [productSearch, setProductSearch] = useState("");
+  const [productPage, setProductPage] = useState(1);
+  const [productPageSize, setProductPageSize] = useState<
+    (typeof PRODUCT_PAGE_SIZE_OPTIONS)[number]
+  >(20);
+  const [productSort, setProductSort] = useState<(typeof PRODUCT_SORT_OPTIONS)[number]>(
+    "-updated_at",
+  );
+  const [productCategoryFilter, setProductCategoryFilter] = useState<number | "all">("all");
+  const [productActiveFilter, setProductActiveFilter] = useState<"all" | "active" | "draft">(
+    "all",
+  );
+  const [discountSearch, setDiscountSearch] = useState("");
+  const [discountPage, setDiscountPage] = useState(1);
+  const [discountPageSize, setDiscountPageSize] = useState<
+    (typeof DISCOUNT_PAGE_SIZE_OPTIONS)[number]
+  >(20);
+  const [discountSort, setDiscountSort] = useState<(typeof DISCOUNT_SORT_OPTIONS)[number]>(
+    "-updated_at",
+  );
+  const [discountCategoryFilter, setDiscountCategoryFilter] = useState<number | "all">("all");
+  const [discountActiveFilter, setDiscountActiveFilter] = useState<"all" | "active" | "draft">(
+    "all",
+  );
+  const [orderSearch, setOrderSearch] = useState("");
+  const [orderPage, setOrderPage] = useState(1);
+  const [orderPageSize, setOrderPageSize] = useState<(typeof ORDER_PAGE_SIZE_OPTIONS)[number]>(20);
+  const [orderExternalRefFilter, setOrderExternalRefFilter] = useState("");
+  const [orderSort, setOrderSort] = useState<(typeof ORDER_SORT_OPTIONS)[number]>("newest");
+  const [orderStatusFilter, setOrderStatusFilter] = useState<AdminOrderStatus | "all">("all");
+  const [orderPaymentStatusFilter, setOrderPaymentStatusFilter] = useState<
+    AdminPaymentStatus | "all"
+  >("all");
+  const [orderDeliveryMethodFilter, setOrderDeliveryMethodFilter] = useState<
+    AdminDeliveryMethod | "all"
+  >("all");
+  const [orderDateFrom, setOrderDateFrom] = useState("");
+  const [orderDateTo, setOrderDateTo] = useState("");
+  const [userSearch, setUserSearch] = useState("");
+  const [userPage, setUserPage] = useState(1);
+  const [userPageSize, setUserPageSize] = useState<(typeof USER_PAGE_SIZE_OPTIONS)[number]>(20);
+  const [userSort, setUserSort] = useState<(typeof USER_SORT_OPTIONS)[number]>("newest");
+  const [userRoleFilter, setUserRoleFilter] = useState<AdminRole | "all">("all");
+  const [userActiveFilter, setUserActiveFilter] = useState<"all" | "active" | "inactive">("all");
+  const [isUrlStateReady, setIsUrlStateReady] = useState(false);
+  const [inventoryLowStockOnly, setInventoryLowStockOnly] = useState(false);
+  const [activitySearch, setActivitySearch] = useState("");
+  const [activityEntityFilter, setActivityEntityFilter] = useState<
+    AdminActivityEvent["entity"] | "all"
+  >("all");
+  const [auditActionFilter, setAuditActionFilter] = useState("");
+  const [auditTraceIdFilter, setAuditTraceIdFilter] = useState("");
+  const [auditActorIdFilter, setAuditActorIdFilter] = useState<number | "all">("all");
+  const [activityPage, setActivityPage] = useState(1);
+  const [auditPage, setAuditPage] = useState(1);
+  const [inventoryMovementType, setInventoryMovementType] = useState<
+    AdminInventoryMovement["type"] | "all"
+  >("all");
+  const [selectedInventoryItem, setSelectedInventoryItem] = useState<Pick<
+    AdminInventoryRecord,
+    "product_id" | "variant_id" | "product_name" | "sku" | "size" | "color"
+  > | null>(null);
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
+    traceId?: string;
   } | null>(null);
   const [productModalMode, setProductModalMode] =
     useState<ProductModalMode>("create");
@@ -684,9 +772,310 @@ const AdminPanel = () => {
   const canManageDiscounts = hasPermission(currentPermissions, ADMIN_PERMISSIONS.DISCOUNTS_MANAGE);
   const canManageOrders = hasPermission(currentPermissions, ADMIN_PERMISSIONS.ORDERS_MANAGE);
   const canManageContent = hasPermission(currentPermissions, ADMIN_PERMISSIONS.CONTENT_MANAGE);
+  const canManageUsers = hasPermission(currentPermissions, ADMIN_PERMISSIONS.USERS_MANAGE);
   const visibleNavItems = currentUser
     ? NAV_ITEMS.filter((item) => hasPermission(currentPermissions, item.permission))
     : NAV_ITEMS;
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+    if (tab && NAV_ITEMS.some((item) => item.key === tab)) {
+      setActiveTab(tab as AdminTab);
+    }
+
+    setProductSearch(params.get("product_search") || "");
+
+    const productSortParam = params.get("product_sort");
+    if (
+      productSortParam &&
+      PRODUCT_SORT_OPTIONS.includes(productSortParam as (typeof PRODUCT_SORT_OPTIONS)[number])
+    ) {
+      setProductSort(productSortParam as (typeof PRODUCT_SORT_OPTIONS)[number]);
+    }
+
+    const productCategoryParam = Number(params.get("product_category_id"));
+    if (Number.isFinite(productCategoryParam) && productCategoryParam > 0) {
+      setProductCategoryFilter(productCategoryParam);
+    }
+
+    const productActiveParam = params.get("product_active");
+    if (productActiveParam === "active" || productActiveParam === "draft") {
+      setProductActiveFilter(productActiveParam);
+    }
+
+    const productPageParam = Number(params.get("product_page"));
+    if (Number.isFinite(productPageParam) && productPageParam > 0) {
+      setProductPage(productPageParam);
+    }
+
+    const productPageSizeParam = Number(params.get("product_page_size"));
+    if (
+      Number.isFinite(productPageSizeParam) &&
+      PRODUCT_PAGE_SIZE_OPTIONS.includes(
+        productPageSizeParam as (typeof PRODUCT_PAGE_SIZE_OPTIONS)[number],
+      )
+    ) {
+      setProductPageSize(productPageSizeParam as (typeof PRODUCT_PAGE_SIZE_OPTIONS)[number]);
+    }
+
+    setDiscountSearch(params.get("discount_search") || "");
+
+    const discountSortParam = params.get("discount_sort");
+    if (
+      discountSortParam &&
+      DISCOUNT_SORT_OPTIONS.includes(discountSortParam as (typeof DISCOUNT_SORT_OPTIONS)[number])
+    ) {
+      setDiscountSort(discountSortParam as (typeof DISCOUNT_SORT_OPTIONS)[number]);
+    }
+
+    const discountCategoryParam = Number(params.get("discount_category_id"));
+    if (Number.isFinite(discountCategoryParam) && discountCategoryParam > 0) {
+      setDiscountCategoryFilter(discountCategoryParam);
+    }
+
+    const discountActiveParam = params.get("discount_active");
+    if (discountActiveParam === "active" || discountActiveParam === "draft") {
+      setDiscountActiveFilter(discountActiveParam);
+    }
+
+    const discountPageParam = Number(params.get("discount_page"));
+    if (Number.isFinite(discountPageParam) && discountPageParam > 0) {
+      setDiscountPage(discountPageParam);
+    }
+
+    const discountPageSizeParam = Number(params.get("discount_page_size"));
+    if (
+      Number.isFinite(discountPageSizeParam) &&
+      DISCOUNT_PAGE_SIZE_OPTIONS.includes(
+        discountPageSizeParam as (typeof DISCOUNT_PAGE_SIZE_OPTIONS)[number],
+      )
+    ) {
+      setDiscountPageSize(discountPageSizeParam as (typeof DISCOUNT_PAGE_SIZE_OPTIONS)[number]);
+    }
+
+    setOrderSearch(params.get("order_search") || "");
+    setOrderExternalRefFilter(params.get("order_external_ref") || "");
+
+    const orderSortParam = params.get("order_sort");
+    if (
+      orderSortParam &&
+      ORDER_SORT_OPTIONS.includes(orderSortParam as (typeof ORDER_SORT_OPTIONS)[number])
+    ) {
+      setOrderSort(orderSortParam as (typeof ORDER_SORT_OPTIONS)[number]);
+    }
+
+    const orderStatus = params.get("order_status");
+    if (orderStatus && ORDER_STATUS_FILTER_OPTIONS.includes(orderStatus as AdminOrderStatus)) {
+      setOrderStatusFilter(orderStatus as AdminOrderStatus);
+    }
+
+    const orderPaymentStatus = params.get("order_payment_status");
+    if (
+      orderPaymentStatus &&
+      PAYMENT_STATUS_FILTER_OPTIONS.includes(orderPaymentStatus as AdminPaymentStatus)
+    ) {
+      setOrderPaymentStatusFilter(orderPaymentStatus as AdminPaymentStatus);
+    }
+
+    const orderDeliveryMethod = params.get("order_delivery_method");
+    if (
+      orderDeliveryMethod &&
+      DELIVERY_METHOD_FILTER_OPTIONS.includes(orderDeliveryMethod as AdminDeliveryMethod)
+    ) {
+      setOrderDeliveryMethodFilter(orderDeliveryMethod as AdminDeliveryMethod);
+    }
+
+    setOrderDateFrom(params.get("order_date_from") || "");
+    setOrderDateTo(params.get("order_date_to") || "");
+
+    const pageParam = Number(params.get("order_page"));
+    if (Number.isFinite(pageParam) && pageParam > 0) {
+      setOrderPage(pageParam);
+    }
+
+    const pageSizeParam = Number(params.get("order_page_size"));
+    if (
+      Number.isFinite(pageSizeParam) &&
+      ORDER_PAGE_SIZE_OPTIONS.includes(pageSizeParam as (typeof ORDER_PAGE_SIZE_OPTIONS)[number])
+    ) {
+      setOrderPageSize(pageSizeParam as (typeof ORDER_PAGE_SIZE_OPTIONS)[number]);
+    }
+
+    setUserSearch(params.get("user_search") || "");
+
+    const userSortParam = params.get("user_sort");
+    if (
+      userSortParam &&
+      USER_SORT_OPTIONS.includes(userSortParam as (typeof USER_SORT_OPTIONS)[number])
+    ) {
+      setUserSort(userSortParam as (typeof USER_SORT_OPTIONS)[number]);
+    }
+
+    const userRoleParam = params.get("user_role");
+    if (userRoleParam && ["customer", "manager", "admin", "owner"].includes(userRoleParam)) {
+      setUserRoleFilter(userRoleParam as AdminRole);
+    }
+
+    const userActiveParam = params.get("user_active");
+    if (userActiveParam === "active" || userActiveParam === "inactive") {
+      setUserActiveFilter(userActiveParam);
+    }
+
+    const userPageParam = Number(params.get("user_page"));
+    if (Number.isFinite(userPageParam) && userPageParam > 0) {
+      setUserPage(userPageParam);
+    }
+
+    const userPageSizeParam = Number(params.get("user_page_size"));
+    if (
+      Number.isFinite(userPageSizeParam) &&
+      USER_PAGE_SIZE_OPTIONS.includes(userPageSizeParam as (typeof USER_PAGE_SIZE_OPTIONS)[number])
+    ) {
+      setUserPageSize(userPageSizeParam as (typeof USER_PAGE_SIZE_OPTIONS)[number]);
+    }
+
+    setIsUrlStateReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !isUrlStateReady) {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    params.set("tab", activeTab);
+
+    if (productSearch) params.set("product_search", productSearch);
+    else params.delete("product_search");
+
+    if (productSort !== "-updated_at") params.set("product_sort", productSort);
+    else params.delete("product_sort");
+
+    if (productCategoryFilter !== "all") {
+      params.set("product_category_id", String(productCategoryFilter));
+    } else params.delete("product_category_id");
+
+    if (productActiveFilter !== "all") params.set("product_active", productActiveFilter);
+    else params.delete("product_active");
+
+    if (productPage > 1) params.set("product_page", String(productPage));
+    else params.delete("product_page");
+
+    if (productPageSize !== 20) params.set("product_page_size", String(productPageSize));
+    else params.delete("product_page_size");
+
+    if (discountSearch) params.set("discount_search", discountSearch);
+    else params.delete("discount_search");
+
+    if (discountSort !== "-updated_at") params.set("discount_sort", discountSort);
+    else params.delete("discount_sort");
+
+    if (discountCategoryFilter !== "all") {
+      params.set("discount_category_id", String(discountCategoryFilter));
+    } else params.delete("discount_category_id");
+
+    if (discountActiveFilter !== "all") params.set("discount_active", discountActiveFilter);
+    else params.delete("discount_active");
+
+    if (discountPage > 1) params.set("discount_page", String(discountPage));
+    else params.delete("discount_page");
+
+    if (discountPageSize !== 20) params.set("discount_page_size", String(discountPageSize));
+    else params.delete("discount_page_size");
+
+    if (orderSearch) params.set("order_search", orderSearch);
+    else params.delete("order_search");
+
+    if (orderExternalRefFilter) params.set("order_external_ref", orderExternalRefFilter);
+    else params.delete("order_external_ref");
+
+    if (orderSort !== "newest") params.set("order_sort", orderSort);
+    else params.delete("order_sort");
+
+    if (orderStatusFilter !== "all") params.set("order_status", orderStatusFilter);
+    else params.delete("order_status");
+
+    if (orderPaymentStatusFilter !== "all") {
+      params.set("order_payment_status", orderPaymentStatusFilter);
+    } else {
+      params.delete("order_payment_status");
+    }
+
+    if (orderDeliveryMethodFilter !== "all") {
+      params.set("order_delivery_method", orderDeliveryMethodFilter);
+    } else {
+      params.delete("order_delivery_method");
+    }
+
+    if (orderDateFrom) params.set("order_date_from", orderDateFrom);
+    else params.delete("order_date_from");
+
+    if (orderDateTo) params.set("order_date_to", orderDateTo);
+    else params.delete("order_date_to");
+
+    if (orderPage > 1) params.set("order_page", String(orderPage));
+    else params.delete("order_page");
+
+    if (orderPageSize !== 20) params.set("order_page_size", String(orderPageSize));
+    else params.delete("order_page_size");
+
+    if (userSearch) params.set("user_search", userSearch);
+    else params.delete("user_search");
+
+    if (userSort !== "newest") params.set("user_sort", userSort);
+    else params.delete("user_sort");
+
+    if (userRoleFilter !== "all") params.set("user_role", userRoleFilter);
+    else params.delete("user_role");
+
+    if (userActiveFilter !== "all") params.set("user_active", userActiveFilter);
+    else params.delete("user_active");
+
+    if (userPage > 1) params.set("user_page", String(userPage));
+    else params.delete("user_page");
+
+    if (userPageSize !== 20) params.set("user_page_size", String(userPageSize));
+    else params.delete("user_page_size");
+
+    const nextUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ""}`;
+    window.history.replaceState(window.history.state, "", nextUrl);
+  }, [
+    activeTab,
+    productSearch,
+    productSort,
+    productCategoryFilter,
+    productActiveFilter,
+    productPage,
+    productPageSize,
+    discountSearch,
+    discountSort,
+    discountCategoryFilter,
+    discountActiveFilter,
+    discountPage,
+    discountPageSize,
+    orderSearch,
+    orderExternalRefFilter,
+    orderSort,
+    orderStatusFilter,
+    orderPaymentStatusFilter,
+    orderDeliveryMethodFilter,
+    orderDateFrom,
+    orderDateTo,
+    orderPage,
+    orderPageSize,
+    userSearch,
+    userSort,
+    userRoleFilter,
+    userActiveFilter,
+    userPage,
+    userPageSize,
+    isUrlStateReady,
+  ]);
 
   const dashboardQuery = useGetAdminDashboardQuery(
     { range },
@@ -697,15 +1086,72 @@ const AdminPanel = () => {
     { skip: activeTab !== "dashboard" },
   );
   const productsQuery = useGetAdminProductsQuery(
-    { page: 1, page_size: 50, search: search || undefined },
+    activeTab === "products"
+      ? {
+          page: productPage,
+          page_size: productPageSize,
+          search: productSearch || undefined,
+          category_id: productCategoryFilter === "all" ? undefined : productCategoryFilter,
+          is_active:
+            productActiveFilter === "all"
+              ? undefined
+              : productActiveFilter === "active",
+          ordering: productSort,
+        }
+      : activeTab === "discounts"
+        ? {
+            page: discountPage,
+            page_size: discountPageSize,
+            search: discountSearch || undefined,
+            category_id: discountCategoryFilter === "all" ? undefined : discountCategoryFilter,
+            is_active:
+              discountActiveFilter === "all"
+                ? undefined
+                : discountActiveFilter === "active",
+            ordering: discountSort,
+          }
+        : { page: 1, page_size: 50, search: search || undefined },
     { skip: activeTab !== "products" && activeTab !== "discounts" },
+  );
+  const inventoryQuery = useGetAdminInventoryQuery(
+    {
+      page: 1,
+      page_size: 20,
+      search: productSearch || undefined,
+      low_stock: inventoryLowStockOnly || undefined,
+    },
+    { skip: activeTab !== "products" },
+  );
+  const inventoryMovementsQuery = useGetAdminInventoryMovementsQuery(
+    {
+      page: 1,
+      page_size: 12,
+      search: productSearch || undefined,
+      product_id: selectedInventoryItem?.product_id,
+      variant_id: selectedInventoryItem?.variant_id,
+      type: inventoryMovementType === "all" ? undefined : inventoryMovementType,
+    },
+    { skip: activeTab !== "products" },
   );
   const contentProductsQuery = useGetAdminProductsQuery(
     { page: 1, page_size: 200 },
     { skip: activeTab !== "content" },
   );
   const ordersQuery = useGetAdminOrdersQuery(
-    { page: 1, page_size: 50, search: search || undefined },
+    {
+      page: orderPage,
+      page_size: orderPageSize,
+      search: orderSearch || undefined,
+      external_ref: orderExternalRefFilter || undefined,
+      ordering: orderSort,
+      status: orderStatusFilter === "all" ? undefined : orderStatusFilter,
+      payment_status:
+        orderPaymentStatusFilter === "all" ? undefined : orderPaymentStatusFilter,
+      delivery_method:
+        orderDeliveryMethodFilter === "all" ? undefined : orderDeliveryMethodFilter,
+      date_from: orderDateFrom || undefined,
+      date_to: orderDateTo || undefined,
+    },
     { skip: activeTab !== "orders" },
   );
   const contentQuery = useGetAdminContentQuery(undefined, {
@@ -721,11 +1167,45 @@ const AdminPanel = () => {
     skip: activeTab !== "products" && activeTab !== "discounts" && !isProductModalOpen,
   });
   const usersQuery = useGetAdminUsersQuery(
-    { page: 1, page_size: 50, search: search || undefined },
-    { skip: activeTab !== "users" },
+    activeTab === "activity"
+      ? { page: 1, page_size: 100 }
+      : {
+          page: userPage,
+          page_size: userPageSize,
+          search: userSearch || undefined,
+          ordering: userSort,
+          role: userRoleFilter === "all" ? undefined : userRoleFilter,
+          is_active:
+            userActiveFilter === "all"
+              ? undefined
+              : userActiveFilter === "active",
+        },
+    { skip: activeTab !== "users" && activeTab !== "activity" },
   );
+  const rolesQuery = useGetAdminRolesQuery(undefined, {
+    skip: activeTab !== "users",
+  });
+  const permissionsQuery = useGetAdminPermissionsQuery(undefined, {
+    skip: activeTab !== "users",
+  });
   const activityQuery = useGetAdminActivityQuery(
-    { page: 1, page_size: 50 },
+    {
+      page: activityPage,
+      page_size: 50,
+      entity: activityEntityFilter === "all" ? undefined : activityEntityFilter,
+    },
+    { skip: activeTab !== "activity" },
+  );
+  const auditQuery = useGetAdminAuditQuery(
+    {
+      page: auditPage,
+      page_size: 20,
+      search: activitySearch || undefined,
+      entity: activityEntityFilter === "all" ? undefined : activityEntityFilter,
+      action: auditActionFilter || undefined,
+      trace_id: auditTraceIdFilter || undefined,
+      actor_id: auditActorIdFilter === "all" ? undefined : auditActorIdFilter,
+    },
     { skip: activeTab !== "activity" },
   );
 
@@ -744,10 +1224,16 @@ const AdminPanel = () => {
   const [patchAdminAboutPageMutation, { isLoading: isSavingAboutPage }] =
     usePatchAdminAboutPageMutation();
   const [uploadAdminAboutImageMutation] = useUploadAdminAboutImageMutation();
+  const [postAdminRoleMutation, { isLoading: isCreatingRole }] = usePostAdminRoleMutation();
+  const [patchAdminRoleMutation, { isLoading: isUpdatingRole }] = usePatchAdminRoleMutation();
+  const [deleteAdminRoleMutation, { isLoading: isDeletingRole }] = useDeleteAdminRoleMutation();
+  const [patchAdminUserRolesMutation, { isLoading: isUpdatingUserRoles }] =
+    usePatchAdminUserRolesMutation();
 
   const isSavingProduct =
     isCreatingProduct || isUpdatingProduct || isUploadingProductImages;
   const isProductMutationLoading = isSavingProduct || isDeletingProduct;
+  const isRoleMutationLoading = isCreatingRole || isUpdatingRole || isDeletingRole;
 
   const dashboard = dashboardQuery.data ?? {
     generated_at: new Date().toISOString(),
@@ -782,6 +1268,18 @@ const AdminPanel = () => {
     previous: null,
     results: [],
   };
+  const inventory = inventoryQuery.data ?? {
+    count: 0,
+    next: null,
+    previous: null,
+    results: [],
+  };
+  const inventoryMovements = inventoryMovementsQuery.data ?? {
+    count: 0,
+    next: null,
+    previous: null,
+    results: [],
+  };
   const contentProducts = contentProductsQuery.data ?? {
     count: 0,
     next: null,
@@ -797,12 +1295,30 @@ const AdminPanel = () => {
   const sections = contentQuery.data ?? [];
   const categories = categoriesQuery.data ?? [];
   const users = usersQuery.data ?? { count: 0, next: null, previous: null, results: [] };
+  const roles = rolesQuery.data ?? [];
+  const permissionCatalog = permissionsQuery.data ?? [];
   const activities = activityQuery.data ?? {
     count: 0,
     next: null,
     previous: null,
     results: [],
   };
+  const auditLogs = auditQuery.data ?? {
+    count: 0,
+    next: null,
+    previous: null,
+    results: [],
+  };
+  const activityActors = useMemo(
+    () =>
+      users.results.map((userItem) => ({
+        id: userItem.id,
+        label:
+          [userItem.first_name, userItem.last_name].filter(Boolean).join(" ").trim() ||
+          userItem.email,
+      })),
+    [users.results],
+  );
 
   useEffect(() => {
     if (!homeTitleQuery.data) {
@@ -861,19 +1377,22 @@ const AdminPanel = () => {
     (activeTab === "dashboard"
       ? dashboardQuery.error || financeQuery.error
       : activeTab === "products"
-        ? productsQuery.error
+        ? productsQuery.error || inventoryQuery.error || inventoryMovementsQuery.error
         : activeTab === "discounts"
         ? productsQuery.error
         : activeTab === "orders"
           ? ordersQuery.error
-          : activeTab === "content"
+        : activeTab === "content"
             ? contentQuery.error ||
               homeTitleQuery.error ||
               aboutPageQuery.error ||
               contentProductsQuery.error
             : activeTab === "users"
-              ? usersQuery.error
-              : activityQuery.error) as { status?: unknown } | undefined;
+              ? usersQuery.error || rolesQuery.error || permissionsQuery.error
+              : usersQuery.error || activityQuery.error || auditQuery.error) as {
+                  status?: unknown;
+                }
+              | undefined;
   const activeErrorStatus =
     typeof activeQueryError?.status === "number"
       ? activeQueryError.status
@@ -882,6 +1401,77 @@ const AdminPanel = () => {
     activeErrorStatus === 401 ||
     activeErrorStatus === 403 ||
     Boolean(currentUser && !canAccessAdmin);
+  const activeQueryMessage =
+    !isAccessDenied && activeQueryError
+      ? getApiUiMessage(
+          activeQueryError,
+          "Не удалось загрузить данные раздела.",
+          "Слишком много запросов к админке. Попробуйте позже.",
+        )
+      : null;
+  const isActiveTabLoading =
+    activeTab === "dashboard"
+      ? dashboardQuery.isLoading || financeQuery.isLoading
+      : activeTab === "products"
+        ? productsQuery.isLoading || inventoryQuery.isLoading || inventoryMovementsQuery.isLoading
+        : activeTab === "discounts"
+          ? productsQuery.isLoading || categoriesQuery.isLoading
+          : activeTab === "orders"
+            ? ordersQuery.isLoading
+            : activeTab === "content"
+              ? contentQuery.isLoading ||
+                homeTitleQuery.isLoading ||
+                aboutPageQuery.isLoading ||
+                contentProductsQuery.isLoading
+              : activeTab === "users"
+                ? usersQuery.isLoading || rolesQuery.isLoading || permissionsQuery.isLoading
+                : activityQuery.isLoading || auditQuery.isLoading || usersQuery.isLoading;
+  const canRenderActiveTabContent = !isActiveTabLoading && !activeQueryMessage;
+
+  const handleRetryActiveTab = () => {
+    if (activeTab === "dashboard") {
+      void dashboardQuery.refetch();
+      void financeQuery.refetch();
+      return;
+    }
+
+    if (activeTab === "products") {
+      void productsQuery.refetch();
+      void inventoryQuery.refetch();
+      void inventoryMovementsQuery.refetch();
+      return;
+    }
+
+    if (activeTab === "discounts") {
+      void productsQuery.refetch();
+      void categoriesQuery.refetch();
+      return;
+    }
+
+    if (activeTab === "orders") {
+      void ordersQuery.refetch();
+      return;
+    }
+
+    if (activeTab === "content") {
+      void contentQuery.refetch();
+      void homeTitleQuery.refetch();
+      void aboutPageQuery.refetch();
+      void contentProductsQuery.refetch();
+      return;
+    }
+
+    if (activeTab === "users") {
+      void usersQuery.refetch();
+      void rolesQuery.refetch();
+      void permissionsQuery.refetch();
+      return;
+    }
+
+    void usersQuery.refetch();
+    void activityQuery.refetch();
+    void auditQuery.refetch();
+  };
 
   useEffect(() => {
     if (!visibleNavItems.length) {
@@ -900,11 +1490,8 @@ const AdminPanel = () => {
   );
 
   const filteredProducts = useMemo(
-    () =>
-      products.results.filter((item) =>
-        item.name.toLowerCase().includes(search.toLowerCase()),
-      ),
-    [products.results, search],
+    () => products.results,
+    [products.results],
   );
   const discountSummary = useMemo(() => {
     const discountedProducts = filteredProducts.filter((product) => getDiscountPercent(product) > 0);
@@ -929,13 +1516,8 @@ const AdminPanel = () => {
     };
   }, [filteredProducts]);
   const filteredOrders = useMemo(
-    () =>
-      orders.results.filter(
-        (item) =>
-          item.order_number.toLowerCase().includes(search.toLowerCase()) ||
-          item.customer_name.toLowerCase().includes(search.toLowerCase()),
-      ),
-    [orders.results, search],
+    () => orders.results,
+    [orders.results],
   );
 
   const handleRangeChange = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -1140,13 +1722,7 @@ const AdminPanel = () => {
         text: "Главный баннер обновлен.",
       });
     } catch (error) {
-      setMessage({
-        type: "error",
-        text: getApiErrorMessage(
-          error,
-          "Не удалось обновить главный баннер.",
-        ),
-      });
+      setMessage(getApiUiMessage(error, "Не удалось обновить главный баннер."));
     }
   };
 
@@ -1270,10 +1846,7 @@ const AdminPanel = () => {
         text: "Страница «О нас» успешно обновлена.",
       });
     } catch (error) {
-      setMessage({
-        type: "error",
-        text: getApiErrorMessage(error, "Не удалось сохранить страницу «О нас»."),
-      });
+      setMessage(getApiUiMessage(error, "Не удалось сохранить страницу «О нас»."));
     }
   };
 
@@ -1331,10 +1904,7 @@ const AdminPanel = () => {
         text: `Изображение для блока ${index + 1} загружено.`,
       });
     } catch (error) {
-      setMessage({
-        type: "error",
-        text: getApiErrorMessage(error, "Не удалось загрузить изображение блока."),
-      });
+      setMessage(getApiUiMessage(error, "Не удалось загрузить изображение блока."));
     } finally {
       setAboutUploadingBlockIndex(null);
     }
@@ -1391,10 +1961,7 @@ const AdminPanel = () => {
         text: "Hero-изображение страницы «О нас» загружено.",
       });
     } catch (error) {
-      setMessage({
-        type: "error",
-        text: getApiErrorMessage(error, "Не удалось загрузить hero-изображение."),
-      });
+      setMessage(getApiUiMessage(error, "Не удалось загрузить hero-изображение."));
     } finally {
       setAboutUploadingHero(false);
     }
@@ -1509,13 +2076,12 @@ const AdminPanel = () => {
 
       closeProductModal();
     } catch (error) {
-      setMessage({
-        type: "error",
-        text: getApiErrorMessage(
+      setMessage(
+        getApiUiMessage(
           error,
           "Не удалось сохранить товар. Проверьте данные и права доступа.",
         ),
-      });
+      );
     }
   };
 
@@ -1558,10 +2124,7 @@ const AdminPanel = () => {
             : `Скидка для "${product.name}" обновлена.`,
       });
     } catch (error) {
-      setMessage({
-        type: "error",
-        text: getApiErrorMessage(error, "Не удалось обновить скидку."),
-      });
+      setMessage(getApiUiMessage(error, "Не удалось обновить скидку."));
     } finally {
       setDiscountSavingId(null);
     }
@@ -1583,11 +2146,8 @@ const AdminPanel = () => {
         text: `Товар "${selectedProduct.name}" удален.`,
       });
       closeProductModal();
-    } catch {
-      setMessage({
-        type: "error",
-        text: "Не удалось удалить товар.",
-      });
+    } catch (error) {
+      setMessage(getApiUiMessage(error, "Не удалось удалить товар."));
     }
   };
 
@@ -1608,13 +2168,86 @@ const AdminPanel = () => {
         type: "success",
         text: `Статус заказа ${updatedOrder.order_number} изменен: ${STATUS_LABELS[normalizeWorkflowStatus(updatedOrder.status)]}.`,
       });
-    } catch {
-      setMessage({
-        type: "error",
-        text: "Не удалось обновить статус заказа.",
-      });
+    } catch (error) {
+      setMessage(getApiUiMessage(error, "Не удалось обновить статус заказа."));
     }
   };
+
+  const handleCreateRole = async (data: IADMIN.PostRoleReq) => {
+    if (!canManageUsers) {
+      return;
+    }
+
+    setMessage(null);
+    try {
+      const createdRole = await postAdminRoleMutation(data).unwrap();
+      setMessage({
+        type: "success",
+        text: `Роль «${createdRole.name}» создана.`,
+      });
+    } catch (error) {
+      setMessage(getApiUiMessage(error, "Не удалось создать роль."));
+      throw error;
+    }
+  };
+
+  const handleUpdateRole = async (id: number, data: IADMIN.PatchRoleReq["data"]) => {
+    if (!canManageUsers) {
+      return;
+    }
+
+    setMessage(null);
+    try {
+      const updatedRole = await patchAdminRoleMutation({ id, data }).unwrap();
+      setMessage({
+        type: "success",
+        text: `Роль «${updatedRole.name}» обновлена.`,
+      });
+    } catch (error) {
+      setMessage(getApiUiMessage(error, "Не удалось обновить роль."));
+      throw error;
+    }
+  };
+
+  const handleDeleteRole = async (role: AdminRbacRole) => {
+    if (!canManageUsers) {
+      return;
+    }
+
+    setMessage(null);
+    try {
+      await deleteAdminRoleMutation(role.id).unwrap();
+      setMessage({
+        type: "success",
+        text: `Роль «${role.name}» удалена.`,
+      });
+    } catch (error) {
+      setMessage(getApiUiMessage(error, "Не удалось удалить роль."));
+      throw error;
+    }
+  };
+
+  const handleUserRolesUpdate = async (userItem: AdminUser, roleKeys: string[]) => {
+    if (!canManageUsers) {
+      return;
+    }
+
+    setMessage(null);
+    try {
+      await patchAdminUserRolesMutation({
+        id: userItem.id,
+        role_keys: roleKeys,
+      }).unwrap();
+      setMessage({
+        type: "success",
+        text: `Права пользователя ${userItem.email} обновлены.`,
+      });
+    } catch (error) {
+      setMessage(getApiUiMessage(error, "Не удалось обновить роли пользователя."));
+      throw error;
+    }
+  };
+
   if (isAccessDenied) {
     return (
       <section className={scss.AdminPanel}>
@@ -1663,17 +2296,7 @@ const AdminPanel = () => {
               <p>Товары, заказы, контент и аналитика в одном месте.</p>
             </div>
             <div className={scss.topActions}>
-              {(activeTab === "products" ||
-                activeTab === "discounts" ||
-                activeTab === "orders" ||
-                activeTab === "users") && (
-                <input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Поиск..."
-                />
-              )}
-              <select value={range} onChange={handleRangeChange}>
+                <select value={range} onChange={handleRangeChange}>
                 {RANGE_OPTIONS.map((item) => (
                   <option key={item} value={item}>
                     {RANGE_LABELS[item]}
@@ -1683,15 +2306,44 @@ const AdminPanel = () => {
             </div>
           </header>
 
-          {message && (
-            <div
-              className={`${scss.message} ${message.type === "success" ? scss.success : scss.error}`}
-            >
-              {message.text}
+            {message && (
+              <div
+                className={`${scss.message} ${message.type === "success" ? scss.success : scss.error}`}
+              >
+                <div>{message.text}</div>
+                {message.traceId ? (
+                  <div className={scss.messageTrace}>ID запроса: {message.traceId}</div>
+                ) : null}
+              </div>
+            )}
+
+          {isActiveTabLoading && (
+            <div className={scss.panel}>
+              <div className={scss.statePanel}>
+                <h2>Загрузка раздела</h2>
+                <p>Получаем актуальные данные. Это может занять несколько секунд.</p>
+              </div>
             </div>
           )}
 
-          {activeTab === "dashboard" && (
+          {activeQueryMessage && (
+            <div className={scss.panel}>
+              <div className={scss.statePanel}>
+                <h2>Не удалось загрузить раздел</h2>
+                <p>{activeQueryMessage.text}</p>
+                {activeQueryMessage.traceId ? (
+                  <p className={scss.stateTrace}>ID запроса: {activeQueryMessage.traceId}</p>
+                ) : null}
+                <div className={scss.stateActions}>
+                  <button type="button" className={scss.secondaryAction} onClick={handleRetryActiveTab}>
+                    Повторить
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {canRenderActiveTabContent && activeTab === "dashboard" && (
             <AdminDashboardSection
               dashboard={dashboard}
               financeSummary={financeSummary}
@@ -1699,24 +2351,118 @@ const AdminPanel = () => {
             />
           )}
 
-          {activeTab === "products" && (
-            <AdminProductsSection
-              filteredProducts={filteredProducts}
-              canManageProducts={canManageProducts}
-              canDeleteProducts={canDeleteProducts}
-              onCreateProduct={openCreateProductModal}
-              onEditProduct={openEditProductModal}
-              onDeleteProduct={openDeleteProductModal}
-            />
-          )}
+            {canRenderActiveTabContent && activeTab === "products" && (
+              <>
+                <AdminProductsSection
+                  products={filteredProducts}
+                  categories={categories}
+                  totalCount={products.count}
+                  currentPage={productPage}
+                  pageSize={productPageSize}
+                  hasNextPage={Boolean(products.next)}
+                  hasPreviousPage={Boolean(products.previous)}
+                  search={productSearch}
+                  sorting={productSort}
+                  categoryFilter={productCategoryFilter}
+                  activeFilter={productActiveFilter}
+                  canManageProducts={canManageProducts}
+                  canDeleteProducts={canDeleteProducts}
+                  onSearchChange={(value) => {
+                    setProductSearch(value);
+                    setProductPage(1);
+                  }}
+                  onSortChange={(value) => {
+                    setProductSort(value);
+                    setProductPage(1);
+                  }}
+                  onCategoryFilterChange={(value) => {
+                    setProductCategoryFilter(value);
+                    setProductPage(1);
+                  }}
+                  onActiveFilterChange={(value) => {
+                    setProductActiveFilter(value);
+                    setProductPage(1);
+                  }}
+                  onPageChange={setProductPage}
+                  onPageSizeChange={(value) => {
+                    setProductPageSize(value as (typeof PRODUCT_PAGE_SIZE_OPTIONS)[number]);
+                    setProductPage(1);
+                  }}
+                  onResetFilters={() => {
+                    setProductSearch("");
+                    setProductSort("-updated_at");
+                    setProductCategoryFilter("all");
+                    setProductActiveFilter("all");
+                    setProductPage(1);
+                    setProductPageSize(20);
+                  }}
+                  onCreateProduct={openCreateProductModal}
+                  onEditProduct={openEditProductModal}
+                  onDeleteProduct={openDeleteProductModal}
+                />
+                <AdminInventorySection
+                  inventory={inventory}
+                  movements={inventoryMovements}
+                  lowStockOnly={inventoryLowStockOnly}
+                  selectedMovementType={inventoryMovementType}
+                  selectedInventoryItem={selectedInventoryItem}
+                  onToggleLowStock={() => setInventoryLowStockOnly((prev) => !prev)}
+                  onSelectMovementType={setInventoryMovementType}
+                  onSelectInventoryItem={setSelectedInventoryItem}
+                  onClearMovementFilters={() => {
+                    setSelectedInventoryItem(null);
+                    setInventoryMovementType("all");
+                  }}
+                />
+              </>
+            )}
 
-          {activeTab === "discounts" && (
+          {canRenderActiveTabContent && activeTab === "discounts" && (
             <AdminDiscountsSection
               filteredProducts={filteredProducts}
+              categories={categories}
+              totalCount={products.count}
+              currentPage={discountPage}
+              pageSize={discountPageSize}
+              hasNextPage={Boolean(products.next)}
+              hasPreviousPage={Boolean(products.previous)}
+              search={discountSearch}
+              sorting={discountSort}
+              categoryFilter={discountCategoryFilter}
+              activeFilter={discountActiveFilter}
               canManageDiscounts={canManageDiscounts}
               discountSummary={discountSummary}
               discountDrafts={discountDrafts}
               discountSavingId={discountSavingId}
+              onSearchChange={(value) => {
+                setDiscountSearch(value);
+                setDiscountPage(1);
+              }}
+              onSortChange={(value) => {
+                setDiscountSort(value);
+                setDiscountPage(1);
+              }}
+              onCategoryFilterChange={(value) => {
+                setDiscountCategoryFilter(value);
+                setDiscountPage(1);
+              }}
+              onActiveFilterChange={(value) => {
+                setDiscountActiveFilter(value);
+                setDiscountPage(1);
+              }}
+              onPageChange={setDiscountPage}
+              onPageSizeChange={(value) => {
+                setDiscountPageSize(value as (typeof DISCOUNT_PAGE_SIZE_OPTIONS)[number]);
+                setDiscountPage(1);
+              }}
+              onResetFilters={() => {
+                setDiscountSearch("");
+                setDiscountSort("-updated_at");
+                setDiscountCategoryFilter("all");
+                setDiscountActiveFilter("all");
+                setDiscountPage(1);
+                setDiscountPageSize(20);
+              }}
               onDiscountDraftChange={handleDiscountDraftChange}
               onApplyDiscountPreset={applyDiscountPreset}
               onResetDiscountDraft={resetDiscountDraft}
@@ -1724,16 +2470,77 @@ const AdminPanel = () => {
             />
           )}
 
-          {activeTab === "orders" && (
+          {canRenderActiveTabContent && activeTab === "orders" && (
             <AdminOrdersSection
               filteredOrders={filteredOrders}
+              totalCount={orders.count}
+              currentPage={orderPage}
+              pageSize={orderPageSize}
+              hasNextPage={Boolean(orders.next)}
+              hasPreviousPage={Boolean(orders.previous)}
+              search={orderSearch}
+              externalRefFilter={orderExternalRefFilter}
+              ordering={orderSort}
+              statusFilter={orderStatusFilter}
+              paymentStatusFilter={orderPaymentStatusFilter}
+              deliveryMethodFilter={orderDeliveryMethodFilter}
+              dateFrom={orderDateFrom}
+              dateTo={orderDateTo}
               canManageOrders={canManageOrders}
               isUpdatingOrderStatus={isUpdatingOrderStatus}
+              onSearchChange={(value) => {
+                setOrderSearch(value);
+                setOrderPage(1);
+              }}
+              onExternalRefFilterChange={(value) => {
+                setOrderExternalRefFilter(value);
+                setOrderPage(1);
+              }}
+              onOrderingChange={(value) => {
+                setOrderSort(value);
+                setOrderPage(1);
+              }}
+              onStatusFilterChange={(value) => {
+                setOrderStatusFilter(value);
+                setOrderPage(1);
+              }}
+              onPaymentStatusFilterChange={(value) => {
+                setOrderPaymentStatusFilter(value);
+                setOrderPage(1);
+              }}
+              onDeliveryMethodFilterChange={(value) => {
+                setOrderDeliveryMethodFilter(value);
+                setOrderPage(1);
+              }}
+              onDateFromChange={(value) => {
+                setOrderDateFrom(value);
+                setOrderPage(1);
+              }}
+              onDateToChange={(value) => {
+                setOrderDateTo(value);
+                setOrderPage(1);
+              }}
+              onResetFilters={() => {
+                setOrderSearch("");
+                setOrderExternalRefFilter("");
+                setOrderSort("newest");
+                setOrderStatusFilter("all");
+                setOrderPaymentStatusFilter("all");
+                setOrderDeliveryMethodFilter("all");
+                setOrderDateFrom("");
+                setOrderDateTo("");
+                setOrderPage(1);
+              }}
+              onPageChange={setOrderPage}
+              onPageSizeChange={(value) => {
+                setOrderPageSize(value as (typeof ORDER_PAGE_SIZE_OPTIONS)[number]);
+                setOrderPage(1);
+              }}
               onOpenOrderDetails={openOrderDetailsModal}
               onChangeOrderStatus={handleOrderStatusChange}
             />
           )}
-          {activeTab === "content" && (
+          {canRenderActiveTabContent && activeTab === "content" && (
             <AdminContentSection
               contentProducts={contentProducts}
               sections={sections}
@@ -1759,9 +2566,105 @@ const AdminPanel = () => {
             />
           )}
 
-          {activeTab === "users" && <AdminUsersSection users={users} />}
+          {canRenderActiveTabContent && activeTab === "users" && (
+            <AdminUsersSection
+              users={users}
+              roles={roles}
+              permissions={permissionCatalog}
+              search={userSearch}
+              currentPage={userPage}
+              pageSize={userPageSize}
+              sorting={userSort}
+              roleFilter={userRoleFilter}
+              activeFilter={userActiveFilter}
+              canManageUsers={canManageUsers}
+              isRoleMutationLoading={isRoleMutationLoading}
+              isUpdatingUserRoles={isUpdatingUserRoles}
+              onSearchChange={(value) => {
+                setUserSearch(value);
+                setUserPage(1);
+              }}
+              onSortChange={(value) => {
+                setUserSort(value);
+                setUserPage(1);
+              }}
+              onRoleFilterChange={(value) => {
+                setUserRoleFilter(value);
+                setUserPage(1);
+              }}
+              onActiveFilterChange={(value) => {
+                setUserActiveFilter(value);
+                setUserPage(1);
+              }}
+              onPageChange={setUserPage}
+              onPageSizeChange={(value) => {
+                setUserPageSize(value as (typeof USER_PAGE_SIZE_OPTIONS)[number]);
+                setUserPage(1);
+              }}
+              onResetListFilters={() => {
+                setUserSearch("");
+                setUserSort("newest");
+                setUserRoleFilter("all");
+                setUserActiveFilter("all");
+                setUserPage(1);
+                setUserPageSize(20);
+              }}
+              onCreateRole={handleCreateRole}
+              onUpdateRole={handleUpdateRole}
+              onDeleteRole={handleDeleteRole}
+              onUpdateUserRoles={handleUserRolesUpdate}
+            />
+          )}
 
-          {activeTab === "activity" && <AdminActivitySection activities={activities} />}
+          {canRenderActiveTabContent && activeTab === "activity" && (
+            <AdminActivitySection
+              activities={activities}
+              auditLogs={auditLogs}
+              search={activitySearch}
+              entityFilter={activityEntityFilter}
+              actionFilter={auditActionFilter}
+              traceIdFilter={auditTraceIdFilter}
+              actorIdFilter={auditActorIdFilter}
+              actorOptions={activityActors}
+              activityPage={activityPage}
+              activityPageSize={50}
+              auditPage={auditPage}
+              auditPageSize={20}
+              onSearchChange={(value) => {
+                setActivitySearch(value);
+                setActivityPage(1);
+                setAuditPage(1);
+              }}
+              onEntityFilterChange={(value) => {
+                setActivityEntityFilter(value);
+                setActivityPage(1);
+                setAuditPage(1);
+              }}
+              onActionFilterChange={(value) => {
+                setAuditActionFilter(value);
+                setAuditPage(1);
+              }}
+              onTraceIdFilterChange={(value) => {
+                setAuditTraceIdFilter(value);
+                setAuditPage(1);
+              }}
+              onActorFilterChange={(value) => {
+                setAuditActorIdFilter(value);
+                setAuditPage(1);
+              }}
+              onActivityPageChange={setActivityPage}
+              onAuditPageChange={setAuditPage}
+              onResetFilters={() => {
+                setActivitySearch("");
+                setActivityEntityFilter("all");
+                setAuditActionFilter("");
+                setAuditTraceIdFilter("");
+                setAuditActorIdFilter("all");
+                setActivityPage(1);
+                setAuditPage(1);
+              }}
+            />
+          )}
 
           <AdminOrderDetailsModal
             selectedOrder={selectedOrder}

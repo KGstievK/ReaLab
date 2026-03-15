@@ -34,14 +34,14 @@ namespace IADMIN {
     | void;
   type GetRevenueRes = AdminRevenuePoint[];
 
-  type GetProductsReq = {
-    page?: number;
-    page_size?: number;
-    search?: string;
-    category_id?: number;
-    is_active?: boolean;
-    ordering?: string;
-  };
+    type GetProductsReq = {
+      page?: number;
+      page_size?: number;
+      search?: string;
+      category_id?: number;
+      is_active?: boolean;
+      ordering?: "name" | "-name" | "created_at" | "-created_at" | "updated_at" | "-updated_at";
+    };
   type GetProductsRes = AdminPaginatedResponse<AdminProduct>;
 
   type GetProductByIdReq = number;
@@ -74,8 +74,11 @@ namespace IADMIN {
     page?: number;
     page_size?: number;
     search?: string;
+    external_ref?: string;
+    ordering?: "newest" | "oldest" | "total_desc" | "total_asc" | "payment_status";
     status?: AdminOrderStatus;
     payment_status?: AdminPaymentStatus;
+    delivery_method?: AdminDeliveryMethod;
     date_from?: string;
     date_to?: string;
   };
@@ -91,10 +94,66 @@ namespace IADMIN {
     page?: number;
     page_size?: number;
     search?: string;
+    ordering?: "newest" | "oldest" | "email_asc" | "email_desc" | "name_asc" | "name_desc";
     role?: AdminRole;
     is_active?: boolean;
   };
   type GetUsersRes = AdminPaginatedResponse<AdminUser>;
+
+  type GetInventoryReq = {
+    page?: number;
+    page_size?: number;
+    search?: string;
+    product_id?: number;
+    low_stock?: boolean;
+  };
+  type GetInventoryRes = AdminPaginatedResponse<AdminInventoryRecord>;
+
+  type GetInventoryMovementsReq = {
+    page?: number;
+    page_size?: number;
+    search?: string;
+    product_id?: number;
+    variant_id?: number;
+    type?: AdminInventoryMovement["type"];
+  };
+  type GetInventoryMovementsRes = AdminPaginatedResponse<AdminInventoryMovement>;
+
+  type GetRolesReq = void;
+  type GetRolesRes = AdminRbacRole[];
+
+  type GetPermissionsReq = void;
+  type GetPermissionsRes = AdminPermissionItem[];
+
+  type PostRoleReq = {
+    key: string;
+    name: string;
+    description?: string;
+    permissions: string[];
+  };
+  type PostRoleRes = AdminRbacRole;
+
+  type PatchRoleReq = {
+    id: number;
+    data: {
+      name?: string;
+      description?: string;
+      permissions?: string[];
+    };
+  };
+  type PatchRoleRes = AdminRbacRole;
+
+  type DeleteRoleReq = number;
+  type DeleteRoleRes = {
+    success: boolean;
+    id: number;
+  };
+
+  type PatchUserRolesReq = {
+    id: number;
+    role_keys: string[];
+  };
+  type PatchUserRolesRes = AdminUserRoleAssignmentResult;
 
   type GetCategoriesReq = void;
   type GetCategoriesRes = AdminCategory[];
@@ -163,6 +222,19 @@ namespace IADMIN {
     entity?: AdminActivityEvent["entity"];
   };
   type GetActivityRes = AdminPaginatedResponse<AdminActivityEvent>;
+
+  type GetAuditReq = {
+    page?: number;
+    page_size?: number;
+    entity?: AdminAuditLog["entity"];
+    action?: string;
+    actor_id?: number;
+    search?: string;
+    trace_id?: string;
+    date_from?: string;
+    date_to?: string;
+  };
+  type GetAuditRes = AdminPaginatedResponse<AdminAuditLog>;
 
   type GetFinanceReq =
     | {

@@ -13,19 +13,21 @@ import { useGetMeQuery } from "../../../../../redux/api/auth";
 import {
   useGetCartQuery,
   useGetPayQuery,
+  useGetPaymentMethodsQuery,
   useGetShippingQuoteQuery,
   usePostOrderMutation,
 } from "../../../../../redux/api/product";
 import PaymentResultModal from "./PaymentResultModal";
 import CheckoutPaymentStep, { CheckoutQrItem } from "./CheckoutPaymentStep";
 import {
-  PAYMENT_METHOD_OPTIONS,
+  FALLBACK_PAYMENT_METHOD_OPTIONS,
   PaymentMethod,
   isQrPaymentMethod,
 } from "./paymentMethods";
 import { notifyTelegramFrontend } from "./frontend";
 import scss from "./CheckoutSection.module.scss";
 import { resolveMediaUrl } from "@/utils/media";
+import { extractApiErrorInfo, getRateLimitAwareMessage } from "@/utils/apiError";
 
 interface CartItem {
   id: number;
@@ -132,8 +134,11 @@ const toNumber = (value: unknown) => {
 
 const formatSom = (value: number) => `${value.toLocaleString("ru-RU")}с`;
 
-const getPaymentMethodLabel = (method: PaymentMethod) =>
-  PAYMENT_METHOD_OPTIONS.find((item) => item.id === method)?.label ??
+const getPaymentMethodLabel = (
+  method: PaymentMethod,
+  methods = FALLBACK_PAYMENT_METHOD_OPTIONS,
+) =>
+  methods.find((item) => item.id === method)?.label ??
   TEXT.notSelected;
 
 const CheckoutSection = () => {
@@ -141,6 +146,7 @@ const CheckoutSection = () => {
   const { data: cart } = useGetCartQuery();
   const { data: meData } = useGetMeQuery();
   const { data: payData } = useGetPayQuery();
+  const { data: paymentMethodsData } = useGetPaymentMethodsQuery();
   const [postOrderMutation] = usePostOrderMutation();
 
   const [step, setStep] = useState<CheckoutStep>(1);
@@ -149,8 +155,11 @@ const CheckoutSection = () => {
   const [paymentMethod, setPaymentMethod] =
     useState<PaymentMethod>("mbank_redirect");
   const [resultState, setResultState] = useState<ResultState>(null);
+  const [createdOrder, setCreatedOrder] = useState<IOrder | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [checkoutErrorMessage, setCheckoutErrorMessage] = useState("");
+  const [checkoutTraceId, setCheckoutTraceId] = useState("");
   const [selectedAddressId, setSelectedAddressId] =
     useState<SavedAddressValue>("manual");
   const [saveAddress, setSaveAddress] = useState(false);
@@ -292,6 +301,20 @@ const CheckoutSection = () => {
   const qrWhatsapp = Array.isArray(payData)
     ? payData[0]?.whatsapp
     : payData?.whatsapp;
+  const paymentMethods =
+    paymentMethodsData?.filter((item) => item.is_enabled) ??
+    FALLBACK_PAYMENT_METHOD_OPTIONS;
+
+  useEffect(() => {
+    if (!paymentMethods.length) {
+      return;
+    }
+
+    const isCurrentAvailable = paymentMethods.some((item) => item.id === paymentMethod);
+    if (!isCurrentAvailable) {
+      setPaymentMethod(paymentMethods[0].id);
+    }
+  }, [paymentMethod, paymentMethods]);
 
   const handleChange =
     (field: keyof FormData) =>
@@ -348,7 +371,7 @@ const CheckoutSection = () => {
       nextErrors.payment = TEXT.choosePayment;
     }
 
-    if (isQrPaymentMethod(paymentMethod) && qrItems.length === 0) {
+    if (isQrPaymentMethod(paymentMethod, paymentMethods) && qrItems.length === 0) {
       nextErrors.payment = TEXT.qrUnavailable;
     }
 
@@ -358,6 +381,8 @@ const CheckoutSection = () => {
 
   const submitOrder = async () => {
     if (!normalizedCart?.id || !normalizedCart?.user) {
+      setCheckoutErrorMessage("Не удалось определить корзину для оформления заказа");
+      setCheckoutTraceId("");
       setResultState("error");
       return;
     }
@@ -378,7 +403,8 @@ const CheckoutSection = () => {
     };
 
     try {
-      await postOrderMutation(orderData).unwrap();
+      const order = await postOrderMutation(orderData).unwrap();
+      setCreatedOrder(order);
 
       await notifyTelegramFrontend({
         firstName: formData.firstName,
@@ -386,7 +412,7 @@ const CheckoutSection = () => {
         city: formData.city,
         address: formData.address,
         delivery: deliveryMethod === "pickup" ? TEXT.pickup : TEXT.courier,
-        paymentMethod: getPaymentMethodLabel(paymentMethod),
+        paymentMethod: getPaymentMethodLabel(paymentMethod, paymentMethods),
         orderUser: normalizedCart.user,
         subtotal: String(subtotal),
         deliveryPrice: String(deliveryPrice),
@@ -411,9 +437,50 @@ const CheckoutSection = () => {
         }),
       });
 
+      setCheckoutErrorMessage("");
+      setCheckoutTraceId("");
       setResultState("success");
     } catch (error) {
       console.error("Order submission failed:", error);
+      const apiError = extractApiErrorInfo(error, "Не удалось оформить заказ");
+      const nextErrors: FormErrors = {};
+
+      if (apiError.fields.first_name) {
+        nextErrors.firstName = apiError.fields.first_name;
+      }
+      if (apiError.fields.phone_number) {
+        nextErrors.phoneNumber = apiError.fields.phone_number;
+      }
+      if (apiError.fields.city) {
+        nextErrors.city = apiError.fields.city;
+      }
+      if (apiError.fields.address) {
+        nextErrors.address = apiError.fields.address;
+      }
+      if (apiError.fields.delivery) {
+        nextErrors.delivery = apiError.fields.delivery;
+      }
+      if (apiError.fields.payment_method) {
+        nextErrors.payment = apiError.fields.payment_method;
+      }
+
+      if (Object.keys(nextErrors).length > 0) {
+        setErrors(nextErrors);
+        setCheckoutErrorMessage("");
+        setCheckoutTraceId(apiError.traceId || "");
+        setCreatedOrder(null);
+        setResultState(null);
+        return;
+      }
+
+      setCreatedOrder(null);
+      setCheckoutErrorMessage(
+        getRateLimitAwareMessage(
+          apiError,
+          "Слишком много попыток оформления заказа. Попробуйте позже.",
+        ),
+      );
+      setCheckoutTraceId(apiError.traceId || "");
       setResultState("error");
     }
   };
@@ -696,6 +763,7 @@ const CheckoutSection = () => {
                 {step === 3 && (
                   <CheckoutPaymentStep
                     paymentMethod={paymentMethod}
+                    paymentMethods={paymentMethods}
                     onChangeMethod={handlePaymentMethodChange}
                     qrItems={qrItems}
                     qrWhatsapp={qrWhatsapp}
@@ -782,7 +850,16 @@ const CheckoutSection = () => {
 
       <PaymentResultModal
         type={resultState}
-        onClose={() => setResultState(null)}
+        orderId={createdOrder?.id ?? null}
+        paymentSession={createdOrder?.payment_session ?? null}
+        errorMessage={checkoutErrorMessage || null}
+        traceId={checkoutTraceId || null}
+        onClose={() => {
+          setResultState(null);
+          setCreatedOrder(null);
+          setCheckoutErrorMessage("");
+          setCheckoutTraceId("");
+        }}
         onGoHome={() => router.push("/")}
       />
     </>

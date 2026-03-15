@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import scss from "./ResetPasswordPage.module.scss";
 import Image from "next/image";
@@ -7,6 +7,7 @@ import backIcon from "@/assets/icons/backIcon.svg";
 import { useRouter, useSearchParams } from "next/navigation";
 import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { usePostForgotPasswordMutation } from "../../../../redux/api/auth";
+import { extractApiErrorInfo, getRateLimitAwareMessage } from "@/utils/apiError";
 
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 59;
@@ -160,12 +161,13 @@ const ResetPasswordPage = () => {
     try {
       await postForgotPassword({ email: contact }).unwrap();
     } catch (error: any) {
-      const errorMessage =
-        error?.data?.data?.email?.[0] ||
-        error?.data?.message ||
-        error?.error ||
-        "Не удалось отправить код повторно";
-      setResendError(String(errorMessage));
+      const apiError = extractApiErrorInfo(error, "Не удалось отправить код повторно");
+      setResendError(
+        getRateLimitAwareMessage(
+          apiError,
+          "Слишком много запросов на повторную отправку кода. Попробуйте позже.",
+        ),
+      );
       setSecondsLeft(0);
     }
   };
@@ -176,14 +178,14 @@ const ResetPasswordPage = () => {
         type="button"
         className={scss.backButton}
         onClick={handleBack}
-        aria-label="Back"
+        aria-label="Назад"
       >
-        <Image src={backIcon} alt="Back" width={24} height={24} />
+        <Image src={backIcon} alt="Назад" width={24} height={24} />
       </button>
-      <Image src={logo} alt="Jumana logo" className={scss.logo} priority />
+      <Image src={logo} alt="Логотип Jumana" className={scss.logo} priority />
 
       <h1>Подтвердите E-mail</h1>
-      <p>Введите код с E-mail</p>
+      <p>Введите код из письма</p>
 
       <div className={scss.codeGroup}>
         {digits.map((digit, index) => (
@@ -198,18 +200,14 @@ const ResetPasswordPage = () => {
             maxLength={1}
             onChange={(event) => handleInputChange(index, event.target.value)}
             onKeyDown={(event) => handleInputKeyDown(event, index)}
-            aria-label={`Digit ${index + 1}`}
+            aria-label={`Цифра ${index + 1}`}
           />
         ))}
       </div>
 
       {submitError && <span className={scss.error}>{submitError}</span>}
 
-      <button
-        type="button"
-        className={scss.submitButton}
-        onClick={handleContinue}
-      >
+      <button type="button" className={scss.submitButton} onClick={handleContinue}>
         Продолжить
       </button>
 
@@ -217,11 +215,7 @@ const ResetPasswordPage = () => {
 
       <div className={scss.resendWrap}>
         <span>Не получили код?</span>
-        <button
-          type="button"
-          onClick={handleResend}
-          disabled={secondsLeft > 0 || isLoading}
-        >
+        <button type="button" onClick={handleResend} disabled={secondsLeft > 0 || isLoading}>
           Повторить
         </button>
       </div>

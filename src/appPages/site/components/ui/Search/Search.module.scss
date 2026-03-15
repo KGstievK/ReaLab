@@ -78,6 +78,18 @@
       transform 0.3s ease-in-out;
     overflow: hidden;
 
+    .SearchState {
+      padding: 14px 12px;
+      color: #6f625e;
+      font-size: 14px;
+      line-height: 20px;
+      font-family: "Manrope", sans-serif;
+    }
+
+    .SearchStateError {
+      color: #9a4e4a;
+    }
+
     &.resultsVisible {
       display: block;
       opacity: 1;

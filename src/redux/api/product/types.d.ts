@@ -39,6 +39,12 @@
   type getPayRes = Pay;
   type getPayReq = void;
 
+  type getPaymentMethodsRes = PaymentMethodOption[];
+  type getPaymentMethodsReq = void;
+
+  type getPaymentSessionRes = PaymentSessionContract;
+  type getPaymentSessionReq = number;
+
   type getShippingQuoteRes = {
     delivery_method: "courier" | "pickup";
     price: number;

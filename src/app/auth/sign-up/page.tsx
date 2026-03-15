@@ -1,6 +1,13 @@
 import { Suspense } from "react";
 import SignUpPage from "../../../appPages/auth/components/pages/SignUpPage";
 import AuthDesktopModal from "../../../appPages/auth/components/layout/AuthDesktopModal";
+import { createNoIndexMetadata } from "@/utils/seo";
+
+export const metadata = createNoIndexMetadata(
+  "Регистрация",
+  "Регистрация аккаунта Jumana.",
+  "/auth/sign-up",
+);
 
 const Page = () => (
   <AuthDesktopModal mode="page">

@@ -17,9 +17,9 @@ const Catalog = () => {
       <div className="container">
         <div className={scss.headerRow}>
           <h2>Каталог</h2>
-          <Link href="/catalog" className={scss.desktopButton}>
+          <button onClick={() => router.push("/catalog")} type="button" className={scss.desktopButton}>
             Каталог <Image src={arrow} alt="arrow" />
-          </Link>
+          </button>
         </div>
 
         <div className={scss.grid}>
