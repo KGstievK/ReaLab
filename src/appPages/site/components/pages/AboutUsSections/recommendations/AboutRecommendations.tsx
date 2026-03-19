@@ -39,6 +39,11 @@ interface ClothesItem {
   }>;
 }
 
+const isDiscounted = (item: ClothesItem) =>
+  Number(item.discount_price) > 0 && Number(item.discount_price) < Number(item.price);
+
+const formatPrice = (value: number) => `${Math.round(value).toLocaleString("ru-RU")} KGS`;
+
 const AboutRecommendations = () => {
   const router = useRouter();
   const pathname = usePathname();
@@ -55,8 +60,7 @@ const AboutRecommendations = () => {
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 750px)");
-    const handleChange = (event: MediaQueryListEvent) =>
-      setIsMobile(event.matches);
+    const handleChange = (event: MediaQueryListEvent) => setIsMobile(event.matches);
 
     setIsMobile(mediaQuery.matches);
     mediaQuery.addEventListener("change", handleChange);
@@ -151,9 +155,7 @@ const AboutRecommendations = () => {
 
     try {
       if (isFavorite) {
-        const favoriteItem = favoriteItems?.find(
-          (fav) => fav.clothes.id === item.id,
-        );
+        const favoriteItem = favoriteItems?.find((fav) => fav.clothes.id === item.id);
         if (favoriteItem) {
           await deleteFavorite(favoriteItem.id).unwrap();
         }
@@ -197,41 +199,33 @@ const AboutRecommendations = () => {
   return (
     <section className={scss.recommendations}>
       <div className="container">
-        <div className={scss.content}>
-          <div className={scss.header}>
-            <h2>
-              <span className={scss.desktopTitle}>Вам может понравиться</span>
-              <span className={scss.mobileTitle}>Новинки</span>
-            </h2>
-
-            <Link href="/catalog" className={scss.desktopAction}>
-              Посмотреть все <Image src={arrow} alt="arrow" />
-            </Link>
+        <div className={scss.header}>
+          <div className={scss.headerCopy}>
+            <span className={scss.eyebrow}>Подборка ReaLab</span>
+            <h2>Рекомендуемые решения</h2>
+            <p>
+              Позиции, которые продолжают логику каталога ReaLab: клинические
+              сценарии, понятные конфигурации и спокойная технологичная подача.
+            </p>
           </div>
 
-          <ul className={scss.mobileTags}>
-            <li>туника</li>
-            <li>платье</li>
-            <li>платок</li>
-          </ul>
+          <Link href="/catalog" className={scss.desktopAction}>
+            Перейти в каталог <Image src={arrow} alt="Стрелка" />
+          </Link>
+        </div>
 
-          <div className={scss.cards}>
-            {visibleRecommendations.map((item) => (
-              <article
-                key={item.id}
-                className={scss.card}
-                onClick={(event) => {
-                  const target = event.target as HTMLElement;
-                  if (target.closest("button, a")) {
-                    return;
-                  }
-                  router.push(buildProductHref(item));
-                }}
-              >
+        <div className={scss.cards}>
+          {visibleRecommendations.map((item) => {
+            const hasDiscount = isDiscounted(item);
+            const isFavorite = favoriteItems?.some((fav) => fav.clothes.id === item.id);
+            const productHref = buildProductHref(item);
+
+            return (
+              <article key={item.id} className={scss.card}>
                 <div className={scss.imageWrap}>
                   <div className={scss.cardTop}>
                     <div className={scss.rating}>
-                      <Image src={star} alt="star" width={14} height={14} />
+                      <Image src={star} alt="Рейтинг" width={14} height={14} />
                       <span>{(item.average_rating || 4.95).toFixed(2)}</span>
                     </div>
 
@@ -239,69 +233,69 @@ const AboutRecommendations = () => {
                       type="button"
                       className={scss.favoriteButton}
                       onClick={(event) => void handleFavoriteClick(event, item)}
+                      aria-label={isFavorite ? "Убрать из избранного" : "Добавить в избранное"}
                     >
                       <Image
-                        src={
-                          favoriteItems?.some((fav) => fav.clothes.id === item.id)
-                            ? heartRed
-                            : heart
-                        }
-                        alt="favorite"
+                        src={isFavorite ? heartRed : heart}
+                        alt="Избранное"
                         width={22}
                         height={22}
                       />
                     </button>
                   </div>
 
-                  {item.clothes_img[0] && (
-                    <Image
-                      src={resolveMediaUrl(item.clothes_img[0].photo)}
-                      alt={item.clothes_name}
-                      width={450}
-                      height={560}
-                      className={scss.mainImage}
-                    />
-                  )}
+                  <Link href={productHref} className={scss.imageLink} aria-label={`Открыть товар ${item.clothes_name}`}>
+                    {item.clothes_img[0] ? (
+                      <Image
+                        src={resolveMediaUrl(item.clothes_img[0].photo)}
+                        alt={item.clothes_name}
+                        width={450}
+                        height={560}
+                        className={scss.mainImage}
+                      />
+                    ) : (
+                      <div className={scss.imageFallback}>Скоро появится фото</div>
+                    )}
+                  </Link>
 
                   <button
                     type="button"
                     className={scss.cartButton}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      router.push(buildProductHref(item));
-                    }}
-                    aria-label="Открыть товар"
+                    onClick={() => router.push(productHref)}
+                    aria-label={`Открыть товар ${item.clothes_name}`}
                   >
-                    <Image src={bagIcon} alt="cart" width={18} height={18} />
+                    <Image src={bagIcon} alt="Открыть товар" width={18} height={18} />
                   </button>
                 </div>
 
                 <div className={scss.cardInfo}>
                   <div className={scss.cardMeta}>
                     <p>{item.category_name}</p>
-                    <ColorsClothes clothesImg={item.clothes_img.slice(0, 3)} />
+                    {item.clothes_img.length > 0 && (
+                      <ColorsClothes clothesImg={item.clothes_img.slice(0, 4)} size="sm" />
+                    )}
                   </div>
 
-                  <h3>{item.clothes_name}</h3>
+                  <Link href={productHref} className={scss.titleLink}>
+                    <h3>{item.clothes_name}</h3>
+                  </Link>
 
                   <div className={scss.priceBlock}>
-                    <span>{Math.round(item.discount_price)}сом</span>
-                    <del>{Math.round(item.price)}сом</del>
+                    <span>{formatPrice(hasDiscount ? item.discount_price : item.price)}</span>
+                    {hasDiscount && <del>{formatPrice(item.price)}</del>}
                   </div>
                 </div>
               </article>
-            ))}
-          </div>
-
-          <Link href="/catalog" className={scss.mobileAction}>
-            Посмотреть все <Image src={arrow} alt="arrow" />
-          </Link>
+            );
+          })}
         </div>
+
+        <Link href="/catalog" className={scss.mobileAction}>
+          Перейти в каталог <Image src={arrow} alt="Стрелка" />
+        </Link>
       </div>
     </section>
   );
 };
 
 export default AboutRecommendations;
-
-

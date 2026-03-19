@@ -1,6 +1,7 @@
-.HeaderProfile {
+﻿.HeaderProfile {
   width: 100%;
   z-index: 1000;
+
   .content {
     .nav {
       width: 100%;
@@ -9,6 +10,7 @@
         width: 100%;
         display: flex;
         flex-direction: column;
+        gap: 0;
 
         &:first-child {
           display: flex;
@@ -20,42 +22,111 @@
 
         li {
           width: 100%;
-
-          a {
-            display: block;
-            width: 100%;
-          }
-
-          button {
-            width: 100%;
-            height: 56px;
-            border: none;
-            border-bottom: 1px solid #a73539;
-            border-radius: 0;
-            background: transparent;
-            color: rgba(12, 12, 12, 0.3);
-            font-family: "Inter", sans-serif;
-            font-size: 20px;
-            font-weight: 400;
-            line-height: 1;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 12px;
-
-            img {
-              width: 20px;
-              height: 20px;
-            }
-          }
-
-          button.active {
-            background: #a73539;
-            color: #fff;
-            border-radius: 2px;
-            border-bottom-color: #a73539;
-          }
+          list-style: none;
         }
+      }
+    }
+  }
+
+  .navLink,
+  .activeLink,
+  .logoutTrigger {
+    width: 100%;
+    min-height: 56px;
+    border: none;
+    border-bottom: 1px solid #d8cac0;
+    border-radius: 0;
+    background: transparent;
+    color: #201a19;
+    font-family: "Manrope", sans-serif;
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 16px;
+    text-decoration: none;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease,
+      transform 0.2s ease;
+
+    img {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    &:hover {
+      background: #f1e7de;
+      color: #6e4b47;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #6e4b47;
+      outline-offset: -2px;
+    }
+  }
+
+  .activeLink {
+    background: #6e4b47;
+    border-bottom-color: #6e4b47;
+    color: #ffffff;
+  }
+
+  .logoutTrigger {
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .logoutNotice {
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px solid #d8cac0;
+    border-radius: 16px;
+    background: #f6f1eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    p {
+      margin: 0;
+      color: #201a19;
+      font-family: "Manrope", sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    button {
+      min-width: 112px;
+      height: 42px;
+      border: 1px solid #6e4b47;
+      border-radius: 999px;
+      background: #ffffff;
+      color: #6e4b47;
+      font-family: "Manrope", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1;
+      padding: 0 18px;
+      transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
+
+      &:hover {
+        background: #6e4b47;
+        color: #ffffff;
+      }
+
+      &:focus-visible {
+        outline: 2px solid #6e4b47;
+        outline-offset: 2px;
       }
     }
   }
@@ -64,7 +135,7 @@
     position: fixed;
     inset: 0;
     z-index: 1500;
-    background: rgba(0, 0, 0, 0.44);
+    background: rgba(20, 16, 15, 0.42);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -73,38 +144,39 @@
 
   .logoutModal {
     width: min(460px, 100%);
-    border-radius: 12px;
-    border: 1px solid #e5e5e5;
-    // background: #fff;
+    border-radius: 16px;
+    border: 1px solid #d8cac0;
+    background: #ffffff;
     padding: 56px 24px 24px;
     position: relative;
     display: flex;
     flex-direction: column;
     gap: 20px;
     align-items: center;
+    box-shadow: 0 24px 70px rgba(32, 26, 25, 0.14);
 
     p {
       margin: 0;
-      color: #3f3f48;
+      color: #201a19;
       text-align: center;
-      font-family: "Inter", sans-serif;
+      font-family: "Manrope", sans-serif;
       font-size: 18px;
-      font-weight: 400;
-      line-height: 1.4;
+      font-weight: 500;
+      line-height: 1.5;
     }
   }
 
   .closeModalButton {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 34px;
-    height: 34px;
-    border: none;
-    border-radius: 50%;
-    // background: #efefef;
-    color: #7c7c87;
-    font-family: "Inter", sans-serif;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border: 1px solid #d8cac0;
+    border-radius: 999px;
+    background: #f6f1eb;
+    color: #6f625e;
+    font-family: "Manrope", sans-serif;
     font-size: 24px;
     font-weight: 500;
     line-height: 1;
@@ -112,19 +184,46 @@
     align-items: center;
     justify-content: center;
     padding: 0;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease;
+
+    &:hover {
+      background: #6e4b47;
+      border-color: #6e4b47;
+      color: #ffffff;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #6e4b47;
+      outline-offset: 2px;
+    }
   }
 
   .confirmLogoutButton {
     width: 100%;
     height: 52px;
     border: none;
-    border-radius: 8px;
-    background: #a73539;
-    color: #fff;
-    font-family: "Inter", sans-serif;
-    font-size: 18px;
-    font-weight: 500;
+    border-radius: 999px;
+    background: #6e4b47;
+    color: #ffffff;
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
+    font-weight: 600;
     line-height: 1;
+    transition:
+      background-color 0.2s ease,
+      transform 0.2s ease;
+
+    &:hover {
+      background: #5d3f3b;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #6e4b47;
+      outline-offset: 2px;
+    }
   }
 }
 
@@ -140,15 +239,24 @@
           &:last-child {
             display: flex;
           }
-
-          li {
-            button {
-              font-size: 18px;
-              height: 52px;
-              padding: 0 10px;
-            }
-          }
         }
+      }
+    }
+
+    .navLink,
+    .activeLink,
+    .logoutTrigger {
+      min-height: 52px;
+      font-size: 16px;
+      padding: 0 12px;
+    }
+
+    .logoutNotice {
+      flex-direction: column;
+      align-items: stretch;
+
+      button {
+        width: 100%;
       }
     }
 
@@ -163,7 +271,7 @@
 
     .confirmLogoutButton {
       height: 48px;
-      font-size: 16px;
+      font-size: 15px;
     }
   }
 }

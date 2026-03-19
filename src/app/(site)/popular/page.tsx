@@ -1,13 +1,18 @@
-import PopularClothes from "../../../appPages/site/components/pages/ProductList/popularClothes/PopularClothes";
+﻿import { Suspense } from "react";
+import CatalogReaLabPage from "../../../appPages/site/components/pages/CatalogReaLabPage";
 import { createPageMetadata } from "@/utils/seo";
 
 export const metadata = createPageMetadata({
-  title: "Популярное",
+  title: "Клинический выбор ReaLab",
   description:
-    "Популярные модели Jumana: востребованные платья, туники и комплекты в эстетике premium modest fashion.",
+    "Подборка ReaLab с наиболее востребованным оборудованием для клиник, лабораторий и реабилитационных центров.",
   path: "/popular",
 });
 
-const page = () => <PopularClothes />;
+const page = () => (
+  <Suspense fallback={<div />}>
+    <CatalogReaLabPage mode="popular" />
+  </Suspense>
+);
 
 export default page;

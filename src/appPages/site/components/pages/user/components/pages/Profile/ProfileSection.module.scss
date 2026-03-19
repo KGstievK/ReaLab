@@ -1,4 +1,4 @@
-.ProfileSection {
+﻿.ProfileSection {
   width: 100%;
   padding-bottom: 20px;
 
@@ -12,7 +12,7 @@
     h1 {
       margin: 0;
       color: #0c0c0c;
-      font-family: "Inter", sans-serif;
+      font-family: "Manrope", sans-serif;
       font-size: 20px;
       font-weight: 500;
       line-height: 1;
@@ -21,7 +21,7 @@
     .subtitle {
       margin: 0;
       color: #717171;
-      font-family: "Inter", sans-serif;
+      font-family: "Manrope", sans-serif;
       font-size: 16px;
       font-weight: 300;
       line-height: 24px;
@@ -63,7 +63,7 @@
         display: grid;
         place-items: center;
         color: #7c7c7c;
-        font-family: "Inter", sans-serif;
+        font-family: "Manrope", sans-serif;
         font-size: 30px;
         font-weight: 600;
         line-height: 1;
@@ -103,11 +103,11 @@
         width: 220px;
         max-width: 100%;
         height: 46px;
-        border: 1px solid #a73539;
+        border: 1px solid #6e4b47;
         border-radius: 10px;
         background: #fff;
-        color: #a73539;
-        font-family: "Inter", sans-serif;
+        color: #6e4b47;
+        font-family: "Manrope", sans-serif;
         font-size: 14px;
         font-weight: 500;
         line-height: 1.5;
@@ -116,7 +116,7 @@
       .avatarHint {
         margin: 0;
         color: #8f8f8f;
-        font-family: "Inter", sans-serif;
+        font-family: "Manrope", sans-serif;
         font-size: 12px;
         font-weight: 400;
         line-height: 1.5;
@@ -131,7 +131,7 @@
 
     > span {
       color: #717171;
-      font-family: "Inter", sans-serif;
+      font-family: "Manrope", sans-serif;
       font-size: 14px;
       font-weight: 300;
       line-height: 1;
@@ -144,11 +144,11 @@
     input {
       width: 100%;
       height: 60px;
-      border: 1px solid #e5bfbd;
+      border: 1px solid #d8cac0;
       border-radius: 4px;
-      background: #fffaf5;
+      background: #f6f1eb;
       color: #717171;
-      font-family: "Inter", sans-serif;
+      font-family: "Manrope", sans-serif;
       font-size: 16px;
       font-weight: 300;
       line-height: 24px;
@@ -189,14 +189,14 @@
     border-radius: 8px;
     background: #d2d2d2;
     color: #fff;
-    font-family: "Inter", sans-serif;
+    font-family: "Manrope", sans-serif;
     font-size: 22px;
     font-weight: 500;
     line-height: 1;
     cursor: not-allowed;
 
     &.active {
-      background: #a73539;
+      background: #6e4b47;
       cursor: pointer;
     }
   }
@@ -206,9 +206,9 @@
     flex-direction: column;
     gap: 6px;
     padding: 18px;
-    border: 1px solid #e5bfbd;
+    border: 1px solid #d8cac0;
     border-radius: 10px;
-    background: #fffaf5;
+    background: #f6f1eb;
 
     h3,
     p {
@@ -217,7 +217,7 @@
 
     h3 {
       color: #0c0c0c;
-      font-family: "Inter", sans-serif;
+      font-family: "Manrope", sans-serif;
       font-size: 16px;
       font-weight: 500;
       line-height: 1.3;
@@ -225,11 +225,54 @@
 
     p {
       color: #717171;
-      font-family: "Inter", sans-serif;
+      font-family: "Manrope", sans-serif;
       font-size: 14px;
       font-weight: 300;
       line-height: 1.5;
     }
+  }
+
+  .statusState {
+    border: 1px solid #d8cac0;
+    border-radius: 12px;
+    background: #f6f1eb;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    p {
+      margin: 0;
+      color: #2f2f2f;
+      font-family: "Manrope", sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.5;
+    }
+
+    button {
+      min-width: 148px;
+      height: 42px;
+      border: 1px solid #6e4b47;
+      border-radius: 10px;
+      background: #fff;
+      color: #6e4b47;
+      font-family: "Manrope", sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1;
+      padding: 0 16px;
+    }
+  }
+
+  .statusStateError {
+    border-color: #d9c0bf;
+  }
+
+  .statusStateSuccess {
+    border-color: #cdddc9;
+    background: #f7fbf6;
   }
 
   .addressBook {
@@ -259,7 +302,7 @@
     h2,
     h3 {
       color: #0c0c0c;
-      font-family: "Inter", sans-serif;
+      font-family: "Manrope", sans-serif;
       font-weight: 500;
       line-height: 1.3;
     }
@@ -275,7 +318,7 @@
     p {
       margin-top: 4px;
       color: #717171;
-      font-family: "Inter", sans-serif;
+      font-family: "Manrope", sans-serif;
       font-size: 14px;
       font-weight: 300;
       line-height: 1.5;
@@ -287,18 +330,18 @@
     min-width: 180px;
     height: 46px;
     padding: 0 18px;
-    border: 1px solid #a73539;
+    border: 1px solid #6e4b47;
     border-radius: 10px;
     background: #fff;
-    color: #a73539;
-    font-family: "Inter", sans-serif;
+    color: #6e4b47;
+    font-family: "Manrope", sans-serif;
     font-size: 14px;
     font-weight: 500;
     line-height: 1;
   }
 
   .secondarySubmit {
-    background: #a73539;
+    background: #6e4b47;
     color: #fff;
   }
 
@@ -310,15 +353,15 @@
   .addressEmpty,
   .addressCard,
   .addressForm {
-    border: 1px solid #e5bfbd;
+    border: 1px solid #d8cac0;
     border-radius: 12px;
-    background: #fffaf5;
+    background: #f6f1eb;
   }
 
   .addressEmpty {
     padding: 18px;
     color: #717171;
-    font-family: "Inter", sans-serif;
+    font-family: "Manrope", sans-serif;
     font-size: 14px;
     font-weight: 300;
     line-height: 1.5;
@@ -337,7 +380,7 @@
 
     h3 {
       color: #0c0c0c;
-      font-family: "Inter", sans-serif;
+      font-family: "Manrope", sans-serif;
       font-size: 16px;
       font-weight: 500;
       line-height: 1.3;
@@ -345,7 +388,7 @@
 
     p {
       color: #717171;
-      font-family: "Inter", sans-serif;
+      font-family: "Manrope", sans-serif;
       font-size: 14px;
       font-weight: 300;
       line-height: 1.5;
@@ -360,8 +403,8 @@
     padding: 4px 10px;
     border-radius: 999px;
     background: #f1e1dd;
-    color: #a73539;
-    font-family: "Inter", sans-serif;
+    color: #6e4b47;
+    font-family: "Manrope", sans-serif;
     font-size: 12px;
     font-weight: 500;
     line-height: 1;
@@ -378,9 +421,9 @@
   .linkButton {
     border: none;
     background: transparent;
-    color: #a73539;
+    color: #6e4b47;
     padding: 0;
-    font-family: "Inter", sans-serif;
+    font-family: "Manrope", sans-serif;
     font-size: 14px;
     font-weight: 500;
     line-height: 1.4;
@@ -421,7 +464,7 @@
     align-items: center;
     gap: 10px;
     color: #4d4d4d;
-    font-family: "Inter", sans-serif;
+    font-family: "Manrope", sans-serif;
     font-size: 14px;
     font-weight: 400;
     line-height: 1.5;
@@ -429,14 +472,14 @@
     input {
       width: 16px;
       height: 16px;
-      accent-color: #a73539;
+      accent-color: #6e4b47;
     }
   }
 
   .addressError {
     margin: 0;
-    color: #a73539;
-    font-family: "Inter", sans-serif;
+    color: #6e4b47;
+    font-family: "Manrope", sans-serif;
     font-size: 13px;
     font-weight: 400;
     line-height: 1.4;
@@ -516,6 +559,15 @@
       padding: 14px;
     }
 
+    .statusState {
+      flex-direction: column;
+      align-items: stretch;
+
+      button {
+        width: 100%;
+      }
+    }
+
     .addressBook {
       margin-top: 18px;
     }
@@ -560,3 +612,4 @@
     }
   }
 }
+

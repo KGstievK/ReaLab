@@ -1,4 +1,8 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
+
+export const SITE_NAME = "ReaLab";
+export const SITE_DESCRIPTION =
+  "ReaLab — storefront медицинского оборудования для клиник, лабораторий и реабилитационных центров.";
 
 const normalizeSiteUrl = (value?: string | null) => {
   const fallback = "http://localhost:3000";
@@ -11,13 +15,60 @@ const normalizeSiteUrl = (value?: string | null) => {
   return `https://${raw.replace(/\/+$/, "")}`;
 };
 
+const normalizeApiBaseUrl = (value?: string | null) => {
+  const raw = value?.trim() || "";
+  if (!raw) {
+    return null;
+  }
+
+  if (/^https?:\/\//i.test(raw)) {
+    return raw.replace(/\/+$/, "");
+  }
+
+  return `https://${raw.replace(/\/+$/, "")}`;
+};
+
 export const SITE_URL = normalizeSiteUrl(
   process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL,
 );
 
+const API_BASE_URL = normalizeApiBaseUrl(
+  process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL,
+);
+
+export const getApiBaseUrl = () => API_BASE_URL;
+
 export const buildAbsoluteUrl = (path = "/") => {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   return `${SITE_URL}${normalizedPath}`;
+};
+
+export const buildPathWithQuery = (
+  path: string,
+  query?: Record<string, string | number | boolean | null | undefined>,
+) => {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  if (!query) {
+    return normalizedPath;
+  }
+
+  const params = new URLSearchParams();
+
+  Object.entries(query).forEach(([key, value]) => {
+    if (value === null || value === undefined) {
+      return;
+    }
+
+    const normalizedValue = String(value).trim();
+    if (!normalizedValue) {
+      return;
+    }
+
+    params.set(key, normalizedValue);
+  });
+
+  const queryString = params.toString();
+  return queryString ? `${normalizedPath}?${queryString}` : normalizedPath;
 };
 
 type CreatePageMetadataOptions = {
@@ -56,7 +107,7 @@ export const createPageMetadata = ({
       title,
       description,
       url: buildAbsoluteUrl(canonical),
-      siteName: "Jumana",
+      siteName: SITE_NAME,
       locale: "ru_RU",
       type: "website",
     },
@@ -79,4 +130,3 @@ export const createNoIndexMetadata = (
     path,
     index: false,
   });
-

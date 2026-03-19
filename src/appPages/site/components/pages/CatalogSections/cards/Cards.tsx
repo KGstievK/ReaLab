@@ -11,7 +11,10 @@ import {
 } from "../../../../../../redux/api/category";
 import { useGetMeQuery } from "../../../../../../redux/api/auth";
 import { getStoredAccessToken } from "../../../../../../utils/authStorage";
-import { buildSignInHref, queueFavoriteIntent } from "../../../../../../utils/authIntent";
+import {
+  buildSignInHref,
+  queueFavoriteIntent,
+} from "../../../../../../utils/authIntent";
 import heart from "@/assets/icons/HeartStraight.svg";
 import heartRed from "@/assets/icons/red-heart-icon.svg";
 import star from "@/assets/images/star.png";
@@ -50,6 +53,32 @@ const SORT_OPTIONS = [
 
 type CatalogSortValue = (typeof SORT_OPTIONS)[number]["value"];
 
+const isDiscounted = (item: ClothesCategoryItem) =>
+  Number(item.discount_price) > 0 && Number(item.discount_price) < Number(item.price);
+
+const isRecentlyAdded = (createdDate: string) => {
+  const timestamp = new Date(createdDate).getTime();
+  if (!Number.isFinite(timestamp)) {
+    return false;
+  }
+
+  return Date.now() - timestamp <= 1000 * 60 * 60 * 24 * 30;
+};
+
+const getProductBadge = (item: ClothesCategoryItem) => {
+  if (isDiscounted(item)) {
+    return "Sale";
+  }
+
+  if (isRecentlyAdded(item.created_date)) {
+    return "Новинка";
+  }
+
+  return null;
+};
+
+const formatPrice = (value: number) => `${Math.round(value).toLocaleString("ru-RU")} KGS`;
+
 const Cards: FC<{
   value: string;
   size: string;
@@ -59,12 +88,25 @@ const Cards: FC<{
   page: number;
   onPageChange: (page: number) => void;
   onSortChange: (sort: CatalogSortValue) => void;
-}> = ({ value, size, color, priceRange, sort, page, onPageChange, onSortChange }) => {
+  onClearFilters: () => void;
+}> = ({
+  value,
+  size,
+  color,
+  priceRange,
+  sort,
+  page,
+  onPageChange,
+  onSortChange,
+  onClearFilters,
+}) => {
   const router = useRouter();
   const pathname = usePathname();
 
   const minPrice = Number.isFinite(priceRange[0]) ? priceRange[0] : 0;
-  const maxPrice = Number.isFinite(priceRange[1]) ? priceRange[1] : Number.MAX_SAFE_INTEGER;
+  const maxPrice = Number.isFinite(priceRange[1])
+    ? priceRange[1]
+    : Number.MAX_SAFE_INTEGER;
 
   const clothesQuery = useMemo(() => {
     const query: ICATEGORY.getCatalogFeedReq = {
@@ -105,12 +147,16 @@ const Cards: FC<{
   const filteredItems = catalogFeed?.items ?? [];
   const totalItems = catalogFeed?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalItems / CATALOG_PAGE_SIZE));
+  const activeFilterTokens = [value, size, color, minPrice > 0 ? String(minPrice) : "", maxPrice < Number.MAX_SAFE_INTEGER ? String(maxPrice) : ""].filter(Boolean);
 
   const visiblePages = useMemo(() => {
     const start = Math.max(1, page - 2);
     const end = Math.min(totalPages, Math.max(start + 4, Math.min(totalPages, 5)));
     const normalizedStart = Math.max(1, end - 4);
-    return Array.from({ length: end - normalizedStart + 1 }, (_, index) => normalizedStart + index);
+    return Array.from(
+      { length: end - normalizedStart + 1 },
+      (_, index) => normalizedStart + index,
+    );
   }, [page, totalPages]);
 
   const hasAccessToken = Boolean(getStoredAccessToken());
@@ -184,9 +230,18 @@ const Cards: FC<{
     <div id={scss.Cards}>
       <div className={scss.content}>
         <div className={scss.toolbar}>
-          <p className={scss.resultsCount}>
-            {isFetching ? "Обновляем каталог..." : `Найдено товаров: ${totalItems}`}
-          </p>
+          <div className={scss.toolbarMeta}>
+            <p className={scss.resultsCount}>
+              {isFetching && filteredItems.length === 0
+                ? "Подбираем позиции..."
+                : `Найдено позиций: ${totalItems}`}
+            </p>
+            {activeFilterTokens.length > 0 && (
+              <button type="button" className={scss.resetInline} onClick={onClearFilters}>
+                Сбросить фильтры
+              </button>
+            )}
+          </div>
 
           <label className={scss.sortControl}>
             <span>Сортировка</span>
@@ -203,65 +258,115 @@ const Cards: FC<{
           </label>
         </div>
 
-        {!isFetching && filteredItems.length === 0 ? (
-          <div className={scss.emptyState}>
-            <h3>По выбранным параметрам ничего не найдено</h3>
-            <p>Измените фильтры или сбросьте часть ограничений.</p>
-          </div>
-        ) : (
+        {isFetching && filteredItems.length === 0 ? (
           <div className={scss.cards}>
-            {filteredItems.map((item) => (
-              <div key={item.id} className={scss.card}>
-                <div className={scss.blockImg}>
-                  <div className={scss.like}>
-                    <div className={scss.star}>
-                      <Image width={500} height={300} alt="photo" src={star} />
-                      <h6>{item.average_rating}</h6>
-                    </div>
-                    <button
-                      type="button"
-                      className={scss.heart}
-                      onClick={(event) => {
-                        void handleFavoriteClick(event, item);
-                      }}
-                    >
-                      <Image
-                        width={24}
-                        height={24}
-                        src={favoriteItems?.some((fav) => fav.clothes.id === item.id) ? heartRed : heart}
-                        alt="heart"
-                      />
-                    </button>
-                  </div>
-
-                  {item.clothes_img.slice(0, 1).map((image, index) => (
-                    <Link href={buildProductHref(item)} key={`${item.id}-${index}`}>
-                      <Image
-                        width={5000}
-                        height={3000}
-                        src={resolveMediaUrl(image.photo) as string | StaticImport}
-                        alt="photo"
-                        className={scss.mainImg}
-                      />
-                    </Link>
-                  ))}
-                </div>
-
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className={`${scss.card} ${scss.cardSkeleton}`}>
+                <div className={scss.blockImg} />
                 <div className={scss.blockText}>
-                  <div className={scss.productCategory}>
-                    <h4>{item.category_name}</h4>
-                    <div className={scss.colors}>
-                      <ColorsClothes clothesImg={item.clothes_img.slice(0, 3)} />
-                    </div>
-                  </div>
-                  <h2>{item.clothes_name}</h2>
-                  <div className={scss.price}>
-                    <span>{Math.round(item.discount_price).toString()} сом</span>
-                    <del>{Math.round(item.price)} сом</del>
-                  </div>
+                  <span className={scss.skeletonLine} />
+                  <span className={`${scss.skeletonLine} ${scss.skeletonLineWide}`} />
+                  <span className={`${scss.skeletonLine} ${scss.skeletonLineShort}`} />
                 </div>
               </div>
             ))}
+          </div>
+        ) : !isFetching && filteredItems.length === 0 ? (
+          <div className={scss.emptyState}>
+            <span className={scss.emptyEyebrow}>Каталог</span>
+            <h3>По выбранным параметрам ничего не найдено</h3>
+            <p>
+              Измените диапазон цены, исполнение или конфигурацию. Каталог сохранит состояние,
+              поэтому можно быстро вернуться к нужной комбинации.
+            </p>
+            <button type="button" onClick={onClearFilters}>
+              Сбросить фильтры
+            </button>
+          </div>
+        ) : (
+          <div className={scss.cards}>
+            {filteredItems.map((item, index) => {
+              const image = item.clothes_img[0];
+              const badge = getProductBadge(item);
+              const hasDiscount = isDiscounted(item);
+              const productHref = buildProductHref(item);
+              const isFavorite = favoriteItems?.some((fav) => fav.clothes.id === item.id);
+
+              return (
+                <article key={item.id} className={scss.card}>
+                  <div className={scss.blockImg}>
+                    <div className={scss.cardTop}>
+                      <div className={scss.cardIndicators}>
+                        {badge && <span className={scss.badge}>{badge}</span>}
+                        <div className={scss.star}>
+                          <Image width={16} height={16} alt="Рейтинг" src={star} />
+                          <h6>{item.average_rating ? item.average_rating.toFixed(1) : "0.0"}</h6>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        className={scss.heart}
+                        onClick={(event) => {
+                          void handleFavoriteClick(event, item);
+                        }}
+                        aria-label={isFavorite ? "Убрать из избранного" : "Добавить в избранное"}
+                      >
+                        <Image
+                          width={24}
+                          height={24}
+                          src={isFavorite ? heartRed : heart}
+                          alt="Избранное"
+                        />
+                      </button>
+                    </div>
+
+                    <Link href={productHref} className={scss.imageLink}>
+                      {image ? (
+                        <Image
+                          width={1200}
+                          height={1600}
+                          src={resolveMediaUrl(image.photo) as string | StaticImport}
+                          alt={item.clothes_name}
+                          className={scss.mainImg}
+                          priority={page === 1 && index < 2}
+                          sizes="(max-width: 680px) 50vw, (max-width: 1100px) 33vw, 25vw"
+                        />
+                      ) : (
+                        <div className={scss.imageFallback}>Скоро появится фото</div>
+                      )}
+                    </Link>
+                  </div>
+
+                  <div className={scss.blockText}>
+                    <div className={scss.productCategory}>
+                      <h4>{item.category_name}</h4>
+                      {item.clothes_img.length > 0 && (
+                        <div className={scss.colors}>
+                          <ColorsClothes clothesImg={item.clothes_img.slice(0, 4)} size="sm" />
+                        </div>
+                      )}
+                    </div>
+
+                    <Link href={productHref} className={scss.productTitleLink}>
+                      <h2>{item.clothes_name}</h2>
+                    </Link>
+
+                    <div className={scss.cardMeta}>
+                      <span>{item.size?.slice(0, 3).join(" · ") || "Конфигурация уточняется"}</span>
+                      {item.promo_category?.[0]?.promo_category && (
+                        <span>{item.promo_category[0].promo_category}</span>
+                      )}
+                    </div>
+
+                    <div className={scss.price}>
+                      <span>{formatPrice(hasDiscount ? item.discount_price : item.price)}</span>
+                      {hasDiscount && <del>{formatPrice(item.price)}</del>}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
 
@@ -303,3 +408,4 @@ const Cards: FC<{
 };
 
 export default Cards;
+

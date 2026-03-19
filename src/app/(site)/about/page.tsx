@@ -1,17 +1,17 @@
-import AboutUs from "../../../appPages/site/components/pages/AboutUs";
+﻿import AboutReaLabPage from "../../../appPages/site/components/pages/AboutReaLabPage";
 import { createPageMetadata } from "@/utils/seo";
 
 export const metadata = createPageMetadata({
-  title: "О бренде",
+  title: "О платформе ReaLab",
   description:
-    "История Jumana, философия бренда, подход к дизайну, качеству и современной скромной женской одежде Made in Kyrgyzstan.",
+    "История ReaLab, философия платформы, подход к цифровой подаче медтеха и сервисной экосистеме для клиник и лабораторий.",
   path: "/about",
 });
 
 const page = () => {
   return (
     <div>
-      <AboutUs />
+      <AboutReaLabPage />
     </div>
   );
 };

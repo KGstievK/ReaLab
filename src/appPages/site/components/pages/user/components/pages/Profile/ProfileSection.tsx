@@ -15,6 +15,7 @@ import {
 } from "../../../../../../../../redux/api/auth";
 import AvatarCropModal from "./avatarCropModal/AvatarCropModal";
 import scss from "./ProfileSection.module.scss";
+import { extractApiErrorInfo, getRateLimitAwareMessage } from "@/utils/apiError";
 
 type EditableField = "fullName" | "phone" | "address" | "email";
 
@@ -56,7 +57,13 @@ const EMPTY_ADDRESS_FORM: AddressFormValues = {
 
 const ProfileSection: FC = () => {
   const router = useRouter();
-  const { data: response } = useGetMeQuery();
+  const {
+    data: response,
+    isLoading: isProfileLoading,
+    isError: isProfileError,
+    error: profileQueryError,
+    refetch: refetchProfile,
+  } = useGetMeQuery();
   const [putMe, { isLoading: isSaving }] = usePutMeMutation();
   const [editable, setEditable] =
     useState<Record<EditableField, boolean>>(EDITABLE_DEFAULT);
@@ -66,6 +73,9 @@ const ProfileSection: FC = () => {
   const [addressForm, setAddressForm] =
     useState<AddressFormValues>(EMPTY_ADDRESS_FORM);
   const [addressError, setAddressError] = useState<string | null>(null);
+  const [profileMessage, setProfileMessage] = useState<string | null>(null);
+  const [profileErrorMessage, setProfileErrorMessage] = useState<string | null>(null);
+  const [addressMessage, setAddressMessage] = useState<string | null>(null);
 
   const { register, handleSubmit, reset, setFocus, formState } =
     useForm<ProfileFormValues>({
@@ -86,7 +96,13 @@ const ProfileSection: FC = () => {
     return response[0];
   }, [response]);
 
-  const { data: profileAddresses = [] } = useGetProfileAddressesQuery(undefined, {
+  const {
+    data: profileAddresses = [],
+    isLoading: isAddressesLoading,
+    isError: isAddressesError,
+    error: addressesQueryError,
+    refetch: refetchAddresses,
+  } = useGetProfileAddressesQuery(undefined, {
     skip: !user,
   });
 
@@ -118,7 +134,7 @@ const ProfileSection: FC = () => {
   }, [defaultAddress?.address, defaultAddress?.phone_number, reset, user]);
 
   useEffect(() => {
-    const savedAvatar = localStorage.getItem("jumana_profile_avatar");
+    const savedAvatar = localStorage.getItem("realab_profile_avatar");
     if (savedAvatar) {
       setAvatarUrl(savedAvatar);
     }
@@ -126,22 +142,22 @@ const ProfileSection: FC = () => {
 
   useEffect(() => {
     if (avatarUrl) {
-      localStorage.setItem("jumana_profile_avatar", avatarUrl);
+      localStorage.setItem("realab_profile_avatar", avatarUrl);
       return;
     }
 
-    localStorage.removeItem("jumana_profile_avatar");
+    localStorage.removeItem("realab_profile_avatar");
   }, [avatarUrl]);
 
   const initials = useMemo(() => {
     if (!user) {
-      return "J";
+      return "R";
     }
 
     const name = [user.first_name, user.last_name].filter(Boolean).join(" ").trim();
 
     if (!name) {
-      return "J";
+      return "R";
     }
 
     return name
@@ -162,6 +178,8 @@ const ProfileSection: FC = () => {
 
   const enableField = (field: EditableField) => {
     setEditable((prev) => ({ ...prev, [field]: true }));
+    setProfileMessage(null);
+    setProfileErrorMessage(null);
     setTimeout(() => {
       setFocus(field);
     }, 0);
@@ -170,6 +188,7 @@ const ProfileSection: FC = () => {
   const resetAddressEditor = () => {
     setEditingAddressId(null);
     setAddressError(null);
+    setAddressMessage(null);
     setAddressForm({
       ...EMPTY_ADDRESS_FORM,
       recipient_name:
@@ -184,6 +203,7 @@ const ProfileSection: FC = () => {
   const startEditAddress = (address: AUTH.ProfileAddress) => {
     setEditingAddressId(address.id);
     setAddressError(null);
+    setAddressMessage(null);
     setAddressForm({
       label: address.label || "",
       recipient_name: address.recipient_name || "",
@@ -211,6 +231,8 @@ const ProfileSection: FC = () => {
     const last_name = rest.join(" ");
 
     try {
+      setProfileMessage(null);
+      setProfileErrorMessage(null);
       await putMe({
         id: user.id,
         username: user.username,
@@ -223,8 +245,12 @@ const ProfileSection: FC = () => {
 
       reset(formValues);
       setEditable(EDITABLE_DEFAULT);
+      setProfileMessage("Данные профиля сохранены.");
     } catch (error) {
-      console.error("Profile update failed:", error);
+      const apiError = extractApiErrorInfo(error, "Не удалось сохранить профиль");
+      setProfileErrorMessage(
+        getRateLimitAwareMessage(apiError, "Не удалось сохранить профиль. Попробуйте позже."),
+      );
     }
   };
 
@@ -241,6 +267,7 @@ const ProfileSection: FC = () => {
         [field]: value,
       }));
       setAddressError(null);
+      setAddressMessage(null);
     };
 
   const handleAddressSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -275,16 +302,24 @@ const ProfileSection: FC = () => {
     };
 
     try {
+      setAddressError(null);
+      setAddressMessage(null);
       if (editingAddressId) {
         await patchProfileAddress({ id: editingAddressId, ...payload }).unwrap();
       } else {
         await postProfileAddress(payload).unwrap();
       }
 
+      const successMessage = editingAddressId
+        ? "Адрес обновлён."
+        : "Адрес сохранён в профиле.";
       resetAddressEditor();
+      setAddressMessage(successMessage);
     } catch (error) {
-      console.error("Address save failed:", error);
-      setAddressError("Не удалось сохранить адрес.");
+      const apiError = extractApiErrorInfo(error, "Не удалось сохранить адрес");
+      setAddressError(
+        getRateLimitAwareMessage(apiError, "Не удалось сохранить адрес. Попробуйте позже."),
+      );
     }
   };
 
@@ -294,24 +329,69 @@ const ProfileSection: FC = () => {
     }
 
     try {
+      setAddressError(null);
+      setAddressMessage(null);
       await deleteProfileAddress({ id }).unwrap();
       if (editingAddressId === id) {
         resetAddressEditor();
       }
+      setAddressMessage("Адрес удалён.");
     } catch (error) {
-      console.error("Address delete failed:", error);
-      setAddressError("Не удалось удалить адрес.");
+      const apiError = extractApiErrorInfo(error, "Не удалось удалить адрес");
+      setAddressError(
+        getRateLimitAwareMessage(apiError, "Не удалось удалить адрес. Попробуйте позже."),
+      );
     }
   };
 
   const handleSetDefaultAddress = async (id: number) => {
     try {
+      setAddressError(null);
+      setAddressMessage(null);
       await setDefaultProfileAddress({ id }).unwrap();
+      setAddressMessage("Адрес по умолчанию обновлён.");
     } catch (error) {
-      console.error("Set default address failed:", error);
-      setAddressError("Не удалось обновить адрес по умолчанию.");
+      const apiError = extractApiErrorInfo(error, "Не удалось обновить адрес по умолчанию");
+      setAddressError(
+        getRateLimitAwareMessage(
+          apiError,
+          "Не удалось обновить адрес по умолчанию. Попробуйте позже.",
+        ),
+      );
     }
   };
+
+  if (isProfileLoading && !user) {
+    return (
+      <section className={scss.ProfileSection}>
+        <div className={scss.content}>
+          <div className={scss.statusState}>
+            <p>Загружаем профиль...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (isProfileError && !user) {
+    return (
+      <section className={scss.ProfileSection}>
+        <div className={scss.content}>
+          <div className={`${scss.statusState} ${scss.statusStateError}`} role="alert">
+            <p>
+              {getRateLimitAwareMessage(
+                extractApiErrorInfo(profileQueryError, "Не удалось загрузить профиль"),
+                "Не удалось загрузить профиль. Попробуйте позже.",
+              )}
+            </p>
+            <button type="button" onClick={() => void refetchProfile()}>
+              Повторить
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   if (!user) {
     return null;
@@ -320,8 +400,20 @@ const ProfileSection: FC = () => {
   return (
     <section className={scss.ProfileSection}>
       <div className={scss.content}>
-        <h1>Личные данные</h1>
-        <p className={scss.subtitle}>Подтвердите свою личность</p>
+        <h1>Профиль ReaLab</h1>
+        <p className={scss.subtitle}>Управляйте данными аккаунта, адресами и контактами для поставки.</p>
+
+        {profileMessage ? (
+          <div className={`${scss.statusState} ${scss.statusStateSuccess}`} role="status">
+            <p>{profileMessage}</p>
+          </div>
+        ) : null}
+
+        {profileErrorMessage ? (
+          <div className={`${scss.statusState} ${scss.statusStateError}`} role="alert">
+            <p>{profileErrorMessage}</p>
+          </div>
+        ) : null}
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className={scss.avatarBlock}>
@@ -348,7 +440,7 @@ const ProfileSection: FC = () => {
               </button>
 
               <p className={scss.avatarHint}>
-                Рекомендуем использовать формат 300 x 300 и размером не более 2 мб
+                Рекомендуем квадратный формат 300 x 300 и размер файла не более 2 МБ
               </p>
             </div>
           </div>
@@ -485,8 +577,30 @@ const ProfileSection: FC = () => {
             </button>
           </div>
 
+          {addressMessage ? (
+            <div className={`${scss.statusState} ${scss.statusStateSuccess}`} role="status">
+              <p>{addressMessage}</p>
+            </div>
+          ) : null}
+
+          {isAddressesError ? (
+            <div className={`${scss.statusState} ${scss.statusStateError}`} role="alert">
+              <p>
+                {getRateLimitAwareMessage(
+                  extractApiErrorInfo(addressesQueryError, "Не удалось загрузить адреса"),
+                  "Не удалось загрузить адреса. Попробуйте позже.",
+                )}
+              </p>
+              <button type="button" onClick={() => void refetchAddresses()}>
+                Повторить
+              </button>
+            </div>
+          ) : null}
+
           <div className={scss.addressList}>
-            {addresses.length === 0 ? (
+            {isAddressesLoading ? (
+              <div className={scss.addressEmpty}>Загружаем сохранённые адреса...</div>
+            ) : addresses.length === 0 ? (
               <div className={scss.addressEmpty}>
                 У вас пока нет сохранённых адресов.
               </div>

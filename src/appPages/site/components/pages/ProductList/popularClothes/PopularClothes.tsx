@@ -39,6 +39,8 @@ interface ClothesCategoryItem {
   }>;
 }
 
+const formatPrice = (value: number) => `${Math.round(value).toLocaleString("ru-RU")} KGS`;
+
 const PopularClothes = () => {
   const router = useRouter();
   const pathname = usePathname();
@@ -113,7 +115,7 @@ const PopularClothes = () => {
           <Image src={backIcon} alt="icon " width={22} height={22} />
           <Link href="/">Главная</Link>/<Link href="/popular">Популярные</Link>
         </div>
-        <h1 className={scss.title}>Популярные</h1>
+        <h1 className={scss.title}>Популярные решения</h1>
         <div className={scss.content}>
           <div className={scss.cards}>
             {newArrivals?.map((item) => (
@@ -178,9 +180,9 @@ const PopularClothes = () => {
                   <h2>{item.clothes_name}</h2>
                   <div className={scss.price}>
                     <span>
-                      {Math.round(item.discount_price).toString()} сом
+                      {formatPrice(item.discount_price)}
                     </span>
-                    <del>{Math.round(item.price)} сом</del>
+                    <del>{formatPrice(item.price)}</del>
                   </div>
                 </div>
               </div>

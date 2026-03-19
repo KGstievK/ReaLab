@@ -55,11 +55,15 @@
     city: string;
     country: string;
     is_estimated: boolean;
+    is_live_rate: boolean;
+    quote_source: "pickup" | "city_matrix" | "country_estimate";
+    warning: string | null;
   };
   type getShippingQuoteReq = {
     delivery: "курьер" | "самовывоз";
     city?: string;
     country?: string;
+    payment_method?: "mbank_redirect" | "finca_qr" | "manual";
   };
 }
 

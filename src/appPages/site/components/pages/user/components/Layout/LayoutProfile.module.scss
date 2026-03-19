@@ -1,23 +1,35 @@
-.LayoutProfile {
+﻿.LayoutProfile {
   width: 100%;
-  background: #f7f7f7;
-  padding: 24px 0 50px;
+  background: #f6f1eb;
+  padding: 28px 0 64px;
 
   .desktopBreadcrumbs,
   .mobileBreadcrumbs {
-    margin: 0;
     display: flex;
     align-items: center;
-    gap: 19px;
+    gap: 12px;
+    margin: 0;
 
     a,
     span {
-      color: #a73539;
-      font-family: "Inter", sans-serif;
+      color: #6f625e;
+      font-family: "Manrope", sans-serif;
       font-size: 12px;
-      font-weight: 500;
-      line-height: 1;
+      font-weight: 600;
+      line-height: 1.4;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
       white-space: nowrap;
+    }
+
+    a {
+      text-decoration: none;
+      transition: color 0.2s ease;
+
+      &:hover,
+      &:focus-visible {
+        color: #6e4b47;
+      }
     }
   }
 
@@ -26,36 +38,63 @@
   }
 
   .content {
-    margin-top: 30px;
+    margin-top: 28px;
     display: grid;
-    grid-template-columns: 300px minmax(0, 1fr);
-    gap: 60px;
+    grid-template-columns: 304px minmax(0, 1fr);
+    gap: 32px;
     align-items: flex-start;
 
     .headerMobile {
       display: none;
     }
 
+    .headerDesktop,
+    .mainDesktop,
+    .headerMobile,
+    .mainMobile {
+      min-width: 0;
+      border: 1px solid #d8cac0;
+      border-radius: 24px;
+      background: #ffffff;
+    }
+
+    .headerDesktop,
+    .headerMobile {
+      overflow: hidden;
+      position: sticky;
+      top: 104px;
+    }
+
     .headerDesktop {
       display: block;
     }
 
+    .mainDesktop,
+    .mainMobile {
+      padding: 32px;
+      box-shadow: 0 18px 48px rgba(32, 26, 25, 0.05);
+    }
+
     .mainDesktop {
       display: block;
-      min-width: 0;
     }
 
     .mainMobile {
       display: none;
-      min-width: 0;
     }
   }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .LayoutProfile {
     .content {
-      gap: 36px;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 24px;
+
+      .mainDesktop,
+      .mainMobile {
+        padding: 28px;
+      }
     }
   }
 }
@@ -64,14 +103,19 @@
   .LayoutProfile {
     .content {
       grid-template-columns: 240px minmax(0, 1fr);
-      gap: 24px;
+      gap: 20px;
+
+      .mainDesktop,
+      .mainMobile {
+        padding: 24px;
+      }
     }
   }
 }
 
 @media (max-width: 750px) {
   .LayoutProfile {
-    padding: 16px 0 24px;
+    padding: 16px 0 32px;
 
     .desktopBreadcrumbs {
       display: none;
@@ -80,28 +124,39 @@
     .mobileBreadcrumbs {
       display: flex;
       gap: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
     }
 
     .content {
       margin-top: 0;
       grid-template-columns: 1fr;
-      gap: 0;
+      gap: 16px;
 
-      .headerMobile {
+      .headerMobile,
+      .mainMobile {
         display: block;
       }
 
-      .headerDesktop {
-        display: none;
-      }
-
+      .headerDesktop,
       .mainDesktop {
         display: none;
       }
 
+      .headerMobile,
       .mainMobile {
-        display: block;
+        position: static;
+        top: auto;
+      }
+
+      .mainMobile {
+        padding: 20px 16px;
+        border-radius: 20px;
+      }
+
+      .headerMobile {
+        border-radius: 20px;
       }
     }
   }

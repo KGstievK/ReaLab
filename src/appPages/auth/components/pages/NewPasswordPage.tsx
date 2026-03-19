@@ -2,7 +2,7 @@
 
 import scss from "./NewPasswordPage.module.scss";
 import Image from "next/image";
-import logo from "@/assets/icons/logo.svg";
+const logo = "/media/branding/realab-mark.svg";
 import backIcon from "@/assets/icons/backIcon.svg";
 import { HiOutlineLockClosed } from "react-icons/hi";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -158,7 +158,7 @@ const NewPasswordPage = () => {
       >
         <Image src={backIcon} alt="Назад" width={24} height={24} />
       </button>
-      <Image src={logo} alt="Логотип Jumana" className={scss.logo} priority />
+      <Image src={logo} alt="Логотип ReaLab" className={scss.logo} priority width={136} height={96} />
 
       <h1>Новый пароль</h1>
       <p>Создайте новый пароль</p>

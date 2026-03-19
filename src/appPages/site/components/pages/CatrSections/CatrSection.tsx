@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -13,6 +13,7 @@ import {
   useUpdateBasketMutation,
 } from "../../../../../redux/api/product";
 import { resolveMediaUrl } from "@/utils/media";
+import { extractApiErrorInfo, getRateLimitAwareMessage } from "@/utils/apiError";
 
 interface CartItem {
   id: number;
@@ -48,7 +49,7 @@ const toNumber = (value: unknown) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-const formatSom = (value: number) => `${value.toLocaleString("ru-RU")}c`;
+const formatPrice = (value: number) => `${value.toLocaleString("ru-RU")} KGS`;
 
 const withUpdatedQuantity = (item: CartItem, quantity: number): CartItem => ({
   ...item,
@@ -57,13 +58,23 @@ const withUpdatedQuantity = (item: CartItem, quantity: number): CartItem => ({
 });
 
 const CatrSection = () => {
-  const { data: cart, refetch, isLoading } = useGetCartQuery(undefined, {
+  const {
+    data: cart,
+    refetch,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+  } = useGetCartQuery(undefined, {
     refetchOnMountOrArgChange: true,
   });
   const [basketData, setBasketData] = useState<CartItem[]>([]);
-  const [updateMutation] = useUpdateBasketMutation();
-  const [deleteMutation] = useDeleteBasketMutation();
+  const [cartNotice, setCartNotice] = useState<string | null>(null);
+  const [updateMutation, { isLoading: isUpdatingBasket }] = useUpdateBasketMutation();
+  const [deleteMutation, { isLoading: isDeletingBasket }] = useDeleteBasketMutation();
   const router = useRouter();
+
+  const isMutating = isUpdatingBasket || isDeletingBasket;
 
   const normalizedCart = useMemo<CartResponse | undefined>(() => {
     if (Array.isArray(cart)) {
@@ -82,6 +93,17 @@ const CatrSection = () => {
     setBasketData([]);
   }, [normalizedCart]);
 
+  useEffect(() => {
+    if (!isError) {
+      return;
+    }
+
+    const apiError = extractApiErrorInfo(error, "Не удалось загрузить корзину");
+    setCartNotice(
+      getRateLimitAwareMessage(apiError, "Не удалось загрузить корзину. Попробуйте позже."),
+    );
+  }, [error, isError]);
+
   const handleUpdateQuantity = async (itemId: number, quantity: number) => {
     if (quantity < 1) {
       return;
@@ -90,6 +112,7 @@ const CatrSection = () => {
     const previousBasketData = basketData;
 
     try {
+      setCartNotice(null);
       const currentItem = basketData.find((item) => item.id === itemId);
       if (!currentItem) {
         return;
@@ -105,16 +128,13 @@ const CatrSection = () => {
 
       if (sameItems.length > 0) {
         const mergedQuantity =
-          sameItems.reduce((total, item) => total + item.quantity, 0) +
-          quantity;
+          sameItems.reduce((total, item) => total + item.quantity, 0) + quantity;
 
         setBasketData(
           basketData
             .filter((item) => !sameItems.some((same) => same.id === item.id))
             .map((item) =>
-              item.id === itemId
-                ? withUpdatedQuantity(item, mergedQuantity)
-                : item,
+              item.id === itemId ? withUpdatedQuantity(item, mergedQuantity) : item,
             ),
         );
 
@@ -140,19 +160,26 @@ const CatrSection = () => {
       }
 
       void refetch();
-    } catch (error) {
+    } catch (mutationError) {
       setBasketData(previousBasketData);
-      console.error("Error updating basket:", error);
+      const apiError = extractApiErrorInfo(mutationError, "Не удалось обновить корзину");
+      setCartNotice(
+        getRateLimitAwareMessage(apiError, "Не удалось обновить корзину. Попробуйте ещё раз."),
+      );
     }
   };
 
   const handleDelete = async (id: number) => {
     try {
+      setCartNotice(null);
       await deleteMutation(id).unwrap();
       await refetch();
       setBasketData((prev) => prev.filter((item) => item.id !== id));
-    } catch (error) {
-      console.error("Delete error:", error);
+    } catch (mutationError) {
+      const apiError = extractApiErrorInfo(mutationError, "Не удалось удалить товар");
+      setCartNotice(
+        getRateLimitAwareMessage(apiError, "Не удалось удалить товар. Попробуйте ещё раз."),
+      );
     }
   };
 
@@ -161,11 +188,16 @@ const CatrSection = () => {
   };
 
   const handleGoToCheckout = () => {
+    if (basketData.length === 0) {
+      return;
+    }
+
     try {
+      setCartNotice(null);
       localStorage.setItem("cartItems", JSON.stringify(basketData));
       router.push("/cart/checkout");
-    } catch (error) {
-      console.error("Error while moving to checkout:", error);
+    } catch {
+      setCartNotice("Не удалось подготовить корзину к оформлению. Попробуйте ещё раз.");
     }
   };
 
@@ -174,9 +206,7 @@ const CatrSection = () => {
     0,
   );
   const subtotal =
-    basketData.length > 0
-      ? calculatedSubtotal
-      : toNumber(normalizedCart?.total_price);
+    basketData.length > 0 ? calculatedSubtotal : toNumber(normalizedCart?.total_price);
   const delivery = basketData.length > 0 ? DELIVERY_PRICE : 0;
   const discount = basketData.length > 0 ? DISCOUNT_PRICE : 0;
   const payableTotal = Math.max(subtotal + delivery - discount, 0);
@@ -199,18 +229,34 @@ const CatrSection = () => {
             <span className={scss.current}>Корзина</span>
           </nav>
 
-          <h1 className="title">Корзина</h1>
+          <h1 className={scss.pageTitle}>Корзина</h1>
 
-          {isLoading ? (
-            <div className={scss.loadingState}>Загрузка корзины...</div>
+          {cartNotice ? (
+            <div className={`${scss.statusState} ${scss.statusStateError}`} role="alert">
+              <p>{cartNotice}</p>
+              <button type="button" onClick={() => void refetch()}>
+                Повторить
+              </button>
+            </div>
+          ) : null}
+
+          {isLoading && !normalizedCart ? (
+            <div className={scss.loadingState}>Загружаем корзину...</div>
+          ) : isError && !normalizedCart ? (
+            <div className={`${scss.statusState} ${scss.statusStateError}`} role="alert">
+              <p>Не удалось загрузить корзину.</p>
+              <button type="button" onClick={() => void refetch()}>
+                Попробовать снова
+              </button>
+            </div>
           ) : basketData.length > 0 ? (
             <div className={scss.cartLayout}>
               <div className={scss.itemsColumn}>
                 <div className={scss.tableHead}>
-                  <p>Продукт</p>
+                  <p>Оборудование</p>
                   <p>Цена</p>
                   <p>Количество</p>
-                  <p>Всего</p>
+                  <p>Сумма</p>
                 </div>
 
                 <div className={scss.itemsList}>
@@ -226,6 +272,7 @@ const CatrSection = () => {
                           className={scss.mobileRemoveButton}
                           onClick={() => handleDelete(item.id)}
                           aria-label="Удалить товар"
+                          disabled={isMutating}
                         >
                           ×
                         </button>
@@ -239,30 +286,28 @@ const CatrSection = () => {
                           />
                           <div className={scss.productInfo}>
                             <h3>{item.clothes.clothes_name}</h3>
-                            <p>{selectedImage?.color || "Цвет не указан"}</p>
+                            <p>{selectedImage?.color || "Финиш не указан"}</p>
                           </div>
                         </div>
 
-                        <p className={scss.priceCell}>
-                          {formatSom(toNumber(item.just_price))}
-                        </p>
+                        <p className={scss.priceCell}>{formatPrice(toNumber(item.just_price))}</p>
 
                         <div className={scss.quantityCell}>
                           <div className={scss.counter}>
                             <button
                               type="button"
-                              onClick={() =>
-                                handleUpdateQuantity(item.id, item.quantity - 1)
-                              }
+                              onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                              disabled={isMutating || item.quantity <= 1}
+                              aria-label="Уменьшить количество"
                             >
                               −
                             </button>
                             <span>{item.quantity}</span>
                             <button
                               type="button"
-                              onClick={() =>
-                                handleUpdateQuantity(item.id, item.quantity + 1)
-                              }
+                              onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                              disabled={isMutating}
+                              aria-label="Увеличить количество"
                             >
                               +
                             </button>
@@ -271,14 +316,13 @@ const CatrSection = () => {
                             type="button"
                             className={scss.deleteButton}
                             onClick={() => handleDelete(item.id)}
+                            disabled={isMutating}
                           >
                             удалить
                           </button>
                         </div>
 
-                        <p className={scss.totalCell}>
-                          {formatSom(toNumber(item.total_price))}
-                        </p>
+                        <p className={scss.totalCell}>{formatPrice(toNumber(item.total_price))}</p>
                       </article>
                     );
                   })}
@@ -286,7 +330,7 @@ const CatrSection = () => {
               </div>
 
               <aside className={scss.summaryCard}>
-                <h2>Детали оплаты</h2>
+                <h2>Сводка заказа</h2>
 
                 <div className={scss.summaryItems}>
                   {basketData.map((item) => {
@@ -295,10 +339,7 @@ const CatrSection = () => {
                     );
 
                     return (
-                      <div
-                        key={`summary-${item.id}`}
-                        className={scss.summaryItem}
-                      >
+                      <div key={`summary-${item.id}`} className={scss.summaryItem}>
                         <Image
                           width={91}
                           height={98}
@@ -307,7 +348,7 @@ const CatrSection = () => {
                         />
                         <div className={scss.summaryItemText}>
                           <h3>{item.clothes.clothes_name}</h3>
-                          <p>{selectedImage?.color || "Цвет не указан"}</p>
+                          <p>{selectedImage?.color || "Финиш не указан"}</p>
                           <p>
                             {item.quantity} x {toNumber(item.just_price)}
                           </p>
@@ -319,20 +360,20 @@ const CatrSection = () => {
 
                 <div className={scss.summaryRows}>
                   <div className={scss.row}>
-                    <span>Итог</span>
-                    <span>{formatSom(subtotal)}</span>
+                    <span>Оборудование</span>
+                    <span>{formatPrice(subtotal)}</span>
                   </div>
                   <div className={scss.row}>
                     <span>Доставка</span>
-                    <span>{formatSom(delivery)}</span>
+                    <span>{formatPrice(delivery)}</span>
                   </div>
                   <div className={scss.row}>
                     <span>Скидка</span>
-                    <span>-{formatSom(discount)}</span>
+                    <span>-{formatPrice(discount)}</span>
                   </div>
                   <div className={`${scss.row} ${scss.totalRow}`}>
                     <span>Итого к оплате:</span>
-                    <span>{formatSom(payableTotal)}</span>
+                    <span>{formatPrice(payableTotal)}</span>
                   </div>
                 </div>
 
@@ -340,12 +381,13 @@ const CatrSection = () => {
                   type="button"
                   className={scss.checkoutButton}
                   onClick={handleGoToCheckout}
+                  disabled={isMutating || isFetching || basketData.length === 0}
                 >
                   <span className={scss.desktopButtonLabel}>
-                    Оформить заказ
+                    {isMutating ? "Обновляем корзину..." : "Перейти к оформлению"}
                   </span>
                   <span className={scss.mobileButtonLabel}>
-                    Посмотреть все →
+                    {isMutating ? "Обновляем..." : "К checkout →"}
                   </span>
                 </button>
               </aside>
@@ -353,13 +395,13 @@ const CatrSection = () => {
           ) : (
             <div className={scss.emptyState}>
               <Image src={imgBasket} alt="Корзина пуста" />
-              <h2>Ваша корзина пуста</h2>
+              <h2>Корзина пока пуста</h2>
               <p>
-                Похоже, вы еще не добавили в корзину никаких товаров. Начните
-                делать покупки, чтобы заполнить ее.
+                Вы еще не добавили оборудование в корзину. Перейдите в каталог,
+                чтобы собрать поставку или запрос на коммерческое предложение.
               </p>
               <button type="button" onClick={handleGoToCatalog}>
-                Добавить товар
+                Перейти в каталог
               </button>
             </div>
           )}

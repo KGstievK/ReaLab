@@ -1,4 +1,4 @@
-export const extractProductIdFromSlug = (slug: string): number | null => {
+﻿export const extractProductIdFromSlug = (slug: string): number | null => {
   if (!slug) return null;
 
   if (/^\d+$/.test(slug)) {
@@ -16,8 +16,8 @@ export const extractProductIdFromSlug = (slug: string): number | null => {
 const slugifyProductSegment = (value?: string | null): string =>
   (value || "")
     .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9а-яё]+/gi, "-")
+    .normalize("NFKD")
+    .replace(/[^\p{Letter}\p{Number}]+/gu, "-")
     .replace(/^-+|-+$/g, "");
 
 export const buildProductHref = (product: {
@@ -34,5 +34,5 @@ export const buildProductHref = (product: {
     (product.slug || "").trim() ||
     slugifyProductSegment(product.clothes_name || product.clothesName);
 
-  return baseSlug ? `/product/${baseSlug}-${product.id}` : `/product/${product.id}`;
+  return baseSlug ? `/product/${baseSlug}-${product.id}` : `/${product.id}`;
 };

@@ -1,11 +1,11 @@
-import { Suspense } from "react";
+﻿import { Suspense } from "react";
 import NewPasswordPage from "../../../appPages/auth/components/pages/NewPasswordPage";
 import AuthDesktopModal from "../../../appPages/auth/components/layout/AuthDesktopModal";
 import { createNoIndexMetadata } from "@/utils/seo";
 
 export const metadata = createNoIndexMetadata(
-  "Новый пароль",
-  "Создание нового пароля для аккаунта Jumana.",
+  "Новый пароль ReaLab",
+  "Создание нового пароля для аккаунта ReaLab.",
   "/auth/new_password",
 );
 

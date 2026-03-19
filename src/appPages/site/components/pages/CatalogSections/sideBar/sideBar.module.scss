@@ -1,10 +1,9 @@
-.filter {
+﻿.filter {
   width: 100%;
   display: flex;
   align-items: flex-start;
-  justify-content: flex-start;
-  gap: 24px;
-  padding-bottom: 100px;
+  gap: 28px;
+  padding-bottom: 80px;
 
   .blockFilter {
     width: 100%;
@@ -22,260 +21,299 @@
 
   .filterContainer {
     width: 100%;
-    padding: 0;
+    padding: 22px;
+    border: 1px solid var(--color-line);
+    border-radius: 24px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(251, 247, 243, 0.96));
+    box-shadow: 0 18px 34px rgba(32, 26, 25, 0.04);
 
     &.mobileFilterContainer {
       max-width: none;
       border: none;
       border-radius: 0;
-      background: #ededed;
-      height: calc(100vh - 44px);
-      height: calc(100dvh - 44px);
+      background: transparent;
+      box-shadow: none;
+      height: calc(100vh - 84px);
+      height: calc(100dvh - 84px);
       overflow-y: auto;
+      padding: 18px 18px 26px;
+    }
+  }
+
+  .filterIntro {
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid rgba(216, 202, 192, 0.72);
+
+    p {
+      margin: 8px 0 0;
+      color: var(--color-subtext);
+      font-family: var(--font-ui);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+  }
+
+  .filterEyebrow {
+    color: var(--color-brand);
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .filterSection {
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(216, 202, 192, 0.6);
+    padding-bottom: 16px;
+  }
+
+  .filterHeader {
+    width: 100%;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: transparent;
+    cursor: pointer;
+
+    h4 {
+      margin: 0;
+      color: var(--color-text);
+      font-family: var(--font-ui);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      line-height: 1.2;
+      text-transform: uppercase;
     }
 
-    .filterSection {
-      margin-bottom: 16px;
+    img {
+      width: 14px;
+      height: 8px;
+      object-fit: contain;
+    }
+  }
+
+  .filterContent {
+    padding-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .checkboxContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+      display: none;
     }
 
-    .filterHeader {
-      width: 100%;
-      border: none;
-      border-radius: 2px;
-      padding: 14px 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #ac373f;
-      cursor: pointer;
-
-      h4 {
-        color: #fff;
-        font-size: 18px;
-        font-weight: 500;
-        letter-spacing: 0.3px;
-      }
-
-      img {
-        width: 15px;
-        height: 9px;
-      }
+    .customCheckbox {
+      width: 18px;
+      height: 18px;
+      border: 1px solid rgba(111, 98, 94, 0.55);
+      border-radius: 5px;
+      background: var(--color-surface);
+      position: relative;
+      flex-shrink: 0;
+      transition:
+        border-color var(--transition-base),
+        background-color var(--transition-base);
     }
 
-    .filterContent {
-      padding: 12px 2px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+    .optionLabel {
+      color: var(--color-text);
+      font-family: var(--font-ui);
+      font-size: 14px;
+      line-height: 1.4;
     }
 
-    .checkboxContainer {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      cursor: pointer;
-
-      input[type="checkbox"] {
-        display: none;
-      }
-
-      .customCheckbox {
-        width: 18px;
-        height: 18px;
-        border: 1px solid #525252;
-        border-radius: 2px;
-        background: #fff;
-        position: relative;
-        flex-shrink: 0;
-      }
-
-      .optionLabel {
-        color: #4a4a4a;
-        font-size: 16px;
-        line-height: 1.2;
-      }
-
-      .optionCount {
-        margin-left: auto;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: #e9e9e9;
-        color: #777;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 13px;
-        line-height: 1;
-      }
-
-      input[type="checkbox"]:checked + .customCheckbox {
-        border-color: #ac373f;
-        background: #ac373f;
-      }
-
-      input[type="checkbox"]:checked + .customCheckbox::after {
-        content: "";
-        position: absolute;
-        top: 2px;
-        left: 6px;
-        width: 4px;
-        height: 9px;
-        border: solid #fff;
-        border-width: 0 2px 2px 0;
-        transform: rotate(45deg);
-      }
-    }
-
-    .priceInputs {
-      display: flex;
+    .optionCount {
+      margin-left: auto;
+      min-width: 30px;
+      height: 30px;
+      padding: 0 8px;
+      border-radius: var(--radius-pill);
+      background: rgba(241, 231, 222, 0.95);
+      color: var(--color-subtext);
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 28px;
+      font-family: var(--font-ui);
+      font-size: 12px;
+      line-height: 1;
+    }
 
-      input {
-        width: 84px;
-        height: 44px;
-        border-radius: 10px;
-        border: 1px solid #ceb8ae;
-        padding: 10px;
-        text-align: center;
-        color: #7d7d7d;
-        font-size: 16px;
+    input[type="checkbox"]:checked + .customCheckbox {
+      border-color: var(--color-brand);
+      background: var(--color-brand);
+    }
 
-        &::placeholder {
-          color: #b7b7b7;
-        }
+    input[type="checkbox"]:checked + .customCheckbox::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 6px;
+      width: 4px;
+      height: 9px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+  }
+
+  .priceInputs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+
+    input {
+      width: 100%;
+      height: 46px;
+      border-radius: 14px;
+      border: 1px solid var(--color-line);
+      padding: 0 14px;
+      background: var(--color-surface);
+      color: var(--color-text);
+      font-family: var(--font-ui);
+      font-size: 14px;
+      text-align: center;
+
+      &::placeholder {
+        color: rgba(111, 98, 94, 0.8);
       }
     }
+  }
 
-    .rangeSliderWrap {
-      position: relative;
-      width: calc(100% - 24px);
-      margin-left: auto;
-      margin-right: auto;
-      height: 24px;
-      margin-top: 10px;
-    }
+  .rangeSliderWrap {
+    position: relative;
+    width: calc(100% - 6px);
+    margin-left: auto;
+    margin-right: auto;
+    height: 24px;
+    margin-top: 6px;
+  }
 
-    .rangeTrackArea {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      left: 12px;
-      right: 12px;
-      height: 100%;
-    }
+  .rangeTrackArea {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 12px;
+    right: 12px;
+    height: 100%;
+  }
 
-    .rangeTrack,
-    .rangeFill {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      height: 5px;
-      border-radius: 999px;
-    }
+  .rangeTrack,
+  .rangeFill {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 4px;
+    border-radius: var(--radius-pill);
+  }
 
-    .rangeTrack {
-      left: 0;
-      right: 0;
-      background: #d18d92;
-    }
+  .rangeTrack {
+    left: 0;
+    right: 0;
+    background: rgba(216, 202, 192, 0.9);
+  }
 
-    .rangeFill {
-      background: #ac373f;
-    }
+  .rangeFill {
+    background: var(--color-brand);
+  }
 
-    .priceRangeSlider {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      left: 0;
-      width: 100%;
-      height: 24px;
-      margin: 0;
+  .priceRangeSlider {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    width: 100%;
+    height: 24px;
+    margin: 0;
+    background: transparent;
+    border: none;
+    -webkit-appearance: none;
+    appearance: none;
+    pointer-events: none;
+
+    &::-webkit-slider-runnable-track {
+      height: 4px;
       background: transparent;
-      border: none;
+    }
+
+    &::-moz-range-track {
+      height: 4px;
+      background: transparent;
+    }
+
+    &::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      pointer-events: none;
-
-      &::-webkit-slider-runnable-track {
-        height: 5px;
-        background: transparent;
-      }
-
-      &::-moz-range-track {
-        height: 5px;
-        background: transparent;
-      }
-
-      &::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        border: none;
-        background: #ac373f;
-        cursor: pointer;
-        pointer-events: auto;
-        margin-top: -7px;
-      }
-
-      &::-moz-range-thumb {
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        border: none;
-        background: #ac373f;
-        cursor: pointer;
-        pointer-events: auto;
-      }
-
-      &.minRangeSlider {
-        z-index: 2;
-      }
-
-      &.maxRangeSlider {
-        z-index: 3;
-      }
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      background: var(--color-brand);
+      cursor: pointer;
+      pointer-events: auto;
+      margin-top: -7px;
+      box-shadow: 0 8px 16px rgba(32, 26, 25, 0.12);
     }
 
-    .colorShortcut {
-      margin: 4px 0 16px;
-      border-top: 1px solid #d8a0a4;
-      padding-top: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      color: #4a4a4a;
-      font-size: 24px;
+    &::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      background: var(--color-brand);
+      cursor: pointer;
+      pointer-events: auto;
+      box-shadow: 0 8px 16px rgba(32, 26, 25, 0.12);
     }
 
-    .clearFilter {
-      padding-top: 8px;
-      display: flex;
-      justify-content: center;
+    &.minRangeSlider {
+      z-index: 2;
+    }
 
-      button {
-        border: none;
-        background: transparent;
-        color: #bdbdbd;
-        font-size: 16px;
-        font-weight: 500;
-      }
+    &.maxRangeSlider {
+      z-index: 3;
+    }
+  }
+
+  .clearFilter {
+    padding-top: 4px;
+    display: flex;
+    justify-content: center;
+
+    button {
+      min-height: 44px;
+      padding: 0 18px;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-pill);
+      background: var(--color-surface);
+      color: var(--color-brand);
+      font-family: var(--font-ui);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
     }
   }
 
   .mobileOverlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(32, 26, 25, 0.16);
     z-index: 1200;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.25s ease;
+    transition: opacity var(--transition-slow);
   }
 
   .mobileOverlayOpen {
@@ -284,15 +322,16 @@
   }
 
   .mobileSheet {
-    width: min(360px, 88vw);
+    width: min(380px, 90vw);
     max-width: 100%;
     height: 100vh;
     height: 100dvh;
-    background: #ededed;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 241, 235, 0.98));
     transform: translateX(-100%);
-    transition: transform 0.3s ease;
+    transition: transform var(--transition-slow);
     overflow: hidden;
-    box-shadow: 18px 0 48px rgba(0, 0, 0, 0.14);
+    box-shadow: 24px 0 48px rgba(32, 26, 25, 0.12);
+    border-radius: 0 28px 28px 0;
   }
 
   .mobileSheetOpen {
@@ -300,40 +339,88 @@
   }
 
   .mobileSheetTop {
-    height: 44px;
+    min-height: 84px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 12px;
+    gap: 12px;
+    padding: 18px;
+    border-bottom: 1px solid rgba(216, 202, 192, 0.7);
   }
 
   .mobileSheetTitle {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+
+    h4,
+    p {
+      margin: 0;
+    }
 
     h4 {
-      color: #2f2f2f;
-      font-size: 20px;
-      font-weight: 600;
-      letter-spacing: 0.3px;
+      color: var(--color-text);
+      font-family: var(--font-ui);
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.3;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    p {
+      color: var(--color-subtext);
+      font-family: var(--font-ui);
+      font-size: 13px;
+      line-height: 1.5;
     }
   }
 
   .mobileClose {
     border: none;
     background: transparent;
-    color: #6f6f6f;
+    color: var(--color-subtext);
     font-size: 30px;
     line-height: 1;
+    cursor: pointer;
+  }
+
+  .mobileFilterText {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+
+    span,
+    strong {
+      display: block;
+    }
+
+    span {
+      color: var(--color-text);
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      line-height: 1.1;
+      text-transform: uppercase;
+    }
+
+    strong {
+      color: var(--color-subtext);
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.3;
+    }
   }
 }
 
 @media (max-width: 1024px) {
   .filter {
     flex-direction: column;
-    gap: 14px;
-    padding-bottom: 70px;
+    gap: 16px;
+    padding-bottom: 48px;
 
     .blockFilter {
       max-width: none;
@@ -346,75 +433,15 @@
     }
 
     .mobileFilterButton {
-      width: 48px;
-      height: 48px;
-      border: 1px solid #d8c6bf;
-      border-radius: 999px;
-      background: #fff;
+      min-height: 54px;
+      border: 1px solid var(--color-line);
+      border-radius: 18px;
+      background: var(--color-surface);
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      padding: 0;
-      box-shadow: 0 8px 22px rgba(81, 53, 47, 0.08);
-
-      h4 {
-        display: none;
-      }
-    }
-
-    .mobileSheet {
-      background: #ededed;
-      border-radius: 0 24px 24px 0;
-    }
-
-    .mobileSheetTop {
-      height: 52px;
+      gap: 12px;
       padding: 0 16px;
-      border-bottom: 1px solid #dddddd;
-      background: #f4f4f4;
-    }
-
-    .mobileSheetTitle {
-      h4 {
-        font-size: 21px;
-        letter-spacing: 0.4px;
-      }
-    }
-
-    .filterContainer {
-      &.mobileFilterContainer {
-        padding: 16px 16px 20px;
-      }
-
-      .filterHeader {
-        h4 {
-          font-size: 16px;
-        }
-      }
-
-      .filterContent {
-        padding-left: 0;
-        padding-right: 0;
-        margin-bottom: 20px;
-      }
-
-      .priceInputs {
-        gap: 36px;
-      }
-
-      .rangeSliderWrap {
-        width: 100%;
-      }
-
-      .checkboxContainer {
-        .optionLabel {
-          font-size: 15px;
-        }
-      }
-
-      .colorShortcut {
-        font-size: 20px;
-      }
+      box-shadow: 0 10px 24px rgba(32, 26, 25, 0.06);
     }
   }
 }
@@ -424,52 +451,19 @@
     gap: 12px;
 
     .mobileFilterButton {
-      width: 46px;
-      height: 46px;
-    }
-
-    .mobileOverlay {
-      background: rgba(0, 0, 0, 0.16);
+      width: 100%;
+      justify-content: flex-start;
     }
 
     .mobileSheet {
-      width: min(340px, 88vw);
+      width: min(360px, 92vw);
     }
 
     .filterContainer {
       &.mobileFilterContainer {
-        padding: 16px 16px 20px;
-      }
-
-      .filterHeader {
-        h4 {
-          font-size: 16px;
-        }
-      }
-
-      .filterContent {
-        padding-left: 0;
-        padding-right: 0;
-        margin-bottom: 20px;
-      }
-
-      .priceInputs {
-        gap: 36px;
-      }
-
-      .rangeSliderWrap {
-        width: 100%;
-      }
-
-      .checkboxContainer {
-        .optionLabel {
-          font-size: 15px;
-        }
-      }
-
-      .colorShortcut {
-        font-size: 20px;
+        padding: 16px 16px 24px;
       }
     }
   }
 }
+

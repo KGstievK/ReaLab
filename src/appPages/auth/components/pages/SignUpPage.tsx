@@ -8,7 +8,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import Checkbox, { CheckboxChangeEvent } from "antd/es/checkbox";
 import Link from "next/link";
 import Image from "next/image";
-import logo from "@/assets/icons/logo.svg";
+const logo = "/media/branding/realab-mark.svg";
 import { useRouter, useSearchParams } from "next/navigation";
 import { clearAuthTokens, saveAuthTokens } from "@/utils/authStorage";
 import { executePendingAuthIntent } from "@/utils/authIntent";
@@ -22,6 +22,12 @@ interface SignUpProps {
   password: string;
   confirm_password: string;
 }
+
+const signUpSignals = [
+  { title: "B2B start", text: "Подготовьте профиль для корзины, коммерческих запросов и закупочного цикла." },
+  { title: "Return flow", text: "После регистрации пользователь возвращается в нужный сценарий ReaLab." },
+  { title: "Medical context", text: "Аккаунт сразу встраивается в витрину медицинского оборудования, а не в generic shop." },
+];
 
 const SignUpPage: FC = () => {
   const [postRegisterMutation] = usePostRegistrationMutation();
@@ -137,9 +143,24 @@ const SignUpPage: FC = () => {
   return (
     <section className={scss.RegistrationPage}>
       <Link href="/" className={scss.Logo}>
-        <Image src={logo} alt="Логотип Jumana" />
+        <Image src={logo} alt="Логотип ReaLab" width={136} height={96} />
       </Link>
-      <h1>Создать аккаунт</h1>
+      <div className={scss.headerBlock}>
+        <span className={scss.eyebrow}>REA LAB ONBOARDING</span>
+        <h1>Создать аккаунт</h1>
+        <p className={scss.lead}>
+          Зарегистрируйте доступ к procurement-ready витрине ReaLab и продолжите
+          сценарий выбора, заказа или оснащения без потери контекста.
+        </p>
+      </div>
+      <div className={scss.signalGrid}>
+        {signUpSignals.map((item) => (
+          <article key={item.title} className={scss.signalCard}>
+            <strong>{item.title}</strong>
+            <span>{item.text}</span>
+          </article>
+        ))}
+      </div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <input
           type="text"

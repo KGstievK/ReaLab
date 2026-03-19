@@ -3,7 +3,7 @@
 import Image from "next/image";
 import scss from "./ForgotPage.module.scss";
 import { SubmitHandler, useForm } from "react-hook-form";
-import logo from "@/assets/icons/logo.svg";
+const logo = "/media/branding/realab-mark.svg";
 import backIcon from "@/assets/icons/backIcon.svg";
 import { usePostForgotPasswordMutation } from "../../../../redux/api/auth";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -108,7 +108,7 @@ const ForgotPage = () => {
       >
         <Image src={backIcon} alt="Назад" width={24} height={24} />
       </button>
-      <Image src={logo} alt="Логотип Jumana" className={scss.logo} priority />
+      <Image src={logo} alt="Логотип ReaLab" className={scss.logo} priority width={136} height={96} />
       <h1>Забыли пароль?</h1>
       <p>Введите ваш E-mail, чтобы получить код для сброса пароля</p>
 

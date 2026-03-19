@@ -8,7 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FC, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import logo from "@/assets/icons/logo.svg";
+const logo = "/media/branding/realab-mark.svg";
 import google from "@/assets/icons/google.svg";
 import { useRouter, useSearchParams } from "next/navigation";
 import { saveAuthTokens } from "@/utils/authStorage";
@@ -21,6 +21,12 @@ interface LoginProps {
   username: string;
   password: string;
 }
+
+const signInSignals = [
+  { title: "Clinical access", text: "Вход в procurement, корзину, историю поставок и профиль организации." },
+  { title: "Soft control", text: "Спокойный интерфейс без перегруза, но с быстрым переходом к действию." },
+  { title: "Secure session", text: "Токены, intents и возврат в нужный сценарий после авторизации." },
+];
 
 const SignInPage: FC = () => {
   const [postLoginMutation] = usePostLoginMutation();
@@ -119,9 +125,24 @@ const SignInPage: FC = () => {
   return (
     <section className={scss.LoginPage}>
       <Link href="/" className={scss.Logo}>
-        <Image src={logo} alt="Логотип Jumana" />
+        <Image src={logo} alt="Логотип ReaLab" width={136} height={96} />
       </Link>
-      <h1>Войти в аккаунт</h1>
+      <div className={scss.headerBlock}>
+        <span className={scss.eyebrow}>REA LAB ACCESS</span>
+        <h1>Войти в аккаунт</h1>
+        <p className={scss.lead}>
+          Вход в clinical commerce-среду ReaLab: каталог, избранное, оформление,
+          история поставок и B2B-сценарии.
+        </p>
+      </div>
+      <div className={scss.signalGrid}>
+        {signInSignals.map((item) => (
+          <article key={item.title} className={scss.signalCard}>
+            <strong>{item.title}</strong>
+            <span>{item.text}</span>
+          </article>
+        ))}
+      </div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <input
           type="text"

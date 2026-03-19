@@ -1,0 +1,69 @@
+.TabBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 14px;
+  z-index: 45;
+  display: none;
+  transition: transform var(--transition-slow), opacity var(--transition-base);
+}
+
+.content {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px;
+  border-radius: 28px;
+  background: rgba(238, 242, 247, 0.88);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow-card);
+}
+
+.block a {
+  min-height: 58px;
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  border-radius: 18px;
+  color: var(--color-subtext);
+}
+
+.block svg {
+  width: 20px;
+  height: 20px;
+}
+
+.block h4 {
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.active {
+  color: var(--color-brand);
+}
+
+.block a:has(.active) {
+  background: linear-gradient(145deg, rgba(255, 143, 139, 0.18), rgba(137, 178, 203, 0.12));
+  box-shadow: var(--shadow-soft-sm);
+  color: var(--color-text);
+}
+
+.hide {
+  transform: translateY(120%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+@media (max-width: 760px) {
+  .TabBar {
+    display: block;
+  }
+}

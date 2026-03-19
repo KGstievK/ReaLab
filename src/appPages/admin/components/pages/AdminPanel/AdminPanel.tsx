@@ -285,12 +285,12 @@ const MOCK_ORDERS: AdminOrder[] = [
     items: [
       {
         product_id: 201,
-        product_name: "JUMANA 24",
+        product_name: "ReaLab Bedside C5",
         quantity: 2,
         unit_price: 1400,
         total_price: 2800,
-        size: "M",
-        color: "Черный",
+        size: "Ward",
+        color: "Arctic White",
         image_url: "",
       },
     ],
@@ -315,12 +315,12 @@ const MOCK_ORDERS: AdminOrder[] = [
     items: [
       {
         product_id: 220,
-        product_name: "Hijab Premium",
+        product_name: "ReaLab Infuse S3",
         quantity: 3,
         unit_price: 2000,
         total_price: 6000,
-        size: "One size",
-        color: "Песочный",
+        size: "ICU",
+        color: "Pacific Blue",
         image_url: "",
       },
     ],
@@ -412,7 +412,7 @@ const MOCK_DASHBOARD: AdminDashboardOverview = {
   top_products: [
     {
       product_id: 201,
-      product_name: "JUMANA 24",
+      product_name: "ReaLab Pulse 8",
       sold_items: 48,
       orders_count: 31,
       revenue: 67200,
@@ -420,7 +420,7 @@ const MOCK_DASHBOARD: AdminDashboardOverview = {
     },
     {
       product_id: 220,
-      product_name: "Hijab Premium",
+      product_name: "ReaLab EchoGo C7",
       sold_items: 41,
       orders_count: 25,
       revenue: 58200,
@@ -428,7 +428,7 @@ const MOCK_DASHBOARD: AdminDashboardOverview = {
     },
     {
       product_id: 204,
-      product_name: "Abaya Classic",
+      product_name: "ReaLab VentFlow V12",
       sold_items: 35,
       orders_count: 21,
       revenue: 49700,
@@ -438,8 +438,8 @@ const MOCK_DASHBOARD: AdminDashboardOverview = {
   low_stock: [
     {
       product_id: 204,
-      product_name: "Abaya Classic",
-      sku: "ABA-CLS-004",
+      product_name: "ReaLab VentFlow V12",
+      sku: "RLB-VNT-012",
       stock: 6,
       min_stock: 10,
       updated_at: "2026-02-28T09:10:00.000Z",
@@ -457,12 +457,12 @@ const MOCK_PRODUCTS: AdminPaginatedResponse<AdminProduct> = {
   results: [
     {
       id: 201,
-      name: "JUMANA 24",
-      slug: "jumana-24",
-      description: "Базовое платье из мягкой ткани.",
-      category_id: 4,
-      category_name: "Платья",
-      textile_name: "Тафета",
+      name: "ReaLab Pulse 8",
+      slug: "realab-pulse-8",
+      description: "Портативный монитор пациента для палатных и базовых сценариев.",
+      category_id: 1,
+      category_name: "Мониторинг пациентов",
+      textile_name: "Vital Sensors",
       created_at: "2026-02-10T10:20:00.000Z",
       updated_at: "2026-02-27T18:00:00.000Z",
       active: true,
@@ -472,18 +472,18 @@ const MOCK_PRODUCTS: AdminPaginatedResponse<AdminProduct> = {
       base_price: 4800,
       discount_price: 4400,
       cost_price: 2600,
-      promo_categories: ["популярные", "тренд"],
+      promo_categories: ["клинический выбор", "featured"],
       images: [],
       variants: [],
     },
     {
       id: 220,
-      name: "Hijab Premium",
-      slug: "hijab-premium",
-      description: "Премиальный хиджаб, легкий и дышащий.",
+      name: "ReaLab EchoGo C7",
+      slug: "realab-echogo-c7",
+      description: "Компактная система визуальной диагностики для кабинета и выезда.",
       category_id: 2,
-      category_name: "Хиджабы",
-      textile_name: "Шелк",
+      category_name: "Визуальная диагностика",
+      textile_name: "Imaging Suite",
       created_at: "2026-02-11T09:00:00.000Z",
       updated_at: "2026-02-27T17:00:00.000Z",
       active: true,
@@ -499,12 +499,12 @@ const MOCK_PRODUCTS: AdminPaginatedResponse<AdminProduct> = {
     },
     {
       id: 240,
-      name: "Cape Winter",
-      slug: "cape-winter",
-      description: "Утепленный кейп для холодного сезона.",
-      category_id: 6,
-      category_name: "Накидки",
-      textile_name: "Шерсть",
+      name: "ReaLab VentFlow V12",
+      slug: "realab-ventflow-v12",
+      description: "Система дыхательной поддержки для ICU и транспортных сценариев.",
+      category_id: 4,
+      category_name: "Дыхательная поддержка",
+      textile_name: "Respiratory Core",
       created_at: "2026-02-20T12:20:00.000Z",
       updated_at: "2026-02-26T12:00:00.000Z",
       active: false,
@@ -547,7 +547,7 @@ const MOCK_USERS: AdminPaginatedResponse<AdminUser> = {
         id: 3,
         first_name: "Admin",
         last_name: "Manager",
-        email: "manager@jumana.com",
+        email: "manager@realab.med",
         phone_number: "+996777001122",
         legacy_role: "manager",
         role: "manager",
@@ -573,8 +573,8 @@ const MOCK_CONTENT: AdminCmsSection[] = [
       {
         id: 1,
         key: "slide_1",
-        title: "Скромность, воплощенная в элегантности",
-        subtitle: "Made in Kyrgyzstan",
+        title: "Инженерная точность для клинических команд",
+        subtitle: "Clinical systems by ReaLab",
         image: "/media/banner-1.jpg",
         cta_text: "Каталог",
         cta_link: "/catalog",
@@ -592,8 +592,8 @@ const MOCK_CONTENT: AdminCmsSection[] = [
       {
         id: 2,
         key: "sale_1",
-        title: "Скидки до 50%",
-        subtitle: "Не упустите шанс",
+        title: "Спецусловия на оснащение отделений",
+        subtitle: "Актуальные предложения ReaLab",
         image: "/media/sale-1.jpg",
         cta_text: "Подробнее",
         cta_link: "/sale",
@@ -626,7 +626,7 @@ const MOCK_ACTIVITY: AdminPaginatedResponse<AdminActivityEvent> = {
       type: "product_updated",
       entity: "product",
       entity_id: 201,
-      entity_label: "JUMANA 24",
+      entity_label: "ReaLab Pulse 8",
       message: "Обновлена цена товара",
       created_at: "2026-02-26T12:20:00.000Z",
       actor: { id: 3, name: "Admin Manager", role: "manager" },
@@ -2248,6 +2248,24 @@ const AdminPanel = () => {
     }
   };
 
+  const renderTabPanel = (tab: AdminTab, content: ReactNode) => {
+    if (!canRenderActiveTabContent || activeTab !== tab) {
+      return null;
+    }
+
+    return (
+      <div
+        id={`admin-panel-${tab}`}
+        className={scss.tabPanel}
+        role="tabpanel"
+        aria-labelledby={`admin-tab-${tab}`}
+        tabIndex={-1}
+      >
+        {content}
+      </div>
+    );
+  };
+
   if (isAccessDenied) {
     return (
       <section className={scss.AdminPanel}>
@@ -2255,7 +2273,7 @@ const AdminPanel = () => {
           <div className={scss.main}>
             <header className={scss.topBar}>
               <div>
-                <h1>Панель управления сайтом</h1>
+                <h1>Панель управления ReaLab</h1>
                 <p>Недостаточно прав для доступа к админ-панели.</p>
               </div>
             </header>
@@ -2269,12 +2287,16 @@ const AdminPanel = () => {
     <section className={scss.AdminPanel}>
       <div className={scss.shell}>
         <aside className={scss.sidebar}>
-          <h2>Jumana Админ</h2>
-          <ul>
+          <h2>ReaLab Admin</h2>
+          <ul role="tablist" aria-label="Разделы админки">
             {visibleNavItems.map((item) => (
               <li key={item.key}>
                 <button
+                  id={`admin-tab-${item.key}`}
                   type="button"
+                  role="tab"
+                  aria-selected={activeTab === item.key}
+                  aria-controls={`admin-panel-${item.key}`}
                   className={activeTab === item.key ? scss.active : ""}
                   onClick={() => {
                     setActiveTab(item.key);
@@ -2289,14 +2311,14 @@ const AdminPanel = () => {
           </ul>
         </aside>
 
-        <div className={scss.main}>
+        <div className={scss.main} aria-busy={isActiveTabLoading}>
           <header className={scss.topBar}>
             <div>
-              <h1>Панель управления сайтом</h1>
-              <p>Товары, заказы, контент и аналитика в одном месте.</p>
+              <h1>Панель управления ReaLab</h1>
+              <p>Оборудование, заказы, контент и аналитика в одном медицинском контуре.</p>
             </div>
             <div className={scss.topActions}>
-                <select value={range} onChange={handleRangeChange}>
+                <select aria-label="Период аналитики" value={range} onChange={handleRangeChange}>
                 {RANGE_OPTIONS.map((item) => (
                   <option key={item} value={item}>
                     {RANGE_LABELS[item]}
@@ -2309,6 +2331,8 @@ const AdminPanel = () => {
             {message && (
               <div
                 className={`${scss.message} ${message.type === "success" ? scss.success : scss.error}`}
+                role={message.type === "success" ? "status" : "alert"}
+                aria-live={message.type === "success" ? "polite" : "assertive"}
               >
                 <div>{message.text}</div>
                 {message.traceId ? (
@@ -2319,7 +2343,7 @@ const AdminPanel = () => {
 
           {isActiveTabLoading && (
             <div className={scss.panel}>
-              <div className={scss.statePanel}>
+              <div className={scss.statePanel} role="status" aria-live="polite">
                 <h2>Загрузка раздела</h2>
                 <p>Получаем актуальные данные. Это может занять несколько секунд.</p>
               </div>
@@ -2328,7 +2352,7 @@ const AdminPanel = () => {
 
           {activeQueryMessage && (
             <div className={scss.panel}>
-              <div className={scss.statePanel}>
+              <div className={scss.statePanel} role="alert" aria-live="assertive">
                 <h2>Не удалось загрузить раздел</h2>
                 <p>{activeQueryMessage.text}</p>
                 {activeQueryMessage.traceId ? (
@@ -2343,81 +2367,84 @@ const AdminPanel = () => {
             </div>
           )}
 
-          {canRenderActiveTabContent && activeTab === "dashboard" && (
+          {renderTabPanel(
+            "dashboard",
             <AdminDashboardSection
               dashboard={dashboard}
               financeSummary={financeSummary}
               maxRevenue={maxRevenue}
-            />
+            />,
           )}
 
-            {canRenderActiveTabContent && activeTab === "products" && (
-              <>
-                <AdminProductsSection
-                  products={filteredProducts}
-                  categories={categories}
-                  totalCount={products.count}
-                  currentPage={productPage}
-                  pageSize={productPageSize}
-                  hasNextPage={Boolean(products.next)}
-                  hasPreviousPage={Boolean(products.previous)}
-                  search={productSearch}
-                  sorting={productSort}
-                  categoryFilter={productCategoryFilter}
-                  activeFilter={productActiveFilter}
-                  canManageProducts={canManageProducts}
-                  canDeleteProducts={canDeleteProducts}
-                  onSearchChange={(value) => {
-                    setProductSearch(value);
-                    setProductPage(1);
-                  }}
-                  onSortChange={(value) => {
-                    setProductSort(value);
-                    setProductPage(1);
-                  }}
-                  onCategoryFilterChange={(value) => {
-                    setProductCategoryFilter(value);
-                    setProductPage(1);
-                  }}
-                  onActiveFilterChange={(value) => {
-                    setProductActiveFilter(value);
-                    setProductPage(1);
-                  }}
-                  onPageChange={setProductPage}
-                  onPageSizeChange={(value) => {
-                    setProductPageSize(value as (typeof PRODUCT_PAGE_SIZE_OPTIONS)[number]);
-                    setProductPage(1);
-                  }}
-                  onResetFilters={() => {
-                    setProductSearch("");
-                    setProductSort("-updated_at");
-                    setProductCategoryFilter("all");
-                    setProductActiveFilter("all");
-                    setProductPage(1);
-                    setProductPageSize(20);
-                  }}
-                  onCreateProduct={openCreateProductModal}
-                  onEditProduct={openEditProductModal}
-                  onDeleteProduct={openDeleteProductModal}
-                />
-                <AdminInventorySection
-                  inventory={inventory}
-                  movements={inventoryMovements}
-                  lowStockOnly={inventoryLowStockOnly}
-                  selectedMovementType={inventoryMovementType}
-                  selectedInventoryItem={selectedInventoryItem}
-                  onToggleLowStock={() => setInventoryLowStockOnly((prev) => !prev)}
-                  onSelectMovementType={setInventoryMovementType}
-                  onSelectInventoryItem={setSelectedInventoryItem}
-                  onClearMovementFilters={() => {
-                    setSelectedInventoryItem(null);
-                    setInventoryMovementType("all");
-                  }}
-                />
-              </>
-            )}
+          {renderTabPanel(
+            "products",
+            <>
+              <AdminProductsSection
+                products={filteredProducts}
+                categories={categories}
+                totalCount={products.count}
+                currentPage={productPage}
+                pageSize={productPageSize}
+                hasNextPage={Boolean(products.next)}
+                hasPreviousPage={Boolean(products.previous)}
+                search={productSearch}
+                sorting={productSort}
+                categoryFilter={productCategoryFilter}
+                activeFilter={productActiveFilter}
+                canManageProducts={canManageProducts}
+                canDeleteProducts={canDeleteProducts}
+                onSearchChange={(value) => {
+                  setProductSearch(value);
+                  setProductPage(1);
+                }}
+                onSortChange={(value) => {
+                  setProductSort(value);
+                  setProductPage(1);
+                }}
+                onCategoryFilterChange={(value) => {
+                  setProductCategoryFilter(value);
+                  setProductPage(1);
+                }}
+                onActiveFilterChange={(value) => {
+                  setProductActiveFilter(value);
+                  setProductPage(1);
+                }}
+                onPageChange={setProductPage}
+                onPageSizeChange={(value) => {
+                  setProductPageSize(value as (typeof PRODUCT_PAGE_SIZE_OPTIONS)[number]);
+                  setProductPage(1);
+                }}
+                onResetFilters={() => {
+                  setProductSearch("");
+                  setProductSort("-updated_at");
+                  setProductCategoryFilter("all");
+                  setProductActiveFilter("all");
+                  setProductPage(1);
+                  setProductPageSize(20);
+                }}
+                onCreateProduct={openCreateProductModal}
+                onEditProduct={openEditProductModal}
+                onDeleteProduct={openDeleteProductModal}
+              />
+              <AdminInventorySection
+                inventory={inventory}
+                movements={inventoryMovements}
+                lowStockOnly={inventoryLowStockOnly}
+                selectedMovementType={inventoryMovementType}
+                selectedInventoryItem={selectedInventoryItem}
+                onToggleLowStock={() => setInventoryLowStockOnly((prev) => !prev)}
+                onSelectMovementType={setInventoryMovementType}
+                onSelectInventoryItem={setSelectedInventoryItem}
+                onClearMovementFilters={() => {
+                  setSelectedInventoryItem(null);
+                  setInventoryMovementType("all");
+                }}
+              />
+            </>,
+          )}
 
-          {canRenderActiveTabContent && activeTab === "discounts" && (
+          {renderTabPanel(
+            "discounts",
             <AdminDiscountsSection
               filteredProducts={filteredProducts}
               categories={categories}
@@ -2467,10 +2494,11 @@ const AdminPanel = () => {
               onApplyDiscountPreset={applyDiscountPreset}
               onResetDiscountDraft={resetDiscountDraft}
               onSaveDiscount={handleDiscountSave}
-            />
+            />,
           )}
 
-          {canRenderActiveTabContent && activeTab === "orders" && (
+          {renderTabPanel(
+            "orders",
             <AdminOrdersSection
               filteredOrders={filteredOrders}
               totalCount={orders.count}
@@ -2538,9 +2566,10 @@ const AdminPanel = () => {
               }}
               onOpenOrderDetails={openOrderDetailsModal}
               onChangeOrderStatus={handleOrderStatusChange}
-            />
+            />,
           )}
-          {canRenderActiveTabContent && activeTab === "content" && (
+          {renderTabPanel(
+            "content",
             <AdminContentSection
               contentProducts={contentProducts}
               sections={sections}
@@ -2563,10 +2592,11 @@ const AdminPanel = () => {
               onAboutPageSave={handleAboutPageSave}
               onAboutHeroImageUpload={handleAboutHeroImageUpload}
               onAboutBlockImageUpload={handleAboutBlockImageUpload}
-            />
+            />,
           )}
 
-          {canRenderActiveTabContent && activeTab === "users" && (
+          {renderTabPanel(
+            "users",
             <AdminUsersSection
               users={users}
               roles={roles}
@@ -2613,10 +2643,11 @@ const AdminPanel = () => {
               onUpdateRole={handleUpdateRole}
               onDeleteRole={handleDeleteRole}
               onUpdateUserRoles={handleUserRolesUpdate}
-            />
+            />,
           )}
 
-          {canRenderActiveTabContent && activeTab === "activity" && (
+          {renderTabPanel(
+            "activity",
             <AdminActivitySection
               activities={activities}
               auditLogs={auditLogs}
@@ -2663,7 +2694,7 @@ const AdminPanel = () => {
                 setActivityPage(1);
                 setAuditPage(1);
               }}
-            />
+            />,
           )}
 
           <AdminOrderDetailsModal

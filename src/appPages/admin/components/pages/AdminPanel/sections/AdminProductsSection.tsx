@@ -105,13 +105,15 @@ export const AdminProductsSection = ({
         </button>
       </div>
 
-      <div className={scss.productFilters}>
+      <div className={scss.productFilters} role="search" aria-label="Фильтры товаров">
         <input
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Поиск по названию или slug"
+          aria-label="Поиск по названию товара или slug"
         />
         <select
+          aria-label="Сортировка товаров"
           value={sorting}
           onChange={(event) =>
             onSortChange(
@@ -132,6 +134,7 @@ export const AdminProductsSection = ({
           ))}
         </select>
         <select
+          aria-label="Фильтр товаров по категории"
           value={categoryFilter}
           onChange={(event) =>
             onCategoryFilterChange(
@@ -147,6 +150,7 @@ export const AdminProductsSection = ({
           ))}
         </select>
         <select
+          aria-label="Фильтр товаров по статусу"
           value={activeFilter}
           onChange={(event) => onActiveFilterChange(event.target.value as "all" | "active" | "draft")}
         >
@@ -161,15 +165,16 @@ export const AdminProductsSection = ({
 
       <div className={scss.tableWrap}>
         <table>
+          <caption className={scss.srOnly}>Таблица товаров</caption>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Название</th>
-              <th>Категория</th>
-              <th>Остаток</th>
-              <th>Продано</th>
-              <th>Статус</th>
-              <th>Действия</th>
+              <th scope="col">ID</th>
+              <th scope="col">Название</th>
+              <th scope="col">Категория</th>
+              <th scope="col">Остаток</th>
+              <th scope="col">Продано</th>
+              <th scope="col">Статус</th>
+              <th scope="col">Действия</th>
             </tr>
           </thead>
           <tbody>
@@ -223,6 +228,7 @@ export const AdminProductsSection = ({
           <label className={scss.pageSizeControl}>
             <span>Показывать</span>
             <select
+              aria-label="Количество товаров на странице"
               value={pageSize}
               onChange={(event) => onPageSizeChange(Number(event.target.value))}
             >
@@ -241,8 +247,14 @@ export const AdminProductsSection = ({
               value={pageJumpValue}
               onChange={(event) => setPageJumpValue(event.target.value)}
               onBlur={handlePageJump}
+              aria-label="Перейти к странице товаров"
             />
-            <button type="button" className={scss.secondaryAction} onClick={handlePageJump}>
+            <button
+              type="button"
+              className={scss.secondaryAction}
+              onClick={handlePageJump}
+              aria-label="Перейти к выбранной странице товаров"
+            >
               Перейти
             </button>
           </div>
@@ -252,6 +264,7 @@ export const AdminProductsSection = ({
               className={scss.secondaryAction}
               disabled={!hasPreviousPage}
               onClick={() => onPageChange(currentPage - 1)}
+              aria-label="Предыдущая страница товаров"
             >
               Назад
             </button>
@@ -260,6 +273,7 @@ export const AdminProductsSection = ({
               className={scss.secondaryAction}
               disabled={!hasNextPage}
               onClick={() => onPageChange(currentPage + 1)}
+              aria-label="Следующая страница товаров"
             >
               Далее
             </button>

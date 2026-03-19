@@ -7,8 +7,8 @@ import { useGetEndContentQuery } from "../../../../../../redux/api/category";
 import scss from "./Content.module.scss";
 
 const DEFAULT_TEXT =
-  "Мы создаём одежду, которая объединяет традиции и современный стиль. В каждой детали — качество, комфорт и забота о вас. Наши коллекции вдохновляют и подчёркивают вашу индивидуальность.";
-const DEFAULT_SIGNATURE = "С любовью, Jumana";
+  "ReaLab выстраивает поставку медицинского оборудования как цельный продуктовый опыт: от понятного каталога и подбора конфигурации до запуска, сопровождения и повторных закупок.";
+const DEFAULT_SIGNATURE = "Команда ReaLab";
 
 const Content = () => {
   const router = useRouter();
@@ -20,13 +20,16 @@ const Content = () => {
 
   return (
     <section className={scss.contentSection}>
-      <div className={scss.inner}>
-        <p className={scss.text}>{text}</p>
-        <p className={scss.signature}>{signature}</p>
+      <div className="container">
+        <div className={scss.inner}>
+          <span className={scss.eyebrow}>Подход ReaLab</span>
+          <p className={scss.text}>{text}</p>
+          <p className={scss.signature}>{signature}</p>
 
-        <button type="button" onClick={() => router.push("/about")}>
-          Подробнее <Image src={arrow} alt="arrow" />
-        </button>
+          <button type="button" onClick={() => router.push("/about")}>
+            История ReaLab <Image src={arrow} alt="Стрелка" />
+          </button>
+        </div>
       </div>
     </section>
   );

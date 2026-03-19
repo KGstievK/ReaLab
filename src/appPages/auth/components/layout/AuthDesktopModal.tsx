@@ -33,7 +33,7 @@ const AuthDesktopModal: FC<AuthDesktopModalProps> = ({
           type="button"
           className={closeButtonClassName}
           onClick={handleClose}
-          aria-label="Close auth modal"
+          aria-label="Закрыть окно авторизации"
         >
           x
         </button>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useEffect, useState } from "react";
 import s from "./colors.module.scss";
@@ -50,6 +50,11 @@ const colorMap: Record<string, string> = {
   gold: "#b89b39",
   silver: "#b9b9b9",
   maroon: "#6e1f33",
+  graphite: "#6e717b",
+  "arctic white": "#f3f6fb",
+  "pacific blue": "#6f9cbe",
+  "silver mist": "#c5ccd6",
+  "coral signal": "#ff8f8b",
 };
 
 const getColor = (color: string): string => {
@@ -109,4 +114,3 @@ const ColorsClothes: FC<IPropsColors> = ({
 };
 
 export default ColorsClothes;
-

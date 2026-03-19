@@ -83,12 +83,12 @@ const TEXT = {
   cityOsh: "Ош",
   cityKarakol: "Каракол",
   phoneError: "Введите корректный номер",
-  stepOneTitle: "ЛИЧНАЯ ИНФОРМАЦИЯ",
-  stepTwoTitle: "ДОСТАВКА",
+  stepOneTitle: "КОНТАКТНЫЕ ДАННЫЕ",
+  stepTwoTitle: "ПОСТАВКА",
   stepThreeTitle: "ПОДТВЕРЖДЕНИЕ",
-  checkoutTitle: "Оформление заказа",
-  confirmationTitle: "Подтверждение",
-  payDetails: "Детали оплаты",
+  checkoutTitle: "Оформление поставки",
+  confirmationTitle: "Подтверждение заказа",
+  payDetails: "Сводка заказа",
   home: "Главная",
   cart: "Корзина",
   back: "Назад",
@@ -106,7 +106,7 @@ const TEXT = {
   enterAddress: "Введите адрес",
   chooseDelivery: "Выберите способ получения",
   choosePayment: "Выберите способ оплаты",
-  saveAddress: "Сохранить этот адрес в профиле",
+  saveAddress: "Сохранить адрес организации в профиле",
   qrUnavailable: "QR-код временно недоступен",
   pickup: "Самовывоз",
   pickupApi: "самовывоз",
@@ -116,7 +116,7 @@ const TEXT = {
   returnToCart: "Вернуть в корзину",
   manualAddress: "Ввести вручную",
   notSpecified: "Не указан",
-  subtotal: "Итог",
+  subtotal: "Оборудование",
   delivery: "Доставка",
   discount: "Скидка",
   totalToPay: "Итого к оплате:",
@@ -132,7 +132,7 @@ const toNumber = (value: unknown) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-const formatSom = (value: number) => `${value.toLocaleString("ru-RU")}с`;
+const formatPrice = (value: number) => `${value.toLocaleString("ru-RU")} KGS`;
 
 const getPaymentMethodLabel = (
   method: PaymentMethod,
@@ -143,8 +143,19 @@ const getPaymentMethodLabel = (
 
 const CheckoutSection = () => {
   const router = useRouter();
-  const { data: cart } = useGetCartQuery();
-  const { data: meData } = useGetMeQuery();
+  const {
+    data: cart,
+    isLoading: isCartLoading,
+    isError: isCartError,
+    error: cartError,
+    refetch: refetchCart,
+  } = useGetCartQuery();
+  const {
+    data: meData,
+    isError: isProfileError,
+    error: profileError,
+    refetch: refetchProfile,
+  } = useGetMeQuery();
   const { data: payData } = useGetPayQuery();
   const { data: paymentMethodsData } = useGetPaymentMethodsQuery();
   const [postOrderMutation] = usePostOrderMutation();
@@ -278,6 +289,7 @@ const CheckoutSection = () => {
     delivery: deliveryMethod === "pickup" ? TEXT.pickupApi : "курьер",
     city: formData.city,
     country: checkoutCountry,
+    payment_method: paymentMethod,
   } as const;
   const { data: shippingQuote } = useGetShippingQuoteQuery(shippingRequest);
   const deliveryPrice = toNumber(shippingQuote?.price);
@@ -527,6 +539,63 @@ const CheckoutSection = () => {
     });
   };
 
+  if (isCartLoading && !normalizedCart) {
+    return (
+      <section className={scss.CheckoutSection}>
+        <div className="container">
+          <div className={scss.statusState}>
+            <p>Загружаем корзину для оформления заказа...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (isCartError && !normalizedCart) {
+    return (
+      <section className={scss.CheckoutSection}>
+        <div className="container">
+          <div className={`${scss.statusState} ${scss.statusStateError}`} role="alert">
+            <p>
+              {getRateLimitAwareMessage(
+                extractApiErrorInfo(cartError, "Не удалось загрузить корзину"),
+                "Не удалось загрузить корзину. Попробуйте позже.",
+              )}
+            </p>
+            <div className={scss.statusActions}>
+              <button type="button" onClick={() => void refetchCart()}>
+                Повторить
+              </button>
+              <button type="button" onClick={() => router.push("/cart")}>
+                Вернуться в корзину
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (basketData.length === 0) {
+    return (
+      <section className={scss.CheckoutSection}>
+        <div className="container">
+          <div className={`${scss.statusState} ${scss.statusStateEmpty}`}>
+            <p>В корзине нет товаров для оформления заказа.</p>
+            <div className={scss.statusActions}>
+              <button type="button" onClick={() => router.push("/cart")}>
+                Открыть корзину
+              </button>
+              <button type="button" onClick={() => router.push("/catalog")}>
+                Перейти в каталог
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <>
       <section className={scss.CheckoutSection}>
@@ -550,6 +619,20 @@ const CheckoutSection = () => {
               </nav>
 
               <h1 className={scss.pageTitle}>{pageTitle}</h1>
+
+              {isProfileError ? (
+                <div className={`${scss.inlineState} ${scss.inlineStateError}`} role="alert">
+                  <p>
+                    {getRateLimitAwareMessage(
+                      extractApiErrorInfo(profileError, "Не удалось загрузить сохранённые адреса"),
+                      "Не удалось загрузить профиль полностью. Вы всё ещё можете оформить заказ вручную.",
+                    )}
+                  </p>
+                  <button type="button" onClick={() => void refetchProfile()}>
+                    Повторить
+                  </button>
+                </div>
+              ) : null}
 
               <div className={scss.stepper}>
                 <div className={scss.stepItem}>
@@ -751,12 +834,23 @@ const CheckoutSection = () => {
                         <h5>{TEXT.courier}</h5>
                         <p>{deliveryMethod === "courier" ? deliveryEtaLabel : TEXT.courierEta}</p>
                       </div>
-                      <strong>{formatSom(deliveryPrice)}</strong>
+                      <strong>{formatPrice(deliveryPrice)}</strong>
                     </button>
 
                     {errors.delivery && (
                       <p className={scss.commonError}>{errors.delivery}</p>
                     )}
+
+                    {shippingQuote?.warning ? (
+                      <div className={scss.deliveryNotice} role="status">
+                        <p>{shippingQuote.warning}</p>
+                        <span>
+                          {shippingQuote.is_live_rate
+                            ? "Тариф подтверждён автоматически"
+                            : "Сейчас отображается ориентировочный тариф"}
+                        </span>
+                      </div>
+                    ) : null}
                   </div>
                 )}
 
@@ -808,7 +902,7 @@ const CheckoutSection = () => {
                         <h4>{item.clothes.clothes_name}</h4>
                         <p>{selectedImage?.color || TEXT.notSpecified}</p>
                         <p>
-                          {item.quantity} x {toNumber(item.just_price)}
+                          {item.quantity} x {formatPrice(toNumber(item.just_price))}
                         </p>
                       </div>
                     </div>
@@ -819,19 +913,19 @@ const CheckoutSection = () => {
               <div className={scss.summaryRows}>
                 <div className={scss.row}>
                   <span>{TEXT.subtotal}</span>
-                  <span>{formatSom(subtotal)}</span>
+                  <span>{formatPrice(subtotal)}</span>
                 </div>
                 <div className={scss.row}>
                   <span>{TEXT.delivery}</span>
-                  <span>{formatSom(deliveryPrice)}</span>
+                  <span>{formatPrice(deliveryPrice)}</span>
                 </div>
                 <div className={scss.row}>
                   <span>{TEXT.discount}</span>
-                  <span>-{formatSom(discountPrice)}</span>
+                  <span>-{formatPrice(discountPrice)}</span>
                 </div>
                 <div className={`${scss.row} ${scss.totalRow}`}>
                   <span>{TEXT.totalToPay}</span>
-                  <span>{formatSom(totalToPay)}</span>
+                  <span>{formatPrice(totalToPay)}</span>
                 </div>
               </div>
 

@@ -1,0 +1,132 @@
+.BurgeMenu {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(51, 66, 86, 0.18);
+  backdrop-filter: blur(6px);
+  border: 0;
+}
+
+.panel {
+  position: relative;
+  height: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.content {
+  margin-left: auto;
+  width: min(100%, 420px);
+  height: 100%;
+  padding: 26px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background: linear-gradient(180deg, rgba(247, 249, 252, 0.94), rgba(232, 237, 244, 0.96));
+  box-shadow: -18px 0 42px rgba(142, 152, 165, 0.24);
+}
+
+.topRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.brandBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.brandEyebrow {
+  font-size: 0.76rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-subtext);
+}
+
+.brandBlock p {
+  max-width: 28ch;
+  color: var(--color-text);
+}
+
+.closeButton {
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  min-height: 48px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 18px;
+  border-radius: 22px;
+  background: var(--surface-gradient);
+  box-shadow: var(--shadow-soft-sm);
+  color: var(--color-text);
+}
+
+.navLink span {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.navLink svg {
+  color: var(--color-subtext);
+}
+
+.active {
+  background: linear-gradient(145deg, rgba(255, 143, 139, 0.18), rgba(137, 178, 203, 0.12));
+}
+
+.quickActions {
+  display: grid;
+  gap: 14px;
+}
+
+.actionCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 24px;
+  background: var(--surface-gradient);
+  box-shadow: var(--shadow-soft-sm);
+}
+
+.actionCard strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.actionCard span {
+  color: var(--color-subtext);
+  font-size: 0.92rem;
+}
+
+.actionCard svg {
+  width: 20px;
+  height: 20px;
+  color: var(--color-brand);
+}

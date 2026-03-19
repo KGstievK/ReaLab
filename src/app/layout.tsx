@@ -19,17 +19,17 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Jumana",
-    template: "%s | Jumana",
+    default: "ReaLab",
+    template: "%s | ReaLab",
   },
   description:
-    "Jumana — интернет-магазин скромной женской одежды: платья, туники, комплекты, хиджабы и аксессуары в эстетике premium modest fashion.",
+    "ReaLab — storefront медицинского оборудования для клиник, лабораторий и реабилитационных центров с чистым цифровым UX и B2B-ready procurement flow.",
   openGraph: {
-    title: "Jumana",
+    title: "ReaLab",
     description:
-      "Скромная женская одежда Jumana: современный modest fashion, мягкая премиальность и аккуратная эстетика.",
+      "Медицинское оборудование ReaLab: мониторинг, диагностика, инфузионная терапия, лабораторные и реабилитационные решения.",
     url: SITE_URL,
-    siteName: "Jumana",
+    siteName: "ReaLab",
     locale: "ru_RU",
     type: "website",
   },

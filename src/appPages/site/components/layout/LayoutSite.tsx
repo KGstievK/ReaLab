@@ -1,8 +1,8 @@
 import { FC, ReactNode, useEffect, useRef, useState } from "react";
-import Footer from "./Footer/Footer";
+import Footer from "./Footer/FooterReaLab";
 import Header from "./Header/Header";
 import scss from "./LayoutSite.module.scss";
-import Tabbar from "../ui/TabBar/Tabbar";
+import Tabbar from "../ui/TabBar/TabbarReaLab";
 
 interface LayoutSiteProps {
   children: ReactNode;

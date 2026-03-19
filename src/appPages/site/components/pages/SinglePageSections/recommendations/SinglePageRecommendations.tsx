@@ -7,7 +7,7 @@ import scss from "./SinglePageRecommendations.module.scss";
 import star from "@/assets/icons/Star.svg";
 import heart from "@/assets/icons/HeartStraight.svg";
 import heartRed from "@/assets/icons/red-heart-icon.svg";
-import bagSvg from "@/assets/icons/bag-happy.svg";
+import bagSvg from "@/assets/icons/bag-happyBlack.svg";
 import ColorsClothes from "../../../ui/colors/Colors";
 import {
   useDeleteFavoriteMutation,
@@ -43,6 +43,8 @@ interface ClothesItem {
     color: string;
   }>;
 }
+
+const formatPrice = (value: number) => `${Math.round(value).toLocaleString("ru-RU")} KGS`;
 
 const SinglePageRecommendations: FC<RecommendationProps> = ({
   currentProductId,
@@ -83,6 +85,7 @@ const SinglePageRecommendations: FC<RecommendationProps> = ({
   }, [favoriteItems]);
 
   const recommendations = useMemo(() => {
+    
     if (!allClothes.length) {
       return [];
     }
@@ -208,7 +211,7 @@ const SinglePageRecommendations: FC<RecommendationProps> = ({
   return (
     <section className={scss.recommendations}>
       <div className={scss.header}>
-        <h2>Рекомендуемые товары</h2>
+        <h2>Рекомендуемые решения</h2>
       </div>
 
       <div className={scss.cards}>
@@ -243,15 +246,16 @@ const SinglePageRecommendations: FC<RecommendationProps> = ({
                 </button>
               </div>
 
-              {item.clothes_img[0] && (
+              {item.clothes_img.map((image, index) => (
                 <Image
-                  src={resolveMediaUrl(item.clothes_img[0].photo)}
+                  key={index}
+                  src={resolveMediaUrl(image.photo)}
                   alt={item.clothes_name}
                   width={420}
                   height={540}
                   className={scss.mainImage}
                 />
-              )}
+              ))}
 
               <button type="button" className={scss.cartButton}>
                 <Image src={bagSvg} alt="cart" width={20} height={20} />
@@ -262,14 +266,14 @@ const SinglePageRecommendations: FC<RecommendationProps> = ({
               <div className={scss.metaRow}>
                 <p>{item.category_name}</p>
                 {/* <p>PRODUCT CATEGORY</p> */}
-                <ColorsClothes clothesImg={item.clothes_img.slice(0, 3)} size="sm" />
+                {/* <ColorsClothes clothesImg={item.clothes_img.slice(0, 3)} size="sm" /> */}
               </div>
 
               <h3>{item.clothes_name}</h3>
 
               <div className={scss.price}>
-                <span>{Math.round(item.discount_price)} сом</span>
-                <del>{Math.round(item.price)} сом</del>
+                <span>{formatPrice(item.discount_price)}</span>
+                <del>{formatPrice(item.price)}</del>
               </div>
             </div>
           </article>

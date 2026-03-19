@@ -1,11 +1,11 @@
-import { Suspense } from "react";
+﻿import { Suspense } from "react";
 import ForgotPage from "../../../appPages/auth/components/pages/ForgotPage";
 import AuthDesktopModal from "../../../appPages/auth/components/layout/AuthDesktopModal";
 import { createNoIndexMetadata } from "@/utils/seo";
 
 export const metadata = createNoIndexMetadata(
-  "Сброс пароля",
-  "Восстановление доступа к аккаунту Jumana.",
+  "Сброс пароля ReaLab",
+  "Восстановление доступа к аккаунту ReaLab.",
   "/auth/forgot",
 );
 

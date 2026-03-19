@@ -1,11 +1,11 @@
 "use client";
 
-import Home from "../../../appPages/site/components/pages/Home";
+import HomeReaLabPage from "../../../appPages/site/components/pages/HomeReaLabPage";
 
 const page = () => {
   return (
     <div>
-      <Home />
+      <HomeReaLabPage />
     </div>
   );
 };

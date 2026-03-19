@@ -1,5 +1,6 @@
-"use client";
+﻿"use client";
 
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { FC, useEffect, useState } from "react";
@@ -18,18 +19,37 @@ import { getStoredAccessToken } from "../../../../../utils/authStorage";
 import { buildSignInHref } from "../../../../../utils/authIntent";
 import ColorsClothes from "../../ui/colors/Colors";
 import Sizes from "./sizes/Sizes";
-import Review from "./Review/Review";
-import SinglePageRecommendations from "./recommendations/SinglePageRecommendations";
 import { resolveMediaUrl } from "@/utils/media";
+
+const SinglePageRecommendations = dynamic(
+  () => import("./recommendations/SinglePageRecommendations"),
+  {
+    loading: () => (
+      <div className={scss.deferredState}>
+        <p>Подбираем похожие решения...</p>
+      </div>
+    ),
+  },
+);
+
+const Review = dynamic(() => import("./Review/Review"), {
+  loading: () => (
+    <div className={scss.deferredState}>
+      <p>Загружаем отзывы клиентов...</p>
+    </div>
+  ),
+});
 
 const sizes = ["XXS", "XS", "S", "M", "L", "XL", "XXL"];
 
 const capitalize = (value: string): string =>
   value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 
+const formatPrice = (value: number) => `${value.toLocaleString("ru-RU")} KGS`;
+
 interface ClothesImg {
   photo: string;
-  id: number;
+  id?: number | null;
   color: string;
 }
 
@@ -50,13 +70,54 @@ interface FormValues {
   size: string;
 }
 
+const trustItems = [
+  {
+    title: "Поставка и ввод в работу",
+    text: "Согласуем логистику, документы и сценарий запуска оборудования под вашу организацию.",
+  },
+  {
+    title: "Клинический и инженерный контекст",
+    text: "Решения ReaLab подбираются с учетом отделения, потока пациентов и требований к сервису.",
+  },
+  {
+    title: "Поддержка после поставки",
+    text: "Помогаем с сервисным маршрутом, дооснащением и повторными закупками после внедрения.",
+  },
+];
+
+const sizeGuideRows = [
+  { size: "XXS", channels: "4", display: "7\"", usage: "Транспорт и палата" },
+  { size: "XS", channels: "5", display: "8\"", usage: "Смотровой кабинет" },
+  { size: "S", channels: "6", display: "10\"", usage: "Общий стационар" },
+  { size: "M", channels: "8", display: "12\"", usage: "Операционный блок" },
+  { size: "L", channels: "10", display: "15\"", usage: "ICU / реанимация" },
+  { size: "XL", channels: "12", display: "17\"", usage: "Высокая нагрузка" },
+  { size: "XXL", channels: "Модуль", display: "19\"", usage: "Центральная станция" },
+] as const;
+
+const fitNotes = [
+  "Базовые конфигурации подходят для стандартных кабинетов и палатных сценариев.",
+  "Если оборудование планируется для интенсивной терапии, ориентируйтесь на конфигурации с запасом по каналам и экрану.",
+  "Перед закупкой уточняйте итоговую спецификацию, совместимость и сервисный маршрут у команды ReaLab.",
+];
+
+const deliveryNotes = [
+  "Стоимость и срок поставки рассчитываются автоматически на этапе оформления запроса.",
+  "Для крупных проектов команда ReaLab подтверждает график отгрузки и пакет документов отдельно.",
+  "При необходимости поможем с вводом в эксплуатацию, сервисным маршрутом и дооснащением.",
+] as const;
+
 const SinglePageSection: FC = () => {
-  const id = useParams();
+  const params = useParams<{ single: string }>();
+  const productId = Number(params.single);
   const { data: cart } = useGetCartQuery();
-  const { data } = useGetClothesByIdQuery(Number(id.single));
+  const { data } = useGetClothesByIdQuery(productId);
   const [selectedPhoto, setSelectedPhoto] = useState<string | undefined>();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [count, setCounter] = useState(1);
+  const [expandedPanel, setExpandedPanel] = useState<"size" | "fit" | "delivery" | null>(
+    null,
+  );
   const [addBasketMutation] = useAddToBasketMutation();
   const [updateBasketMutation] = useUpdateBasketMutation();
   const router = useRouter();
@@ -107,7 +168,7 @@ const SinglePageSection: FC = () => {
 
     if (!getStoredAccessToken()) {
       const safePath =
-        pathname && pathname.startsWith("/") ? pathname : `/${id.single}`;
+        pathname && pathname.startsWith("/") ? pathname : `/${params.single}`;
       router.push(buildSignInHref(safePath, safePath));
       return;
     }
@@ -159,8 +220,12 @@ const SinglePageSection: FC = () => {
     textile_clothes,
     clothes_img,
     average_rating,
-    id: productId,
+    id,
   } = data;
+
+  const categoryNames = category.map((item) => item.category_name).filter(Boolean);
+  const primaryCategory = categoryNames[0] || "Оборудование";
+  const categoryHref = `/catalog?category=${encodeURIComponent(primaryCategory)}`;
 
   const normalizedAvailableSizes = (
     Array.isArray(availableSizes)
@@ -173,19 +238,35 @@ const SinglePageSection: FC = () => {
   const currentPrice = Math.round(Number(discount_price ?? price));
   const previousPrice = Math.round(Number(price));
   const ratingValue = Number(average_rating || 0).toFixed(2);
+  const isInStock = data.quantities > 0;
+  const isLowStock = isInStock && data.quantities <= 3;
+  const availabilityLabel = isInStock
+    ? `Доступно на складе: ${data.quantities} ед.`
+    : "Нет в наличии";
+  const restockHref = `/contacts?topic=restock&product=${id}`;
+  const submitSelection = handleSubmit(onSubmit);
+
+  const handleSelectPhoto = (item: ClothesImg) => {
+    if (!item.id) {
+      return;
+    }
+
+    setFormValue("color_id", item.id, { shouldValidate: true });
+    setSelectedPhoto(item.photo);
+  };
 
   return (
     <section className={scss.SinglePageSection}>
       <div className="container">
-        <div className={scss.header}>
+        <nav className={scss.header} aria-label="Хлебные крошки">
           <Link href="/">Главная</Link>
-          <span>|</span>
-          <Link href="/catalog">Категории</Link>
-          <span>|</span>
-          <span>Платья</span>
-          <span>|</span>
-          <Link href={`/${productId}`}>{clothes_name}</Link>
-        </div>
+          <span aria-hidden="true">|</span>
+          <Link href="/catalog">Каталог</Link>
+          <span aria-hidden="true">|</span>
+          <Link href={categoryHref}>{primaryCategory}</Link>
+          <span aria-hidden="true">|</span>
+          <span aria-current="page">{clothes_name}</span>
+        </nav>
 
         <div className={scss.content}>
           <div className={scss.images}>
@@ -195,28 +276,42 @@ const SinglePageSection: FC = () => {
                 alt={clothes_name}
                 width={6000}
                 height={5000}
+                priority
+                sizes="(max-width: 1100px) 100vw, 52vw"
               />
             </div>
 
-            <div className={scss.thumbnails}>
-              {clothes_img?.map((item: ClothesImg) => (
-                <div
-                  key={item.id}
-                  className={`${scss.thumbnail} ${
-                    item.photo === selectedPhoto ? scss.activeThumbnail : ""
-                  }`}
-                  onClick={() => {
-                    setFormValue("color_id", item.id, { shouldValidate: true });
-                    setSelectedPhoto(item.photo);
-                  }}
-                >
-                  <Image
-                    src={resolveMediaUrl(item.photo)}
-                    alt={`Фото ${item.id}`}
-                    width={2500}
-                    height={2500}
-                  />
-                </div>
+            <div className={scss.thumbnails} aria-label="Миниатюры оборудования">
+              {clothes_img?.map((item, index) => {
+                const isSelected = item.photo === selectedPhoto;
+                const colorLabel = item.color ? `Исполнение ${item.color}` : `Фото ${index + 1}`;
+
+                return (
+                  <button
+                    key={item.id ?? `${item.photo}-${index}`}
+                    type="button"
+                    className={`${scss.thumbnail} ${isSelected ? scss.activeThumbnail : ""}`}
+                    onClick={() => handleSelectPhoto(item)}
+                    aria-label={`Выбрать изображение: ${colorLabel}`}
+                    aria-pressed={isSelected}
+                  >
+                    <Image
+                      src={resolveMediaUrl(item.photo)}
+                      alt={`${clothes_name}, ${colorLabel}`}
+                      width={2500}
+                      height={2500}
+                      sizes="(max-width: 1100px) 18vw, 8vw"
+                    />
+                  </button>
+                );
+              })}
+            </div>
+             <div className={scss.trustGrid1}>
+              {trustItems.map((item) => (
+                <article key={item.title} className={scss.trustItem}>
+                  <h4>{item.title}</h4>
+                  <p>{item.text}</p>
+                </article>
               ))}
             </div>
           </div>
@@ -229,7 +324,7 @@ const SinglePageSection: FC = () => {
             <input type="hidden" {...register("size", { required: true })} />
 
             <div className={scss.headLine}>
-              <h3>{category.map((item) => item.category_name)}</h3>
+              <h3>{categoryNames.join(", ")}</h3>
               <div className={scss.mark}>
                 <Image src={star} alt="Рейтинг" width={24} height={24} />
                 <h6>{ratingValue}</h6>
@@ -238,13 +333,29 @@ const SinglePageSection: FC = () => {
 
             <h1>{clothes_name}</h1>
 
+            <div className={scss.statusRow}>
+              <div className={scss.availabilityGroup}>
+                <span
+                  className={`${scss.availability} ${
+                    isInStock ? scss.inStock : scss.outOfStock
+                  }`}
+                >
+                  {availabilityLabel}
+                </span>
+                {isLowStock ? (
+                  <span className={scss.availabilityHint}>Осталось совсем немного</span>
+                ) : null}
+              </div>
+              <span className={scss.metaItem}>Артикул: RL-{id}</span>
+            </div>
+
             <div className={scss.price}>
-              <del>{previousPrice} Сом</del>
-              <h4>{currentPrice} Сом</h4>
+              {previousPrice !== currentPrice ? <del>{formatPrice(previousPrice)}</del> : null}
+              <h4>{formatPrice(currentPrice)}</h4>
             </div>
 
             <div className={scss.textile}>
-              <h5>Ткань:</h5>
+              <h5>Материалы и платформа:</h5>
               <h4>
                 {textile_clothes
                   .map((item: { textile_name: string }) =>
@@ -255,7 +366,7 @@ const SinglePageSection: FC = () => {
             </div>
 
             <div className={scss.colors}>
-              <h5>Цвета:</h5>
+              <h5>Исполнения:</h5>
               <ColorsClothes
                 clothesImg={clothes_img}
                 onClick={(item) => {
@@ -263,18 +374,32 @@ const SinglePageSection: FC = () => {
                     return;
                   }
 
-                  setFormValue("color_id", item.id, { shouldValidate: true });
-                  setSelectedPhoto(item.photo);
+                  handleSelectPhoto(item);
                 }}
               />
               {errors.color_id && (
                 <p className={scss.error} role="alert">
-                  Пожалуйста, выберите цвет
+                  Пожалуйста, выберите исполнение
                 </p>
               )}
             </div>
             <div className={scss.description}>
               <p>{clothes_description}</p>
+            </div>
+
+            <div className={scss.metaList}>
+              <div className={scss.metaCard}>
+                <span>Поставщик</span>
+                <strong>{data.made_in || "ReaLab Certified"}</strong>
+              </div>
+              <div className={scss.metaCard}>
+                <span>Категория оборудования</span>
+                <strong>{primaryCategory}</strong>
+              </div>
+              <div className={scss.metaCard}>
+                <span>Сценарий</span>
+                <strong>Клиники, лаборатории и ICU</strong>
+              </div>
             </div>
 
             <div className={scss.sizes}>
@@ -289,40 +414,154 @@ const SinglePageSection: FC = () => {
               />
               {errors.size && (
                 <p className={scss.error} role="alert">
-                  Пожалуйста, выберите размер
+                  Пожалуйста, выберите конфигурацию
                 </p>
               )}
             </div>
 
-            <div className={scss.quantity}>
-              <h3>Количество:</h3>
-              <div className={scss.groupOfBtn}>
-                <div className={scss.counter}>
-                  <button
-                    type="button"
-                    onClick={decrementCount}
-                    disabled={count === 1}
-                  >
-                    -
-                  </button>
-                  <span>{count}</span>
-                  <button
-                    type="button"
-                    onClick={incrementCount}
-                    disabled={count >= data.quantities}
-                    className={count >= data.quantities ? scss.disabledBtn : ""}
-                  >
-                    +
+            {isInStock ? (
+              <div className={scss.quantity}>
+                <h3>Количество единиц:</h3>
+                <div className={scss.groupOfBtn}>
+                  <div className={scss.counter}>
+                    <button
+                      type="button"
+                      onClick={decrementCount}
+                      disabled={count === 1}
+                      aria-label="Уменьшить количество"
+                    >
+                      -
+                    </button>
+                    <span aria-live="polite">{count}</span>
+                    <button
+                      type="button"
+                      onClick={incrementCount}
+                      disabled={count >= data.quantities}
+                      className={count >= data.quantities ? scss.disabledBtn : ""}
+                      aria-label="Увеличить количество"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <button type="submit" className={scss.cart}>
+                    Добавить в запрос
+                    <Image src={bagSvg} alt="Корзина" width={20} height={20} />
                   </button>
                 </div>
-
-                <button type="submit" className={scss.cart}>
-                  В корзину
-                  <Image src={bagSvg} alt="Корзина" width={20} height={20} />
-                </button>
               </div>
+            ) : (
+              <div className={scss.restockCard}>
+                <div>
+                  <h3>Позиция временно недоступна</h3>
+                  <p>
+                    Напишите нам, и мы подскажем сроки поставки или предложим
+                    близкую по сценарию систему.
+                  </p>
+                </div>
+                <Link href={restockHref} className={scss.restockLink}>
+                  Сообщить о поступлении
+                </Link>
+              </div>
+            )}
+
+            <div className={scss.infoAccordions}>
+              <article className={scss.infoAccordion}>
+                <button
+                  type="button"
+                  className={scss.infoAccordionTrigger}
+                  aria-expanded={expandedPanel === "size"}
+                  aria-controls="pdp-size-guide"
+                  onClick={() =>
+                    setExpandedPanel((prev) => (prev === "size" ? null : "size"))
+                  }
+                >
+                  <span>Таблица конфигураций</span>
+                  <span aria-hidden="true">{expandedPanel === "size" ? "−" : "+"}</span>
+                </button>
+                {expandedPanel === "size" ? (
+                  <div id="pdp-size-guide" className={scss.infoAccordionBody}>
+                    <p>
+                      Матрица ниже показывает условные конфигурации каталога. Перед
+                      закупкой сверяйте итоговую спецификацию, комплектацию и
+                      совместимость с менеджером ReaLab.
+                    </p>
+                    <div className={scss.sizeGuideTable}>
+                      <div className={scss.sizeGuideHead}>
+                        <span>Конфиг</span>
+                        <span>Каналы</span>
+                        <span>Экран</span>
+                        <span>Сценарий</span>
+                      </div>
+                      {sizeGuideRows.map((row) => (
+                        <div key={row.size} className={scss.sizeGuideRow}>
+                          <strong>{row.size}</strong>
+                          <span>{row.channels}</span>
+                          <span>{row.display}</span>
+                          <span>{row.usage}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </article>
+
+              <article className={scss.infoAccordion}>
+                <button
+                  type="button"
+                  className={scss.infoAccordionTrigger}
+                  aria-expanded={expandedPanel === "fit"}
+                  aria-controls="pdp-fit-guide"
+                  onClick={() => setExpandedPanel((prev) => (prev === "fit" ? null : "fit"))}
+                >
+                  <span>Комплектация и рекомендации</span>
+                  <span aria-hidden="true">{expandedPanel === "fit" ? "−" : "+"}</span>
+                </button>
+                {expandedPanel === "fit" ? (
+                  <div id="pdp-fit-guide" className={scss.infoAccordionBody}>
+                    <ul className={scss.infoList}>
+                      {fitNotes.map((note) => (
+                        <li key={note}>{note}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </article>
+
+              <article className={scss.infoAccordion}>
+                <button
+                  type="button"
+                  className={scss.infoAccordionTrigger}
+                  aria-expanded={expandedPanel === "delivery"}
+                  aria-controls="pdp-delivery-info"
+                  onClick={() =>
+                    setExpandedPanel((prev) => (prev === "delivery" ? null : "delivery"))
+                  }
+                >
+                  <span>Поставка и сервис</span>
+                  <span aria-hidden="true">{expandedPanel === "delivery" ? "−" : "+"}</span>
+                </button>
+                {expandedPanel === "delivery" ? (
+                  <div id="pdp-delivery-info" className={scss.infoAccordionBody}>
+                    <ul className={scss.infoList}>
+                      {deliveryNotes.map((note) => (
+                        <li key={note}>{note}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </article>
             </div>
+
           </form>
+          <div className={scss.trustGrid2}>
+              {trustItems.map((item) => (
+                <article key={item.title} className={scss.trustItem}>
+                  <h4>{item.title}</h4>
+                  <p>{item.text}</p>
+                </article>
+              ))}
+            </div>
         </div>
 
         <div className={scss.recommendations}>
@@ -335,6 +574,32 @@ const SinglePageSection: FC = () => {
 
         <div className={scss.review}>
           <Review />
+        </div>
+      </div>
+
+      <div className={scss.stickyBar}>
+        <div className="container">
+          <div className={scss.stickyInner}>
+            <div className={scss.stickySummary}>
+              <p>{clothes_name}</p>
+              <div className={scss.stickyPrice}>
+                {previousPrice !== currentPrice ? (
+                  <del>{formatPrice(previousPrice)}</del>
+                ) : null}
+                <strong>{formatPrice(currentPrice)}</strong>
+              </div>
+              <span>{selectedSize ? `Конфигурация: ${selectedSize}` : "Выберите конфигурацию"}</span>
+            </div>
+
+            <button
+              type="button"
+              className={scss.stickyButton}
+              onClick={isInStock ? submitSelection : () => router.push(restockHref)}
+              aria-label={isInStock ? "Добавить позицию в запрос" : "Перейти к заявке на поступление"}
+            >
+              {isInStock ? "Добавить в запрос" : "Сообщить о поступлении"}
+            </button>
+          </div>
         </div>
       </div>
     </section>

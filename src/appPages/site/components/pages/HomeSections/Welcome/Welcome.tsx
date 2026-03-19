@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import scss from "./Welcome.module.scss";
 import Image from "next/image";
 import arrow from "@/assets/icons/arrow.svg";
@@ -65,51 +65,68 @@ const Welcome = () => {
   return (
     <section className={scss.Welcome}>
       <div className="container">
-        <div className={scss.content}>
-          <div className={scss.Swiper}>
-            <div className={scss.SwiperSlide}>
-              <div className={scss.Swiper_Title}>
-                <h4>{data[0].made}</h4>
-                <h1>{data[0].title}</h1>
+        <div className={scss.hero}>
+          <div className={scss.copy}>
+            <span className={scss.eyebrow}>{data[0].made}</span>
+            <h1>{data[0].title}</h1>
+            <p>
+              ReaLab собирает каталог медицинских систем в светлой клинической
+              эстетике: без перегруза, с быстрым выбором конфигураций, поставки и
+              сервисного маршрута.
+            </p>
+
+            <div className={scss.actions}>
+              <button
+                type="button"
+                className={scss.primaryButton}
+                onClick={() => router.push("/catalog")}
+              >
+                Перейти в каталог
+                <Image src={arrow} alt="Стрелка" loading="eager" />
+              </button>
+
+              <Link href="/about" className={scss.secondaryLink}>
+                О ReaLab
+              </Link>
+            </div>
+          </div>
+
+          <div className={scss.gallery}>
+            <div className={scss.mainCard}>
+              <Image
+                className={scss.mainImage}
+                src={activeImage.image}
+                alt="Решение ReaLab"
+                width={420}
+                height={630}
+                onClick={handleMainImageClick}
+                priority
+                sizes="(max-width: 900px) 100vw, 42vw"
+              />
+              <Link href={activeImage.link || "/"} className={scss.buyLink}>
+                Смотреть решение
+                <Image src={arrow} alt="Стрелка" />
+              </Link>
+            </div>
+
+            <div className={scss.previewColumn}>
+              {previewImageIndexes.map((visibleIndex, previewPosition) => (
                 <button
+                  key={images[visibleIndex].id}
                   type="button"
-                  className={scss.catalogButton}
-                  onClick={() => router.push("/catalog")}
+                  className={scss.previewButton}
+                  onClick={() => handlePreviewImageClick(previewPosition + 1)}
                 >
-                  Каталог
-                  <Image src={arrow} alt="Valid src" loading="eager" />
-                </button>
-              </div>
-              <div className={scss.Swiper_Image}>
-                <div className={scss.Swiper_Image_tab}>
                   <Image
-                    className={scss.image_wrapper}
-                    src={activeImage.image}
-                    alt="tab"
-                    width={420}
-                    height={630}
-                    style={{ cursor: "pointer" }}
-                    onClick={handleMainImageClick}
-                    loading="eager"
-                  />
-                  <Link href={activeImage.link || "/"} className={scss.buyLink}>
-                    Купить <Image src={arrow} alt="Valid src" />
-                  </Link>
-                </div>
-                {previewImageIndexes.map((visibleIndex, previewPosition) => (
-                  <Image
-                    key={images[visibleIndex].id}
                     className={scss.previewImage}
                     src={images[visibleIndex].image}
-                    alt={`Slide ${visibleIndex}`}
+                    alt={`Коллекция ${visibleIndex + 1}`}
                     width={156}
                     height={234}
-                    style={{ cursor: "pointer" }}
-                    onClick={() => handlePreviewImageClick(previewPosition + 1)}
-                    loading="eager"
+                    sizes="(max-width: 900px) 26vw, 13vw"
                   />
-                ))}
-              </div>
+                </button>
+              ))}
             </div>
           </div>
         </div>

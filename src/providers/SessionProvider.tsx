@@ -21,7 +21,7 @@ const AUTH_PAGES = [
   "/auth/reset_success",
   "/auth/forgot",
 ];
-const LAST_PUBLIC_PATH_KEY = "jumana:last_public_path";
+const LAST_PUBLIC_PATH_KEY = "realab:last_public_path";
 
 const normalizePathname = (pathname: string): string => pathname.toLowerCase();
 const isSafePath = (path?: string | null): path is string =>

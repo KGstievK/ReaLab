@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useEffect, useId, useRef } from "react";
 import { FiX } from "react-icons/fi";
 import { resolveMediaUrl } from "../../../../../../utils/media";
 import scss from "../AdminPanel.module.scss";
@@ -47,6 +48,27 @@ export const AdminOrderDetailsModal = ({
   onClose,
   onChangeOrderStatus,
 }: AdminOrderDetailsModalProps) => {
+  const headingId = useId();
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (!selectedOrder) {
+      return undefined;
+    }
+
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose, selectedOrder]);
+
   if (!selectedOrder) {
     return null;
   }
@@ -65,13 +87,19 @@ export const AdminOrderDetailsModal = ({
         }
       }}
     >
-      <div className={`${scss.modal} ${scss.orderModal}`}>
+      <div
+        className={`${scss.modal} ${scss.orderModal}`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={headingId}
+      >
         <div className={scss.modalHeader}>
           <div className={scss.orderModalHeader}>
             <p>Детали заказа</p>
-            <h3>{selectedOrder.order_number}</h3>
+            <h3 id={headingId}>{selectedOrder.order_number}</h3>
           </div>
           <button
+            ref={closeButtonRef}
             type="button"
             className={scss.closeButton}
             onClick={onClose}

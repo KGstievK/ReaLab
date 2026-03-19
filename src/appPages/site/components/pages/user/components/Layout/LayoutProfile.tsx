@@ -29,19 +29,19 @@ const LayoutProfile: FC<LayoutProfileProps> = ({ children }) => {
   return (
     <section className={scss.LayoutProfile}>
       <div className="container">
-        <p className={scss.desktopBreadcrumbs}>
-          <Link href={"/"}>{"Главная"}</Link>
+        <nav className={scss.desktopBreadcrumbs} aria-label="Личный кабинет">
+          <Link href="/">Главная</Link>
           <span>|</span>
-          <span>{"Личный кабинет"}</span>
+          <span>Личный кабинет</span>
           <span>|</span>
           <span>{sectionLabel}</span>
-        </p>
+        </nav>
 
-        <p className={scss.mobileBreadcrumbs}>
-          <Link href={"/"}>{"Главная"}</Link>
+        <nav className={scss.mobileBreadcrumbs} aria-label="Личный кабинет">
+          <Link href="/">Главная</Link>
           <span>|</span>
           <span>{sectionLabel}</span>
-        </p>
+        </nav>
 
         <div className={scss.content}>
           <aside
@@ -70,4 +70,3 @@ const LayoutProfile: FC<LayoutProfileProps> = ({ children }) => {
 };
 
 export default LayoutProfile;
-

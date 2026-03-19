@@ -1,215 +1,351 @@
 ﻿.Search {
-  width: 100%;
-  max-width: 50px;
+  position: relative;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.Trigger {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--color-line);
+  background: var(--color-surface);
+  color: var(--color-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    opacity: 0.85;
+  }
+}
+
+.Dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: min(520px, calc(100vw - 32px));
+  z-index: 1100;
+}
+
+.Overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+}
+
+.Backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  background: rgba(32, 26, 25, 0.38);
+  backdrop-filter: blur(4px);
+}
+
+.Panel {
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 20px;
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.PanelHeader {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  position: relative;
-  transition: max-width 0.3s ease-in-out;
-
-  &.open {
-    max-width: 350px;
-  }
-
-  .SearchForm {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    border-radius: 15px;
-    border: 2px solid transparent;
-    padding: 0 10px;
-    transition: all 0.3s ease-in-out;
-
-    &.active {
-      border-color: var(--main-color);
-      padding: 0 20px;
-    }
-
-    input {
-      width: 100%;
-      height: 40px;
-      border: none;
-      padding: 0;
-      opacity: 0;
-      background: transparent;
-      outline: none;
-      transition: opacity 0.3s ease-in-out;
-      color: #1f1f1f;
-      font-size: 14px;
-      font-family: "Inter", sans-serif;
-
-      &::placeholder {
-        color: #acacac;
-      }
-
-      &.inputVisible {
-        opacity: 1;
-      }
-    }
-
-    button.SearchBtn {
-      border: none;
-      background: transparent;
-      padding: 0;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-  }
-
-  .SearchResults {
-    display: none;
-    position: absolute;
-    top: 50px;
-    left: 0;
-    width: 100%;
-    border: 1px solid #d9d9d9;
-    border-radius: 8px;
-    background: #fff;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transform: translateY(-10px);
-    transition:
-      opacity 0.3s ease-in-out,
-      transform 0.3s ease-in-out;
-    overflow: hidden;
-
-    .SearchState {
-      padding: 14px 12px;
-      color: #6f625e;
-      font-size: 14px;
-      line-height: 20px;
-      font-family: "Manrope", sans-serif;
-    }
-
-    .SearchStateError {
-      color: #9a4e4a;
-    }
-
-    &.resultsVisible {
-      display: block;
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-      transform: translateY(0);
-    }
-
-    .SearchItem {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px;
-      border-bottom: 1px solid #efefef;
-      cursor: pointer;
-
-      &:last-child {
-        border-bottom: none;
-      }
-
-      &:hover {
-        background: #f8f1ed;
-      }
-
-      img {
-        width: 50px;
-        height: 50px;
-        object-fit: cover;
-        border-radius: 4px;
-      }
-
-      .infoSearch {
-        p {
-          margin: 0;
-          font-size: 14px;
-          font-family: "Inter", sans-serif;
-          color: #222;
-        }
-      }
-    }
-  }
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--color-line);
 }
 
-@media (max-width: 750px) {
-  .Search {
-    max-width: 100%;
-    justify-content: stretch;
-    padding: 0 0 12px 0;
-
-    &.open {
-      max-width: 100%;
-    }
-
-    .SearchForm {
-      border: 1.5px solid #ce8f95;
-      border-radius: 16px;
-      padding: 0 12px;
-      background: transparent;
-      flex-direction: row-reverse;
-      gap: 6px;
-
-      &.active {
-        border-color: #ce8f95;
-        padding: 0 12px;
-      }
-
-      input {
-        opacity: 1;
-        height: 40px;
-        font-size: 16px;
-      }
-
-      button.SearchBtn {
-        opacity: 0.7;
-      }
-    }
-
-    .SearchResults {
-      top: 47px;
-      border-radius: 10px;
-    }
-  }
+.SearchForm {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-line);
+  background: var(--color-surface-muted);
 }
 
-.Search .SearchResults .SearchSection {
-  padding: 12px 10px 14px;
-  border-top: 1px solid #efefef;
+.SearchIcon {
+  flex-shrink: 0;
+  color: var(--color-subtext);
+  font-size: 18px;
 }
 
-.Search .SearchResults .SearchSectionTitle {
-  display: block;
-  margin-bottom: 8px;
-  color: #6f625e;
-  font-size: 11px;
-  line-height: 16px;
-  font-family: "Manrope", sans-serif;
+.SearchForm input {
+  min-height: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-text);
+}
+
+.IconButton,
+.CloseButton {
+  min-height: 0;
+}
+
+.IconButton {
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--color-line);
+  background: var(--color-surface);
+  color: var(--color-subtext);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.CloseButton {
+  padding: 0 16px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-line);
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.PanelBody {
+  max-height: min(70vh, 620px);
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.Section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.SectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.SectionTitle {
+  color: var(--color-subtext);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
-.Search .SearchResults .SearchSuggestionList {
+.TextButton {
+  min-height: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-brand);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.TagList {
   display: flex;
   flex-wrap: wrap;
+  gap: 10px;
+}
+
+.Tag {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-line);
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 500;
+
+  svg {
+    flex-shrink: 0;
+    color: var(--color-subtext);
+  }
+
+  small {
+    color: var(--color-subtext);
+    font-size: 12px;
+  }
 }
 
-.Search .SearchResults .SearchSuggestion {
-  border: 1px solid #d8cac0;
-  background: #fff;
-  color: #201a19;
-  border-radius: 999px;
-  padding: 7px 12px;
-  font-size: 13px;
-  line-height: 18px;
-  font-family: "Manrope", sans-serif;
-  cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+.ProductPlaceholder {
+  display: block;
 }
 
-.Search .SearchResults .SearchSuggestion:hover {
-  background: #f8f1ed;
-  border-color: #b28b76;
+.ProductList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
+
+.ProductItem {
+  width: 100%;
+  padding: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  overflow: hidden;
+  color: var(--color-text);
+  text-align: left;
+
+  img,
+  .ProductPlaceholder {
+    width: 88px;
+    min-width: 88px;
+    height: 104px;
+    object-fit: cover;
+    background: var(--color-surface-muted);
+  }
+}
+
+.ProductInfo {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 12px 12px 0;
+
+  p,
+  span {
+    margin: 0;
+    font-family: var(--font-ui);
+  }
+
+  p {
+    color: var(--color-text);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.45;
+  }
+
+  span {
+    color: var(--color-brand);
+    font-size: 14px;
+    font-weight: 700;
+  }
+}
+
+.State {
+  padding: 8px 0;
+  color: var(--color-subtext);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.StateError {
+  color: var(--color-error);
+}
+
+.FooterAction {
+  width: 100%;
+  min-height: 52px;
+  border-top: 1px solid var(--color-line);
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 18px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+
+  svg {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 860px) {
+  .Overlay {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: max(12px, env(safe-area-inset-top)) 12px 12px;
+  }
+
+  .Panel {
+    width: 100%;
+    max-width: 680px;
+    min-height: calc(100dvh - 24px - env(safe-area-inset-top));
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .PanelBody {
+    max-height: none;
+    flex: 1;
+  }
+
+  .PanelHeader {
+    padding: 14px;
+  }
+
+  .SearchForm {
+    min-height: 50px;
+  }
+
+  .Trigger {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+  }
+
+  .TagList {
+    gap: 8px;
+  }
+
+  .Tag {
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+}
+
+

@@ -117,18 +117,21 @@ export const AdminOrdersSection = ({
         </div>
       </div>
 
-      <div className={scss.orderFilters}>
+      <div className={scss.orderFilters} role="search" aria-label="Фильтры заказов">
         <input
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Поиск по номеру, клиенту или телефону"
+          aria-label="Поиск по номеру, клиенту или телефону"
         />
         <input
           value={externalRefFilter}
           onChange={(event) => onExternalRefFilterChange(event.target.value)}
           placeholder="Код оплаты / external_ref"
+          aria-label="Код оплаты или внешний идентификатор"
         />
         <select
+          aria-label="Сортировка заказов"
           value={ordering}
           onChange={(event) =>
             onOrderingChange(
@@ -143,6 +146,7 @@ export const AdminOrdersSection = ({
           ))}
         </select>
         <select
+          aria-label="Фильтр по статусу заказа"
           value={statusFilter}
           onChange={(event) => onStatusFilterChange(event.target.value as AdminOrderStatus | "all")}
         >
@@ -154,6 +158,7 @@ export const AdminOrdersSection = ({
           ))}
         </select>
         <select
+          aria-label="Фильтр по статусу оплаты"
           value={paymentStatusFilter}
           onChange={(event) =>
             onPaymentStatusFilterChange(event.target.value as AdminPaymentStatus | "all")
@@ -167,6 +172,7 @@ export const AdminOrdersSection = ({
           ))}
         </select>
         <select
+          aria-label="Фильтр по способу доставки"
           value={deliveryMethodFilter}
           onChange={(event) =>
             onDeliveryMethodFilterChange(event.target.value as AdminDeliveryMethod | "all")
@@ -179,8 +185,18 @@ export const AdminOrdersSection = ({
             </option>
           ))}
         </select>
-        <input type="date" value={dateFrom} onChange={(event) => onDateFromChange(event.target.value)} />
-        <input type="date" value={dateTo} onChange={(event) => onDateToChange(event.target.value)} />
+        <input
+          type="date"
+          value={dateFrom}
+          onChange={(event) => onDateFromChange(event.target.value)}
+          aria-label="Дата заказа от"
+        />
+        <input
+          type="date"
+          value={dateTo}
+          onChange={(event) => onDateToChange(event.target.value)}
+          aria-label="Дата заказа до"
+        />
         <button type="button" className={scss.secondaryAction} onClick={onResetFilters}>
           Сбросить фильтры
         </button>
@@ -188,14 +204,15 @@ export const AdminOrdersSection = ({
 
       <div className={scss.tableWrap}>
         <table>
+          <caption className={scss.srOnly}>Таблица заказов</caption>
           <thead>
             <tr>
-              <th>Номер</th>
-              <th>Клиент</th>
-              <th>Дата</th>
-              <th>Статус</th>
-              <th>Сумма</th>
-              <th>Действие</th>
+              <th scope="col">Номер</th>
+              <th scope="col">Клиент</th>
+              <th scope="col">Дата</th>
+              <th scope="col">Статус</th>
+              <th scope="col">Сумма</th>
+              <th scope="col">Действие</th>
             </tr>
           </thead>
           <tbody>
@@ -264,6 +281,7 @@ export const AdminOrdersSection = ({
           <label className={scss.pageSizeControl}>
             <span>Показывать</span>
             <select
+              aria-label="Количество заказов на странице"
               value={pageSize}
               onChange={(event) => onPageSizeChange(Number(event.target.value))}
             >
@@ -282,8 +300,14 @@ export const AdminOrdersSection = ({
               value={pageJumpValue}
               onChange={(event) => setPageJumpValue(event.target.value)}
               onBlur={handlePageJump}
+              aria-label="Перейти к странице заказов"
             />
-            <button type="button" className={scss.secondaryAction} onClick={handlePageJump}>
+            <button
+              type="button"
+              className={scss.secondaryAction}
+              onClick={handlePageJump}
+              aria-label="Перейти к выбранной странице заказов"
+            >
               Перейти
             </button>
           </div>
@@ -293,6 +317,7 @@ export const AdminOrdersSection = ({
               className={scss.secondaryAction}
               disabled={!hasPreviousPage}
               onClick={() => onPageChange(currentPage - 1)}
+              aria-label="Предыдущая страница заказов"
             >
               Назад
             </button>
@@ -301,6 +326,7 @@ export const AdminOrdersSection = ({
               className={scss.secondaryAction}
               disabled={!hasNextPage}
               onClick={() => onPageChange(currentPage + 1)}
+              aria-label="Следующая страница заказов"
             >
               Далее
             </button>

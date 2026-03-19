@@ -332,13 +332,15 @@ export const AdminUsersSection = ({
         )}
       </div>
 
-      <div className={scss.userFilters}>
+      <div className={scss.userFilters} role="search" aria-label="Фильтры пользователей">
         <input
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Поиск по имени, email, телефону или username"
+          aria-label="Поиск по имени, email, телефону или username"
         />
         <select
+          aria-label="Сортировка пользователей"
           value={sorting}
           onChange={(event) =>
             onSortChange(
@@ -359,6 +361,7 @@ export const AdminUsersSection = ({
           ))}
         </select>
         <select
+          aria-label="Фильтр по базовой роли"
           value={roleFilter}
           onChange={(event) => onRoleFilterChange(event.target.value as AdminRole | "all")}
         >
@@ -369,6 +372,7 @@ export const AdminUsersSection = ({
           <option value="owner">Владелец</option>
         </select>
         <select
+          aria-label="Фильтр по активности пользователя"
           value={activeFilter}
           onChange={(event) =>
             onActiveFilterChange(event.target.value as "all" | "active" | "inactive")
@@ -543,16 +547,17 @@ export const AdminUsersSection = ({
       <div className={scss.usersShell}>
         <div className={scss.tableWrap}>
           <table>
+            <caption className={scss.srOnly}>Таблица пользователей</caption>
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Пользователь</th>
-                <th>Базовая роль</th>
-                <th>Доп. роли</th>
-                <th>Заказы</th>
-                <th>Потрачено</th>
-                <th>Последний заказ</th>
-                <th>Доступ</th>
+                <th scope="col">ID</th>
+                <th scope="col">Пользователь</th>
+                <th scope="col">Базовая роль</th>
+                <th scope="col">Доп. роли</th>
+                <th scope="col">Заказы</th>
+                <th scope="col">Потрачено</th>
+                <th scope="col">Последний заказ</th>
+                <th scope="col">Доступ</th>
               </tr>
             </thead>
             <tbody>
@@ -675,6 +680,7 @@ export const AdminUsersSection = ({
           <label className={scss.pageSizeControl}>
             <span>Показывать</span>
             <select
+              aria-label="Количество пользователей на странице"
               value={pageSize}
               onChange={(event) => onPageSizeChange(Number(event.target.value))}
             >
@@ -693,8 +699,14 @@ export const AdminUsersSection = ({
               value={pageJumpValue}
               onChange={(event) => setPageJumpValue(event.target.value)}
               onBlur={handlePageJump}
+              aria-label="Перейти к странице пользователей"
             />
-            <button type="button" className={scss.secondaryAction} onClick={handlePageJump}>
+            <button
+              type="button"
+              className={scss.secondaryAction}
+              onClick={handlePageJump}
+              aria-label="Перейти к выбранной странице пользователей"
+            >
               Перейти
             </button>
           </div>
@@ -704,6 +716,7 @@ export const AdminUsersSection = ({
               className={scss.secondaryAction}
               disabled={!users.previous}
               onClick={() => onPageChange(currentPage - 1)}
+              aria-label="Предыдущая страница пользователей"
             >
               Назад
             </button>
@@ -712,6 +725,7 @@ export const AdminUsersSection = ({
               className={scss.secondaryAction}
               disabled={!users.next}
               onClick={() => onPageChange(currentPage + 1)}
+              aria-label="Следующая страница пользователей"
             >
               Далее
             </button>

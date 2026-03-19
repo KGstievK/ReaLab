@@ -17,7 +17,6 @@ import arrow from "@/assets/icons/arrow.svg";
 import heart from "@/assets/icons/HeartStraight.svg";
 import heartRed from "@/assets/icons/red-heart-icon.svg";
 import star from "@/assets/icons/Star.svg";
-import ColorsClothes from "../../../ui/colors/Colors";
 import scss from "./New.module.scss";
 import { resolveMediaUrl } from "@/utils/media";
 import { buildProductHref } from "@/utils/productRoute";
@@ -37,6 +36,8 @@ interface ClothesItem {
     color: string;
   }>;
 }
+
+const formatPrice = (value: number) => `${Math.round(value).toLocaleString("ru-RU")} KGS`;
 
 const New = () => {
   const router = useRouter();
@@ -106,16 +107,16 @@ const New = () => {
     <section className={scss.New}>
       <div className="container">
         <div className={scss.headerRow}>
-          <h2>Новинки</h2>
+          <h2>Новые поступления</h2>
           <button onClick={() => router.push("/new")} type="button" className={scss.desktopMore}>
             Посмотреть все <Image src={arrow} alt="arrow" />
           </button>
         </div>
 
         <ul className={scss.tags}>
-          <li>туника</li>
-          <li>платье</li>
-          <li>платок</li>
+          <li>мониторинг</li>
+          <li>диагностика</li>
+          <li>лаборатория</li>
         </ul>
 
         <div className={scss.cards}>
@@ -175,15 +176,15 @@ const New = () => {
                 <div className={scss.productCategory}>
                   <h4>{item.category_name}</h4>
                   <div className={scss.colors}>
-                    <ColorsClothes clothesImg={item.clothes_img.slice(0, 3)} />
+                    {/* <ColorsClothes clothesImg={item.clothes_img.slice(0, 3)} /> */}
                   </div>
                 </div>
 
                 <h3>{item.clothes_name}</h3>
 
                 <div className={scss.price}>
-                  <span>{Math.round(item.discount_price)}сом</span>
-                  <del>{Math.round(item.price)}сом</del>
+                  <span>{formatPrice(item.discount_price)}</span>
+                  <del>{formatPrice(item.price)}</del>
                 </div>
               </div>
             </article>

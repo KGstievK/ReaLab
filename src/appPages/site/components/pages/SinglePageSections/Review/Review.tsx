@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -15,11 +15,11 @@ import scss from "./Review.module.scss";
 import { resolveMediaUrl } from "@/utils/media";
 
 const ratingOptions = [
-  { value: 1, label: "Плохой" },
-  { value: 2, label: "Так себе" },
-  { value: 3, label: "Нормальный" },
-  { value: 4, label: "Хороший" },
-  { value: 5, label: "Отличный" },
+  { value: 1, label: "Плохо" },
+  { value: 2, label: "Слабо" },
+  { value: 3, label: "Нормально" },
+  { value: 4, label: "Хорошо" },
+  { value: 5, label: "Отлично" },
 ];
 
 const formatDate = (dateString: string) => {
@@ -28,9 +28,9 @@ const formatDate = (dateString: string) => {
     return dateString;
   }
 
-  return date.toLocaleDateString("en-US", {
-    month: "long",
+  return date.toLocaleDateString("ru-RU", {
     day: "numeric",
+    month: "long",
     year: "numeric",
   });
 };
@@ -79,7 +79,7 @@ const normalizePhotos = (rawValue: unknown): string[] => {
 };
 
 const Review = () => {
-  const id = useParams();
+  const id = useParams<{ single: string }>();
   const pathname = usePathname();
   const { data: userResponse, status } = useGetMeQuery();
   const { data: clothesResponse, refetch } = useGetClothesByIdQuery(
@@ -128,7 +128,7 @@ const Review = () => {
         <div className={scss.reviewGrid}>
           <div className={scss.reviewFormBlock}>
             <h3>Оставить отзыв</h3>
-            <p>Оставляйте свои комментарии здесь для других клиентов</p>
+            <p>Поделитесь впечатлением о модели, ткани и посадке, чтобы помочь другим покупателям.</p>
 
             {status === "fulfilled" ? (
               <form onSubmit={handleSubmit(onSubmit)}>
@@ -152,13 +152,13 @@ const Review = () => {
 
                 <textarea
                   {...register("text")}
-                  placeholder="Напишите отзыв к этому товару"
+                  placeholder="Напишите, как модель ощущается в носке, как сидит и какой размер вы выбрали"
                 />
 
                 {reviewPhoto && (
                   <div className={scss.previewPhoto}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={reviewPhoto} alt="review upload" />
+                    <img src={reviewPhoto} alt="Предпросмотр отзыва" />
                     <button type="button" onClick={() => setReviewPhoto(null)}>
                       <FiX />
                     </button>
@@ -171,11 +171,8 @@ const Review = () => {
                       <FiImage />
                     </div>
                     <div className={scss.attachText}>
-                      <h4>Прикрепите файл</h4>
-                      <p>
-                        Добавляйте до 10 изображений в форматах jpg, gif, png
-                        размером до 5мб
-                      </p>
+                      <h4>Прикрепите фото</h4>
+                      <p>Можно добавить изображение изделия или посадки. Поддерживаются jpg, gif и png.</p>
                     </div>
                   </div>
 
@@ -189,7 +186,7 @@ const Review = () => {
                 </div>
 
                 <button type="submit" className={scss.submitButton}>
-                  Отправить
+                  Отправить отзыв
                 </button>
               </form>
             ) : (
@@ -201,47 +198,53 @@ const Review = () => {
           </div>
 
           <div className={scss.reviewComments}>
-            {reviewList.map((item, idx) => {
-              const photos = normalizePhotos(item.review_photo).slice(0, 2);
-              const authorName = item.author.first_name || "Пользователь";
+            {reviewList.length === 0 ? (
+              <div className={scss.emptyState}>
+                Пока нет отзывов. Вы можете стать первым покупателем, который поделится впечатлением.
+              </div>
+            ) : (
+              reviewList.map((item, idx) => {
+                const photos = normalizePhotos(item.review_photo).slice(0, 2);
+                const authorName = item.author.first_name || "Покупатель";
 
-              return (
-                <article
-                  key={`${authorName}-${idx}`}
-                  className={scss.commentCard}
-                >
-                  <div className={scss.commentTop}>
-                    <div className={scss.author}>
-                      <div className={scss.avatar}>{authorName.charAt(0)}</div>
-                      <div className={scss.authorInfo}>
-                        <h4>{authorName}</h4>
-                        <p>{formatDate(item.created_date)}</p>
+                return (
+                  <article
+                    key={`${authorName}-${idx}`}
+                    className={scss.commentCard}
+                  >
+                    <div className={scss.commentTop}>
+                      <div className={scss.author}>
+                        <div className={scss.avatar}>{authorName.charAt(0)}</div>
+                        <div className={scss.authorInfo}>
+                          <h4>{authorName}</h4>
+                          <p>{formatDate(item.created_date)}</p>
+                        </div>
+                      </div>
+
+                      <div className={scss.score}>
+                        <FaStar />
+                        {item.stars}
                       </div>
                     </div>
 
-                    <div className={scss.score}>
-                      <FaStar />
-                      {item.stars}
-                    </div>
-                  </div>
+                    <p className={scss.commentText}>{item.text}</p>
 
-                  <p className={scss.commentText}>{item.text}</p>
-
-                  {photos.length > 0 && (
-                    <div className={scss.commentPhotos}>
-                      {photos.map((photo, photoIndex) => (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          key={`${photo}-${photoIndex}`}
-                          src={photo}
-                          alt="review photo"
-                        />
-                      ))}
-                    </div>
-                  )}
-                </article>
-              );
-            })}
+                    {photos.length > 0 && (
+                      <div className={scss.commentPhotos}>
+                        {photos.map((photo, photoIndex) => (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            key={`${photo}-${photoIndex}`}
+                            src={photo}
+                            alt="Фото к отзыву"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </article>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
@@ -256,4 +259,3 @@ const Review = () => {
 };
 
 export default Review;
-

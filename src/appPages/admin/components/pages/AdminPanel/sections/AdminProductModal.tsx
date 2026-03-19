@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { ChangeEvent, RefObject } from "react";
+import { ChangeEvent, RefObject, useEffect, useId, useMemo, useRef } from "react";
 import { FiX } from "react-icons/fi";
 import { resolveMediaUrl } from "../../../../../../utils/media";
 import scss from "../AdminPanel.module.scss";
@@ -47,6 +47,38 @@ export const AdminProductModal = ({
   onFieldChange,
   onImageFilesChange,
 }: AdminProductModalProps) => {
+  const headingId = useId();
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const modalTitle = useMemo(() => {
+    if (productModalMode === "create") {
+      return "Создать товар";
+    }
+
+    if (productModalMode === "edit") {
+      return `Редактировать товар #${selectedProduct?.id ?? ""}`;
+    }
+
+    return `Удалить товар #${selectedProduct?.id ?? ""}`;
+  }, [productModalMode, selectedProduct?.id]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) {
     return null;
   }
@@ -60,16 +92,11 @@ export const AdminProductModal = ({
         }
       }}
     >
-      <div className={scss.modal}>
+      <div className={scss.modal} role="dialog" aria-modal="true" aria-labelledby={headingId}>
         <div className={scss.modalHeader}>
-          <h3>
-            {productModalMode === "create"
-              ? "Создать товар"
-              : productModalMode === "edit"
-                ? `Редактировать товар #${selectedProduct?.id ?? ""}`
-                : `Удалить товар #${selectedProduct?.id ?? ""}`}
-          </h3>
+          <h3 id={headingId}>{modalTitle}</h3>
           <button
+            ref={closeButtonRef}
             type="button"
             className={scss.closeButton}
             onClick={onClose}
@@ -240,8 +267,8 @@ export const AdminProductModal = ({
                   </button>
                 </label>
                 <small>
-                  Загрузите файлы, чтобы заменить текущие фото. До 10 изображений, максимум
-                  7 МБ каждое.
+                  Загрузите файлы, чтобы заменить текущие фото. До 10 изображений, максимум 7 МБ
+                  каждое.
                 </small>
               </div>
 
@@ -249,7 +276,7 @@ export const AdminProductModal = ({
                 <div className={scss.previewGrid}>
                   {productImagePreviews.map((preview, index) => (
                     <div className={scss.previewItem} key={`${preview}-${index}`}>
-                      <img src={preview} alt={`preview-${index + 1}`} />
+                      <img src={preview} alt={`Предпросмотр ${index + 1}`} />
                     </div>
                   ))}
                 </div>
@@ -263,7 +290,7 @@ export const AdminProductModal = ({
                       <div className={scss.previewItem} key={image.id}>
                         <img
                           src={resolveMediaUrl(image.photo)}
-                          alt={image.color || "изображение товара"}
+                          alt={image.color || "Изображение товара"}
                         />
                       </div>
                     ))}

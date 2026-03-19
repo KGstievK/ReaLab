@@ -23,7 +23,7 @@ type AuthIntent =
       payload: FavoriteIntentPayload;
     };
 
-const AUTH_INTENT_KEY = "jumana:auth-intent";
+const AUTH_INTENT_KEY = "realab:auth-intent";
 
 const toSafePath = (path?: string | null): string =>
   path && path.startsWith("/") ? path : "/";

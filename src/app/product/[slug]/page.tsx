@@ -1,10 +1,10 @@
-import { createNoIndexMetadata } from "@/utils/seo";
+﻿import { createNoIndexMetadata } from "@/utils/seo";
 import { notFound, redirect } from "next/navigation";
 import { extractProductIdFromSlug } from "@/utils/productRoute";
 
 export const metadata = createNoIndexMetadata(
-  "Перенаправление товара",
-  "Технический alias-маршрут карточки товара Jumana.",
+  "Технический маршрут товара",
+  "Технический alias-маршрут карточки товара ReaLab.",
   "/product",
 );
 

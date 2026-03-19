@@ -1,4 +1,4 @@
-﻿import { FC, MouseEvent, useEffect, useState } from "react";
+﻿import { FC, MouseEvent, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,13 +9,14 @@ import { clearAuthTokens } from "../../../../../../../../utils/authStorage";
 import { useDispatch } from "react-redux";
 import { api } from "@/redux/api";
 import scss from "./HeaderProfile.module.scss";
+import { extractApiErrorInfo, getRateLimitAwareMessage } from "@/utils/apiError";
 
 type TabItem = {
   label: string;
   path: string | null;
 };
 
-const LAST_PUBLIC_PATH_KEY = "jumana:last_public_path";
+const LAST_PUBLIC_PATH_KEY = "realab:last_public_path";
 
 const isSafePublicPath = (path?: string | null): path is string => {
   if (!path || !path.startsWith("/")) {
@@ -39,30 +40,15 @@ const isSafePublicPath = (path?: string | null): path is string => {
 
 const desktopTabs: TabItem[] = [
   { label: "Профиль", path: "/profile" },
-  {
-    label: "Мои покупки",
-    path: "/profile/history",
-  },
-  {
-    label: "Избранные",
-    path: "/profile/favorite",
-  },
+  { label: "Мои покупки", path: "/profile/history" },
+  { label: "Избранные", path: "/profile/favorite" },
   { label: "Выйти", path: null },
 ];
 
 const mobileTabs: TabItem[] = [
-  {
-    label: "Профиль",
-    path: "/profile/my_office",
-  },
-  {
-    label: "Мои покупки",
-    path: "/profile/history",
-  },
-  {
-    label: "Избранные",
-    path: "/profile/favorite",
-  },
+  { label: "Профиль", path: "/profile/my_office" },
+  { label: "Мои покупки", path: "/profile/history" },
+  { label: "Избранные", path: "/profile/favorite" },
   { label: "Выйти", path: null },
 ];
 
@@ -73,6 +59,8 @@ const HeaderProfile: FC = () => {
   const [logoutMutation] = usePostLogoutMutation();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isLogoutSubmitting, setIsLogoutSubmitting] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const isActive = (path: string | null) => {
     if (!path) {
@@ -93,6 +81,7 @@ const HeaderProfile: FC = () => {
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -110,39 +99,46 @@ const HeaderProfile: FC = () => {
 
   const logout = async () => {
     try {
+      setLogoutError(null);
       await logoutMutation().unwrap();
     } catch (error) {
-      console.error("Logout request failed:", error);
-    } finally {
-      dispatch(api.util.resetApiState());
-      clearAuthTokens();
-
-      const storedPath =
-        typeof window !== "undefined"
-          ? sessionStorage.getItem(LAST_PUBLIC_PATH_KEY)
-          : null;
-      const redirectPath = isSafePublicPath(storedPath) ? storedPath : "/";
-
-      router.replace(redirectPath);
-      router.refresh();
-
-      if (typeof window !== "undefined") {
-        window.setTimeout(() => {
-          if (
-            window.location.pathname.startsWith("/profile") ||
-            window.location.pathname.startsWith("/auth")
-          ) {
-            window.location.replace(redirectPath);
-          }
-        }, 120);
-      }
-
+      const apiError = extractApiErrorInfo(error, "Не удалось выйти из аккаунта");
+      setLogoutError(
+        getRateLimitAwareMessage(apiError, "Не удалось выйти из аккаунта. Попробуйте позже."),
+      );
       setIsLogoutSubmitting(false);
+      return;
     }
+
+    dispatch(api.util.resetApiState());
+    clearAuthTokens();
+
+    const storedPath =
+      typeof window !== "undefined"
+        ? sessionStorage.getItem(LAST_PUBLIC_PATH_KEY)
+        : null;
+    const redirectPath = isSafePublicPath(storedPath) ? storedPath : "/";
+
+    router.replace(redirectPath);
+    router.refresh();
+
+    if (typeof window !== "undefined") {
+      window.setTimeout(() => {
+        if (
+          window.location.pathname.startsWith("/profile") ||
+          window.location.pathname.startsWith("/auth")
+        ) {
+          window.location.replace(redirectPath);
+        }
+      }, 120);
+    }
+
+    setIsLogoutSubmitting(false);
   };
 
-  const handleOpenLogoutModal = (event: MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
+  const handleOpenLogoutModal = (event?: MouseEvent<HTMLElement>) => {
+    event?.preventDefault();
+    setLogoutError(null);
     setIsLogoutModalOpen(true);
   };
 
@@ -164,55 +160,60 @@ const HeaderProfile: FC = () => {
     await logout();
   };
 
+  const renderTab = (tab: TabItem) => {
+    if (!tab.path) {
+      return (
+        <button
+          type="button"
+          className={scss.logoutTrigger}
+          onClick={(event) => handleOpenLogoutModal(event)}
+        >
+          <span>{tab.label}</span>
+          <Image src={vector} alt="" />
+        </button>
+      );
+    }
+
+    const active = isActive(tab.path);
+
+    return (
+      <Link
+        href={tab.path}
+        className={active ? scss.activeLink : scss.navLink}
+        aria-current={active ? "page" : undefined}
+      >
+        <span>{tab.label}</span>
+        <Image src={active ? vectorWite : vector} alt="" />
+      </Link>
+    );
+  };
+
   return (
     <header className={scss.HeaderProfile}>
       <div className={scss.content}>
-        <nav className={scss.nav}>
+        <nav className={scss.nav} aria-label="Разделы личного кабинета">
           <ul>
             {desktopTabs.map((tab) => (
-              <li key={`desktop-${tab.label}`}>
-                <Link
-                  href={tab.path || "/profile"}
-                  onClick={tab.path ? undefined : handleOpenLogoutModal}
-                >
-                  <button
-                    type="button"
-                    className={isActive(tab.path) ? scss.active : ""}
-                  >
-                    {tab.label}
-                    <Image
-                      src={isActive(tab.path) ? vectorWite : vector}
-                      alt="arrow"
-                    />
-                  </button>
-                </Link>
-              </li>
+              <li key={`desktop-${tab.label}`}>{renderTab(tab)}</li>
             ))}
           </ul>
 
           <ul>
             {mobileTabs.map((tab) => (
-              <li key={`mobile-${tab.label}`}>
-                <Link
-                  href={tab.path || "/  "}
-                  onClick={tab.path ? undefined : handleOpenLogoutModal}
-                >
-                  <button
-                    type="button"
-                    className={isActive(tab.path) ? scss.active : ""}
-                  >
-                    {tab.label}
-                    <Image
-                      src={isActive(tab.path) ? vectorWite : vector}
-                      alt="arrow"
-                    />
-                  </button>
-                </Link>
-              </li>
+              <li key={`mobile-${tab.label}`}>{renderTab(tab)}</li>
             ))}
           </ul>
         </nav>
       </div>
+
+      {logoutError ? (
+        <div className={scss.logoutNotice} role="alert">
+          <p>{logoutError}</p>
+          <button type="button" onClick={() => setLogoutError(null)}>
+            Закрыть
+          </button>
+        </div>
+      ) : null}
 
       {isLogoutModalOpen && (
         <div className={scss.logoutOverlay} onClick={handleCloseLogoutModal}>
@@ -224,18 +225,17 @@ const HeaderProfile: FC = () => {
             onClick={(event) => event.stopPropagation()}
           >
             <button
+              ref={closeButtonRef}
               type="button"
               className={scss.closeModalButton}
               onClick={handleCloseLogoutModal}
-              aria-label={"Закрыть"}
+              aria-label="Закрыть"
             >
-              Г-
+              ×
             </button>
 
             <p id="logout-modal-title">
-              {
-                "Вы действительно хотите выйти из этой учетной записи?"
-              }
+              Вы действительно хотите выйти из этой учетной записи?
             </p>
 
             <button
@@ -243,7 +243,7 @@ const HeaderProfile: FC = () => {
               className={scss.confirmLogoutButton}
               onClick={() => void handleLogoutConfirm()}
             >
-              {"Выйти"}
+              {isLogoutSubmitting ? "Выходим..." : "Выйти"}
             </button>
           </div>
         </div>
@@ -253,4 +253,3 @@ const HeaderProfile: FC = () => {
 };
 
 export default HeaderProfile;
-

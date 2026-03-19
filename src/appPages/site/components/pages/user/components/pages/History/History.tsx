@@ -9,6 +9,7 @@ import { TbTruckDelivery } from "react-icons/tb";
 import { useGetOrderQuery } from "../../../../../../../../redux/api/product";
 import styles from "./History.module.scss";
 import { resolveMediaUrl } from "@/utils/media";
+import { extractApiErrorInfo, getRateLimitAwareMessage } from "@/utils/apiError";
 
 type OrderTab = "current" | "delivered";
 type TimelineStatus =
@@ -96,7 +97,7 @@ const toNumber = (value: unknown) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-const formatSom = (value: string | number) => `${toNumber(value).toLocaleString("ru-RU")}с`;
+const formatPrice = (value: string | number) => `${toNumber(value).toLocaleString("ru-RU")} KGS`;
 
 const formatDate = (raw: string) => {
   const date = new Date(raw);
@@ -192,7 +193,7 @@ const getOrderImages = (order: OrderCard) =>
     .filter(Boolean);
 
 const History = () => {
-  const { data } = useGetOrderQuery();
+  const { data, isLoading, isError, error, refetch } = useGetOrderQuery();
   const [tab, setTab] = useState<OrderTab>("current");
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const statusPanelRef = useRef<HTMLDivElement | null>(null);
@@ -328,7 +329,7 @@ const History = () => {
           </div>
           <div className={styles.statusMetaItem}>
             <span>Всего</span>
-            <strong>{formatSom(selectedOrder.cart.total_price)}</strong>
+            <strong>{formatPrice(selectedOrder.cart.total_price)}</strong>
           </div>
           <div className={styles.statusMetaItem}>
             <span>Номер заказа</span>
@@ -419,18 +420,40 @@ const History = () => {
     <section className={styles.History}>
       <h2 className={styles.title}>{"История заказов"}</h2>
       <p className={styles.subtitle}>
-        {
-          "Отслеживание, возврат или покупка товаров"
-        }
+        {"Отслеживание статусов, доставки и оплаты ваших заказов"}
       </p>
 
-      <div className={styles.tabs}>
+      {isLoading && !data ? (
+        <div className={styles.statusState}>
+          <p>Загружаем историю заказов...</p>
+        </div>
+      ) : null}
+
+      {isError && !data ? (
+        <div className={`${styles.statusState} ${styles.statusStateError}`} role="alert">
+          <p>
+            {getRateLimitAwareMessage(
+              extractApiErrorInfo(error, "Не удалось загрузить историю заказов"),
+              "Не удалось загрузить историю заказов. Попробуйте позже.",
+            )}
+          </p>
+          <button type="button" onClick={() => void refetch()}>
+            Повторить
+          </button>
+        </div>
+      ) : null}
+
+      {!isLoading && !isError ? <div className={styles.tabs} role="tablist" aria-label="Категории заказов">
         <button
           type="button"
           className={`${styles.tab} ${tab === "current" ? styles.active : ""}`}
           onClick={() => setTab("current")}
+          role="tab"
+          id="history-tab-current"
+          aria-selected={tab === "current"}
+          aria-controls="history-orders-panel"
         >
-          {"Текущий"}
+          {"Текущие"}
           <span className={`${styles.tabBadge} ${currentOrders.length > 0 ? styles.tabBadgeFilled : ""}`}>
             {currentOrders.length}
           </span>
@@ -440,17 +463,21 @@ const History = () => {
           type="button"
           className={`${styles.tab} ${tab === "delivered" ? styles.active : ""}`}
           onClick={() => setTab("delivered")}
+          role="tab"
+          id="history-tab-delivered"
+          aria-selected={tab === "delivered"}
+          aria-controls="history-orders-panel"
         >
-          {"Доставлен"}
+          {"Доставленные"}
           <span className={`${styles.tabBadge} ${deliveredOrders.length > 0 ? styles.tabBadgeFilled : ""}`}>
             {deliveredOrders.length}
           </span>
         </button>
-      </div>
+      </div> : null}
 
-      {renderStatusPanel()}
+      {!isLoading && !isError ? renderStatusPanel() : null}
 
-      {visibleOrders.length === 0 ? (
+      {!isLoading && !isError && visibleOrders.length === 0 ? (
         <div className={styles.emptyState}>
           <p>
             {tab === "current"
@@ -458,8 +485,13 @@ const History = () => {
               : "У вас нет доставленных заказов"}
           </p>
         </div>
-      ) : (
-        <div className={styles.content}>
+      ) : !isLoading && !isError ? (
+        <div
+          id="history-orders-panel"
+          className={styles.content}
+          role="tabpanel"
+          aria-labelledby={tab === "current" ? "history-tab-current" : "history-tab-delivered"}
+        >
           {visibleOrders.map((order) => (
             <article key={order.id} className={styles.orderCard}>
               <div className={styles.orderMeta}>
@@ -470,7 +502,7 @@ const History = () => {
 
                 <div className={styles.metaItem}>
                   <span>{"Всего"}</span>
-                  <strong>{formatSom(order.cart.total_price)}</strong>
+                  <strong>{formatPrice(order.cart.total_price)}</strong>
                 </div>
 
                 <div className={styles.metaItem}>
@@ -500,7 +532,7 @@ const History = () => {
             </article>
           ))}
         </div>
-      )}
+      ) : null}
     </section>
   );
 };

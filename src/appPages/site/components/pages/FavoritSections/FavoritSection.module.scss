@@ -1,4 +1,4 @@
-.FavoritSection {
+﻿.FavoritSection {
   width: 100%;
   max-width: 960px;
   padding: 8px 0 20px;
@@ -6,19 +6,58 @@
   h2 {
     margin: 0;
     color: #1e1d21;
-    font-family: "Inter", sans-serif;
-    font-size: 48px;
+    font-family: "Manrope", sans-serif;
+    font-size: 36px;
     font-weight: 600;
-    line-height: 52px;
+    line-height: 1.1;
   }
 
   > p {
-    margin: 8px 0 0;
-    color: #9b9b9b;
-    font-family: "Inter", sans-serif;
-    font-size: 36px;
+    margin: 10px 0 0;
+    color: #6f625e;
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
     font-weight: 400;
     line-height: 24px;
+  }
+
+  .statusState {
+    margin-top: 22px;
+    border: 1px solid #d8cac0;
+    border-radius: 12px;
+    background: #f6f1eb;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    p {
+      margin: 0;
+      color: #2f2f2f;
+      font-family: "Manrope", sans-serif;
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 22px;
+    }
+
+    button {
+      min-width: 148px;
+      height: 44px;
+      border: 1px solid #6e4b47;
+      border-radius: 10px;
+      background: #fff;
+      color: #6e4b47;
+      font-family: "Manrope", sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 18px;
+      padding: 0 16px;
+    }
+  }
+
+  .statusStateError {
+    border-color: #d9c0bf;
   }
 
   .grid {
@@ -31,15 +70,18 @@
 
   .card {
     min-width: 0;
-    cursor: pointer;
   }
 
   .imageWrap {
     position: relative;
     width: 100%;
-    border-radius: 4px;
+    border-radius: 10px;
     overflow: hidden;
-    background: #d9d9d9;
+    background: #efe7df;
+  }
+
+  .imageLink {
+    display: block;
   }
 
   .cardTop {
@@ -57,10 +99,13 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(17, 17, 17, 0.56);
 
     span {
       color: #ffffff;
-      font-family: "Inter", sans-serif;
+      font-family: "Manrope", sans-serif;
       font-size: 14px;
       font-weight: 500;
       line-height: 1;
@@ -68,12 +113,20 @@
   }
 
   .favoriteButton {
+    width: 40px;
+    height: 40px;
     border: none;
-    background: transparent;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
     padding: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
   }
 
   .mainImage {
@@ -87,11 +140,11 @@
     position: absolute;
     right: 10px;
     bottom: 10px;
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     border: none;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.95);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.94);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -99,29 +152,34 @@
   }
 
   .cardInfo {
-    margin-top: 10px;
+    margin-top: 12px;
     display: flex;
     flex-direction: column;
-    gap: 7px;
+    gap: 8px;
   }
 
   .category {
     margin: 0;
     color: #757575;
-    font-family: "Lato", sans-serif;
-    font-size: 15px;
-    font-weight: 400;
-    line-height: 18px;
+    font-family: "Manrope", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
     text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 
   h3 {
     margin: 0;
     color: #3e3e3e;
-    font-family: "Playfair Display", serif;
-    font-size: 48px;
-    font-weight: 400;
-    line-height: 1.05;
+    font-family: "Cormorant Garamond", serif;
+    font-size: 34px;
+    font-weight: 500;
+    line-height: 1;
+
+    a {
+      color: inherit;
+    }
   }
 
   .colorRow {
@@ -146,18 +204,18 @@
 
     span {
       color: #121212;
-      font-family: "Inter", sans-serif;
-      font-size: 38px;
-      font-weight: 500;
-      line-height: 30px;
+      font-family: "Manrope", sans-serif;
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 28px;
     }
 
     del {
       color: #6c7275;
-      font-family: "Inter", sans-serif;
-      font-size: 24px;
+      font-family: "Manrope", sans-serif;
+      font-size: 16px;
       font-weight: 400;
-      line-height: 26px;
+      line-height: 20px;
     }
   }
 
@@ -165,13 +223,15 @@
     margin-top: 28px;
     min-height: 280px;
     border: 1px dashed #d1c7c8;
-    border-radius: 8px;
+    border-radius: 12px;
     background: #f8f5f3;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 14px;
+    text-align: center;
+    padding: 24px;
 
     .emptyIcon {
       color: #b23941;
@@ -181,11 +241,26 @@
     p {
       margin: 0;
       color: #636363;
-      font-family: "Inter", sans-serif;
-      font-size: 30px;
+      font-family: "Manrope", sans-serif;
+      font-size: 18px;
       font-weight: 400;
-      line-height: 24px;
+      line-height: 26px;
+      max-width: 420px;
     }
+  }
+
+  .emptyAction {
+    min-width: 220px;
+    height: 48px;
+    border: 1px solid #6e4b47;
+    border-radius: 10px;
+    background: #fff;
+    color: #6e4b47;
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 18px;
+    padding: 0 18px;
   }
 }
 
@@ -203,14 +278,23 @@
     padding: 0 0 10px;
 
     h2 {
-      font-size: 40px;
-      line-height: 30px;
+      font-size: 28px;
+      line-height: 32px;
     }
 
     > p {
-      margin-top: 10px;
-      font-size: 18px;
-      line-height: 22px;
+      margin-top: 8px;
+      font-size: 14px;
+      line-height: 20px;
+    }
+
+    .statusState {
+      flex-direction: column;
+      align-items: stretch;
+
+      button {
+        width: 100%;
+      }
     }
 
     .grid {
@@ -220,7 +304,7 @@
     }
 
     .mainImage {
-      height: 200px;
+      height: 220px;
     }
 
     .cardTop {
@@ -230,23 +314,17 @@
     }
 
     .rating {
+      padding: 5px 8px;
+
       span {
         font-size: 11px;
       }
     }
 
-    .favoriteButton {
-      img {
-        width: 20px;
-        height: 20px;
-      }
-    }
-
+    .favoriteButton,
     .cartButton {
-      width: 26px;
-      height: 26px;
-      right: 8px;
-      bottom: 8px;
+      width: 34px;
+      height: 34px;
     }
 
     .cardInfo {
@@ -254,15 +332,9 @@
       gap: 6px;
     }
 
-    .category {
-      font-size: 11px;
-      line-height: 14px;
-      text-transform: none;
-    }
-
     h3 {
-      font-size: 30px;
-      line-height: 22px;
+      font-size: 24px;
+      line-height: 24px;
     }
 
     .colorRow {
@@ -276,8 +348,8 @@
 
     .priceRow {
       span {
-        font-size: 14px;
-        line-height: 18px;
+        font-size: 16px;
+        line-height: 20px;
       }
 
       del {
@@ -291,9 +363,14 @@
       min-height: 220px;
 
       p {
-        font-size: 18px;
+        font-size: 16px;
         line-height: 22px;
       }
+    }
+
+    .emptyAction {
+      width: 100%;
+      min-width: 0;
     }
   }
 }
@@ -309,3 +386,4 @@
     }
   }
 }
+

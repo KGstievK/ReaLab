@@ -2,7 +2,7 @@
 
 import scss from "./ResetSuccessPage.module.scss";
 import Image from "next/image";
-import logo from "@/assets/icons/logo.svg";
+const logo = "/media/branding/realab-mark.svg";
 import backIcon from "@/assets/icons/backIcon.svg";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -52,7 +52,7 @@ const ResetSuccessPage = () => {
       >
         <Image src={backIcon} alt="Back" width={24} height={24} />
       </button>
-      <Image src={logo} alt="Jumana logo" className={scss.logo} priority />
+      <Image src={logo} alt="ReaLab logo" className={scss.logo} priority width={136} height={96} />
 
       <h1>Успех!</h1>
 

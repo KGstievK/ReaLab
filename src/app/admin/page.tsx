@@ -1,9 +1,9 @@
-import AdminPanel from "../../appPages/admin/components/pages/AdminPanel/AdminPanel";
+﻿import AdminPanel from "../../appPages/admin/components/pages/AdminPanel/AdminPanel";
 import { createNoIndexMetadata } from "@/utils/seo";
 
 export const metadata = createNoIndexMetadata(
   "Админ-панель",
-  "Служебная админ-панель Jumana.",
+  "Служебная админ-панель ReaLab.",
   "/admin",
 );
 
@@ -12,3 +12,4 @@ const AdminPage = () => {
 };
 
 export default AdminPage;
+

@@ -98,7 +98,7 @@ const formatDate = (raw: string) => {
   return date.toLocaleDateString("ru-RU");
 };
 
-const formatSom = (value: string) => `${Number(value || 0).toLocaleString("ru-RU")}с`;
+const formatPrice = (value: string) => `${Number(value || 0).toLocaleString("ru-RU")} KGS`;
 
 const resolveOrderItemImage = (item: CartItem) => {
   const selected = item.clothes.clothes_img.find((img) => {
@@ -156,7 +156,7 @@ const OrderStatusModal = ({ isOpen, inClose, order_status }: OrderStatusModalPro
             </div>
             <div>
               <span>Всего</span>
-              <p>{formatSom(order_status.cart.total_price)}</p>
+              <p>{formatPrice(order_status.cart.total_price)}</p>
             </div>
             <div>
               <span>Номер заказа</span>

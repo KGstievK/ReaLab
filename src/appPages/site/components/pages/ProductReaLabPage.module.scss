@@ -1,0 +1,381 @@
+﻿.page {
+  padding-bottom: 18px;
+}
+
+.breadcrumbs,
+.productShell,
+.supportBand,
+.workflowBand,
+.deferredState {
+  margin-bottom: 18px;
+}
+
+.breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--color-subtext);
+}
+
+.productShell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  gap: 18px;
+}
+
+.mediaColumn,
+.infoColumn {
+  display: grid;
+  gap: 18px;
+}
+
+.mainMedia,
+.benefitCard,
+.infoCard,
+.supportCard,
+.loadingCard,
+.deferredState,
+.workflowCard {
+  padding: clamp(22px, 4vw, 30px);
+  border-radius: 36px;
+  background: rgba(243, 246, 250, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow-soft), var(--shadow-inset-soft);
+}
+
+.mainMedia {
+  overflow: hidden;
+  background: radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.82), transparent 32%),
+    linear-gradient(180deg, #f9fbfd, #e5ecf4);
+}
+
+.mainMedia img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.placeholder {
+  min-height: 460px;
+}
+
+.thumbs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.thumb {
+  padding: 10px;
+  border-radius: 24px;
+  background: rgba(243, 246, 250, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow-soft-sm);
+}
+
+.thumb img {
+  width: 100%;
+  height: auto;
+}
+
+.activeThumb {
+  background: linear-gradient(145deg, rgba(255, 154, 147, 0.18), rgba(137, 178, 203, 0.1));
+}
+
+.benefits {
+  display: grid;
+  gap: 12px;
+}
+
+.benefitCard {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  padding: 18px 20px;
+}
+
+.benefitCard h3,
+.supportCard h2,
+.workflowCard h3 {
+  font-size: var(--font-size-h3);
+}
+
+.benefitCard p,
+.description,
+.supportCard p,
+.notes span,
+.sectionRow small,
+.availabilityBlock small,
+.workflowCard p {
+  color: var(--color-subtext);
+}
+
+.benefitIcon {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: rgba(255, 154, 147, 0.14);
+  color: var(--color-brand);
+  box-shadow: var(--shadow-soft-sm);
+}
+
+.headerMeta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--color-subtext);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+}
+
+.infoCard h1 {
+  margin-top: 12px;
+  font-size: var(--font-size-display);
+  max-width: 10ch;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.badge,
+.supportEyebrow {
+  display: inline-flex;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--color-subtext);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  box-shadow: var(--shadow-soft-sm);
+}
+
+.description {
+  margin-top: 18px;
+  max-width: 60ch;
+}
+
+.priceBlock {
+  margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.priceBlock del {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--color-subtext);
+}
+
+.priceBlock strong {
+  font-size: 2rem;
+  letter-spacing: -0.05em;
+}
+
+.availabilityBlock {
+  text-align: right;
+}
+
+.inStock,
+.outOfStock {
+  display: inline-flex;
+  min-height: 40px;
+  padding: 0 14px;
+  align-items: center;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-soft-sm);
+}
+
+.inStock {
+  background: rgba(137, 178, 203, 0.2);
+}
+
+.outOfStock {
+  background: rgba(255, 154, 147, 0.18);
+}
+
+.specGrid {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.specCard {
+  padding: 16px 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: var(--shadow-soft-sm);
+}
+
+.specCard span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--color-subtext);
+  font-size: 0.82rem;
+}
+
+.sectionRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sizeGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.sizeGrid button {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+}
+
+.activeSize {
+  background: linear-gradient(145deg, rgba(255, 154, 147, 0.22), rgba(137, 178, 203, 0.12));
+}
+
+.quantityRow {
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.quantityControl {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: var(--shadow-inset-soft);
+}
+
+.quantityControl button {
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  min-height: 42px;
+  padding: 0;
+}
+
+.quantityControl span {
+  min-width: 28px;
+  text-align: center;
+}
+
+.ctaRow {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.primaryCta,
+.secondaryCta {
+  min-height: 56px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-soft-sm);
+}
+
+.primaryCta {
+  background: linear-gradient(145deg, rgba(255, 154, 147, 0.3), rgba(255, 197, 192, 0.22));
+}
+
+.secondaryCta {
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.notes {
+  margin-top: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.notes div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.notes svg,
+.supportCard a {
+  color: var(--color-brand);
+}
+
+.supportCard {
+  display: grid;
+  gap: 14px;
+}
+
+.supportCard a {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+}
+
+.workflowGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.workflowCard {
+  display: grid;
+  gap: 12px;
+}
+
+.loadingCard,
+.deferredState {
+  text-align: center;
+}
+
+@media (max-width: 1100px) {
+  .productShell,
+  .ctaRow,
+  .specGrid,
+  .workflowGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .thumbs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .quantityRow,
+  .priceBlock {
+    align-items: stretch;
+  }
+
+  .availabilityBlock {
+    text-align: left;
+  }
+}

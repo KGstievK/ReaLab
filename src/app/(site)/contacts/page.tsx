@@ -1,17 +1,17 @@
-import Contacts from "../../../appPages/site/components/pages/Contacts";
+﻿import ContactsReaLabPage from "../../../appPages/site/components/pages/ContactsReaLabPage";
 import { createPageMetadata } from "@/utils/seo";
 
 export const metadata = createPageMetadata({
   title: "Контакты",
   description:
-    "Контакты Jumana: способы связи, консультация по заказу, доставка, оплата и помощь покупателям.",
+    "Контакты ReaLab: отдел продаж, procurement-консультация, поставка, внедрение и сервисная поддержка.",
   path: "/contacts",
 });
 
 const page = () => {
   return (
     <div>
-      <Contacts />
+      <ContactsReaLabPage />
     </div>
   );
 };

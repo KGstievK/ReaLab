@@ -76,6 +76,7 @@ const renderSnapshot = (snapshot: Record<string, unknown> | null) => {
 const renderPager = (
   page: number,
   totalPages: number,
+  label: string,
   onChange: (page: number) => void,
 ) => (
   <div className={scss.auditPager}>
@@ -83,7 +84,13 @@ const renderPager = (
       Страница {page} из {totalPages}
     </span>
     <div className={scss.auditPagerActions}>
-      <button type="button" className={scss.secondaryAction} onClick={() => onChange(page - 1)} disabled={page <= 1}>
+      <button
+        type="button"
+        className={scss.secondaryAction}
+        onClick={() => onChange(page - 1)}
+        disabled={page <= 1}
+        aria-label={`Предыдущая страница: ${label}`}
+      >
         Назад
       </button>
       <button
@@ -91,6 +98,7 @@ const renderPager = (
         className={scss.secondaryAction}
         onClick={() => onChange(page + 1)}
         disabled={page >= totalPages}
+        aria-label={`Следующая страница: ${label}`}
       >
         Вперёд
       </button>
@@ -134,8 +142,9 @@ export const AdminActivitySection = ({
         </div>
       </div>
 
-      <div className={scss.auditFilters}>
+      <div className={scss.auditFilters} role="search" aria-label="Фильтры событий и аудита">
         <select
+          aria-label="Фильтр по сущности"
           value={entityFilter}
           onChange={(event) =>
             onEntityFilterChange(event.target.value as AdminActivityEvent["entity"] | "all")
@@ -153,21 +162,25 @@ export const AdminActivitySection = ({
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Поиск по сообщению, объекту или исполнителю"
+          aria-label="Поиск по сообщению, объекту или исполнителю"
         />
 
         <input
           value={actionFilter}
           onChange={(event) => onActionFilterChange(event.target.value)}
           placeholder="Фильтр по action, например role.update"
+          aria-label="Фильтр по action"
         />
 
         <input
           value={traceIdFilter}
           onChange={(event) => onTraceIdFilterChange(event.target.value)}
           placeholder="Поиск по trace ID"
+          aria-label="Поиск по trace ID"
         />
 
         <select
+          aria-label="Фильтр по исполнителю"
           value={actorIdFilter === "all" ? "all" : String(actorIdFilter)}
           onChange={(event) =>
             onActorFilterChange(event.target.value === "all" ? "all" : Number(event.target.value))
@@ -209,7 +222,7 @@ export const AdminActivitySection = ({
                   </li>
                 ))}
               </ul>
-              {renderPager(activityPage, activityTotalPages, onActivityPageChange)}
+              {renderPager(activityPage, activityTotalPages, "лента событий", onActivityPageChange)}
             </>
           ) : (
             <div className={scss.tableWrap}>
@@ -266,7 +279,7 @@ export const AdminActivitySection = ({
                   </article>
                 ))}
               </div>
-              {renderPager(auditPage, auditTotalPages, onAuditPageChange)}
+              {renderPager(auditPage, auditTotalPages, "журнал аудита", onAuditPageChange)}
             </>
           ) : (
             <div className={scss.tableWrap}>

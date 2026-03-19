@@ -39,6 +39,8 @@ interface ClothesCategoryItem {
   }>;
 }
 
+const formatPrice = (value: number) => `${Math.round(value).toLocaleString("ru-RU")} KGS`;
+
 const SalePage = () => {
   const router = useRouter();
   const pathname = usePathname();
@@ -168,7 +170,7 @@ const SalePage = () => {
                 </div>
                 <div className={scss.blockText}>
                   <div className={scss.productCategory}>
-                    <h4>Product Category</h4>
+                    <h4>{item.category_name || "Категория оборудования"}</h4>
                     <div className={scss.colors}>
                       <ColorsClothes
                         clothesImg={item.clothes_img.slice(0, 3)}
@@ -178,9 +180,9 @@ const SalePage = () => {
                   <h2>{item.clothes_name}</h2>
                   <div className={scss.price}>
                     <span>
-                      {Math.round(item.discount_price).toString()} сом
+                      {formatPrice(item.discount_price)}
                     </span>
-                    <del>{Math.round(item.price)} сом</del>
+                    <del>{formatPrice(item.price)}</del>
                   </div>
                 </div>
               </div>

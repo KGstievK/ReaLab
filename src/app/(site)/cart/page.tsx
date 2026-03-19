@@ -1,9 +1,9 @@
-import Cart from "../../../appPages/site/components/pages/Cart";
+﻿import Cart from "../../../appPages/site/components/pages/Cart";
 import { createNoIndexMetadata } from "@/utils/seo";
 
 export const metadata = createNoIndexMetadata(
-  "Корзина",
-  "Корзина интернет-магазина Jumana.",
+  "Корзина ReaLab",
+  "Корзина ReaLab для оформления поставки медицинского оборудования.",
   "/cart",
 );
 

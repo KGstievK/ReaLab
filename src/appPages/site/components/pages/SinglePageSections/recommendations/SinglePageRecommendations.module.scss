@@ -22,9 +22,13 @@
   }
 
   .card {
+    position: relative;
     width: 282px;
     min-width: 0;
     cursor: pointer;
+    box-shadow: 20px 20px 40px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 10px 10px 10px 10px;
   }
 
   .cardImage {
@@ -33,6 +37,7 @@
     overflow: hidden;
     height: 389px;
     background: #f1ece8;
+    border-radius: 10px 10px 0px 0px;
   }
 
   .cardTop {
@@ -251,4 +256,3 @@
     }
   }
 }
-

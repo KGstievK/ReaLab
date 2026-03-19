@@ -1,7 +1,9 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { FaBoxOpen } from "react-icons/fa6";
 import star from "@/assets/images/star.png";
 import heartRed from "@/assets/icons/red-heart-icon.svg";
@@ -13,6 +15,7 @@ import {
 import scss from "./FavoritSection.module.scss";
 import { resolveMediaUrl } from "@/utils/media";
 import { buildProductHref } from "@/utils/productRoute";
+import { extractApiErrorInfo, getRateLimitAwareMessage } from "@/utils/apiError";
 
 interface FavoriteItem {
   id: number;
@@ -35,20 +38,23 @@ const toNumber = (value: unknown) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-const formatSom = (value: string | number) =>
-  `${toNumber(value).toLocaleString("ru-RU")}сом`;
+const formatPrice = (value: string | number) =>
+  `${toNumber(value).toLocaleString("ru-RU")} KGS`;
 
 const getColor = (rawColor: string) => {
-  const color = rawColor.toLowerCase();
+  const color = rawColor.trim().toLowerCase();
   const map: Record<string, string> = {
     серый: "#8d8d8d",
     коричневый: "#7a5735",
     синий: "#3d5d9a",
     зеленый: "#4f7446",
+    зелёный: "#4f7446",
     красный: "#b23941",
     желтый: "#f3cf4e",
+    жёлтый: "#f3cf4e",
     оранжевый: "#f09b34",
     черный: "#111111",
+    чёрный: "#111111",
     белый: "#ffffff",
     фиолетовый: "#7b4aa6",
     розовый: "#d588a6",
@@ -84,10 +90,17 @@ const getColor = (rawColor: string) => {
 
 const Favorite = () => {
   const router = useRouter();
-  const { data } = useGetToFavoriteQuery(undefined, {
+  const [favoriteMessage, setFavoriteMessage] = useState<string | null>(null);
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useGetToFavoriteQuery(undefined, {
     refetchOnMountOrArgChange: true,
   });
-  const [deleteFavorite] = useDeleteFavoriteMutation();
+  const [deleteFavorite, { isLoading: isDeletingFavorite }] = useDeleteFavoriteMutation();
 
   const favorites: FavoriteItem[] = Array.isArray(data)
     ? (data as FavoriteItem[])
@@ -100,26 +113,33 @@ const Favorite = () => {
     event.stopPropagation();
 
     try {
+      setFavoriteMessage(null);
       await deleteFavorite(favoriteId).unwrap();
-    } catch (error) {
-      console.error("Failed to delete favorite:", error);
+    } catch (mutationError) {
+      const apiError = extractApiErrorInfo(
+        mutationError,
+        "Не удалось удалить товар из избранного",
+      );
+      setFavoriteMessage(
+        getRateLimitAwareMessage(
+          apiError,
+          "Не удалось удалить товар из избранного. Попробуйте позже.",
+        ),
+      );
     }
   };
 
   const renderCard = (item: FavoriteItem) => {
     const image = resolveMediaUrl(item.clothes.clothes_img[0]?.photo) || "/fallback-image.png";
     const colors = item.clothes.clothes_img.slice(0, 3);
-    const price = formatSom(item.clothes.discount_price);
+    const price = formatPrice(item.clothes.discount_price);
     const oldPrice =
-      toNumber(item.clothes.price) > 0 ? formatSom(item.clothes.price) : "";
+      toNumber(item.clothes.price) > 0 ? formatPrice(item.clothes.price) : "";
     const rating = toNumber(item.clothes.average_rating) || 4.95;
+    const productHref = buildProductHref(item.clothes);
 
     return (
-      <article
-        key={item.id}
-        className={scss.card}
-        onClick={() => router.push(buildProductHref(item.clothes))}
-      >
+      <article key={item.id} className={scss.card}>
         <div className={scss.imageWrap}>
           <div className={scss.cardTop}>
             <div className={scss.rating}>
@@ -132,35 +152,37 @@ const Favorite = () => {
               className={scss.favoriteButton}
               onClick={(event) => void handleDeleteFavorite(event, item.id)}
               aria-label="Удалить из избранного"
+              disabled={isDeletingFavorite}
             >
               <Image src={heartRed} alt="favorite" width={24} height={24} />
             </button>
           </div>
 
-          <Image
-            src={image}
-            alt={item.clothes.clothes_name}
-            width={450}
-            height={560}
-            className={scss.mainImage}
-          />
+          <Link href={productHref} className={scss.imageLink}>
+            <Image
+              src={image}
+              alt={item.clothes.clothes_name}
+              width={450}
+              height={560}
+              className={scss.mainImage}
+            />
+          </Link>
 
           <button
             type="button"
             className={scss.cartButton}
-            onClick={(event) => {
-              event.stopPropagation();
-              router.push(buildProductHref(item.clothes));
-            }}
-            aria-label="Открыть товар"
+            onClick={() => router.push(productHref)}
+            aria-label="Открыть позицию"
           >
             <Image src={bagIcon} alt="cart" width={18} height={18} />
           </button>
         </div>
 
         <div className={scss.cardInfo}>
-          <p className={scss.category}>Product Category</p>
-          <h3>{item.clothes.clothes_name}</h3>
+          <p className={scss.category}>Избранное</p>
+          <h3>
+            <Link href={productHref}>{item.clothes.clothes_name}</Link>
+          </h3>
 
           <div className={scss.colorRow}>
             {colors.map((colorItem, index) => (
@@ -185,12 +207,40 @@ const Favorite = () => {
   return (
     <section className={scss.FavoritSection}>
       <h2>Избранные</h2>
-      <p>Смотрите свой список избранного здесь</p>
+      <p>Сохраняйте интересующие позиции и возвращайтесь к ним при подготовке закупки.</p>
 
-      {favorites.length === 0 ? (
+      {favoriteMessage ? (
+        <div className={`${scss.statusState} ${scss.statusStateError}`} role="alert">
+          <p>{favoriteMessage}</p>
+          <button type="button" onClick={() => void refetch()}>
+            Повторить
+          </button>
+        </div>
+      ) : null}
+
+      {isLoading ? (
+        <div className={scss.statusState}>
+          <p>Загружаем избранные товары...</p>
+        </div>
+      ) : isError ? (
+        <div className={`${scss.statusState} ${scss.statusStateError}`} role="alert">
+          <p>
+            {getRateLimitAwareMessage(
+              extractApiErrorInfo(error, "Не удалось загрузить избранное"),
+              "Не удалось загрузить избранные товары. Попробуйте позже.",
+            )}
+          </p>
+          <button type="button" onClick={() => void refetch()}>
+            Повторить
+          </button>
+        </div>
+      ) : favorites.length === 0 ? (
         <div className={scss.emptyState}>
           <FaBoxOpen className={scss.emptyIcon} />
-          <p>Ваш список избранного пока пуст</p>
+          <p>Список сохраненных позиций пока пуст.</p>
+          <button type="button" className={scss.emptyAction} onClick={() => router.push("/catalog")}>
+            Перейти в каталог
+          </button>
         </div>
       ) : (
         <div className={scss.grid}>{favorites.map(renderCard)}</div>

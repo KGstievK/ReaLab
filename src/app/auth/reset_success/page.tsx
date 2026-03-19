@@ -1,11 +1,11 @@
-import { Suspense } from "react";
+﻿import { Suspense } from "react";
 import ResetSuccessPage from "../../../appPages/auth/components/pages/ResetSuccessPage";
 import AuthDesktopModal from "../../../appPages/auth/components/layout/AuthDesktopModal";
 import { createNoIndexMetadata } from "@/utils/seo";
 
 export const metadata = createNoIndexMetadata(
-  "Пароль изменён",
-  "Подтверждение успешной смены пароля в Jumana.",
+  "Пароль обновлен",
+  "Подтверждение успешной смены пароля в ReaLab.",
   "/auth/reset_success",
 );
 

@@ -11,7 +11,7 @@
     h2 {
       margin: 0;
       // color: var(--main-color);
-      color: #a73539;
+      color: var(--color-text);
       font-family: "Playfair Display", serif;
       font-size: clamp(34px, 3.5vw, 52px);
       font-weight: 500;
@@ -21,21 +21,19 @@
 
   .desktopMore,
   .mobileMore {
-    margin-top: 44px;
-    min-width: 206px;
-    height: 53px;
-    display: flex;
+     min-width: 240px;
+    height: 54px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-brand);
+    background: var(--color-brand);
+    color: #fff;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 16px 74px;
-    color: var(--background);
-    background-color: #a73539;
-    border: none;
-    // color: #a73539;
-    gap: 15px;
-    font-size: 18px;
-    font-weight: 500;
-    line-height: 22px;
+    gap: 10px;
+    font-family: var(--font-ui);
+    font-size: 16px;
+    font-weight: 600;
   }
 
   .mobileMore {
@@ -51,7 +49,7 @@
 
     li {
       list-style: inside;
-      color: #a73539;
+      color: var(--color-text);
       font-family: "Playfair Display", serif;
       font-size: 20px;
       font-style: italic;

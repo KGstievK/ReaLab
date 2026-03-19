@@ -81,6 +81,11 @@ const SideBar: FC = () => {
     }));
   }, [categoryData]);
 
+  const activeFiltersCount = useMemo(
+    () => [category, selectedSize, selectedColor, priceRange.min, priceRange.max].filter(Boolean).length,
+    [category, priceRange.max, priceRange.min, selectedColor, selectedSize],
+  );
+
   useEffect(() => {
     if (!category) {
       return;
@@ -220,14 +225,14 @@ const SideBar: FC = () => {
     setCategory((prev) => (prev === value ? "" : value));
   };
 
-  const handleSizeChange = (size: string) => {
+  const handleSizeChange = (sizeValue: string) => {
     setPage(1);
-    setSelectedSize((prev) => (prev === size ? "" : size));
+    setSelectedSize((prev) => (prev === sizeValue ? "" : sizeValue));
   };
 
-  const handleColorChange = (color: string) => {
+  const handleColorChange = (colorValue: string) => {
     setPage(1);
-    setSelectedColor((prev) => (prev === color ? "" : color));
+    setSelectedColor((prev) => (prev === colorValue ? "" : colorValue));
   };
 
   const handlePriceInputChange = (
@@ -323,10 +328,18 @@ const SideBar: FC = () => {
 
   const renderFilterBody = () => (
     <>
+      <div className={scss.filterIntro}>
+        <span className={scss.filterEyebrow}>Фильтры</span>
+        <p>
+          Настройте выдачу по категории, цене, размеру и цвету. Состояние фильтров
+          сохранится в адресной строке.
+        </p>
+      </div>
+
       <div className={scss.filterSection}>
         <button type="button" className={scss.filterHeader} onClick={() => toggleSection("type")}>
-          <h4>ВИД</h4>
-          <Image src={arrow} alt="toggle" />
+          <h4>Категория</h4>
+          <Image src={arrow} alt="Переключить секцию" />
         </button>
         {openSections.type && (
           <div className={scss.filterContent}>
@@ -348,21 +361,21 @@ const SideBar: FC = () => {
 
       <div className={scss.filterSection}>
         <button type="button" className={scss.filterHeader} onClick={() => toggleSection("price")}>
-          <h4>ЦЕНА</h4>
-          <Image src={arrow} alt="toggle" />
+          <h4>Цена</h4>
+          <Image src={arrow} alt="Переключить секцию" />
         </button>
         {openSections.price && (
           <div className={scss.filterContent}>
             <div className={scss.priceInputs}>
               <input
                 type="text"
-                placeholder="min."
+                placeholder="От"
                 value={priceRange.min}
                 onChange={(event) => handlePriceInputChange(event, "min")}
               />
               <input
                 type="text"
-                placeholder="max."
+                placeholder="До"
                 value={priceRange.max}
                 onChange={(event) => handlePriceInputChange(event, "max")}
               />
@@ -395,8 +408,8 @@ const SideBar: FC = () => {
 
       <div className={scss.filterSection}>
         <button type="button" className={scss.filterHeader} onClick={() => toggleSection("size")}>
-          <h4>РАЗМЕР</h4>
-          <Image src={arrow} alt="toggle" />
+          <h4>Размер</h4>
+          <Image src={arrow} alt="Переключить секцию" />
         </button>
         {openSections.size && (
           <div className={scss.filterContent}>
@@ -415,15 +428,10 @@ const SideBar: FC = () => {
         )}
       </div>
 
-      <div className={scss.colorShortcut}>
-        <span>ЦВЕТ</span>
-        <span>›</span>
-      </div>
-
       <div className={scss.filterSection}>
         <button type="button" className={scss.filterHeader} onClick={() => toggleSection("color")}>
-          <h4>ЦВЕТ</h4>
-          <Image src={arrow} alt="toggle" />
+          <h4>Цвет</h4>
+          <Image src={arrow} alt="Переключить секцию" />
         </button>
         {openSections.color && (
           <div className={scss.filterContent}>
@@ -444,7 +452,7 @@ const SideBar: FC = () => {
 
       <div className={scss.clearFilter}>
         <button type="button" onClick={clearFilters}>
-          Очистить ×
+          Сбросить фильтры
         </button>
       </div>
     </>
@@ -461,8 +469,11 @@ const SideBar: FC = () => {
           aria-expanded={isMobileFilterOpen}
           aria-controls="catalog-mobile-filter"
         >
-          <Image src={filterImg} alt="filter" width={18} height={18} />
-          <h4>ФИЛЬТР</h4>
+          <Image src={filterImg} alt="Фильтр" width={18} height={18} />
+          <div className={scss.mobileFilterText}>
+            <span>Фильтры</span>
+            <strong>{activeFiltersCount > 0 ? `${activeFiltersCount} активн.` : "Все товары"}</strong>
+          </div>
         </button>
 
         <div className={scss.desktopFilter}>
@@ -478,6 +489,7 @@ const SideBar: FC = () => {
         page={page}
         onPageChange={setPage}
         onSortChange={handleSortChange}
+        onClearFilters={clearFilters}
         priceRange={[
           parseInt(priceRange.min, 10) || 0,
           parseInt(priceRange.max, 10) || Number.MAX_SAFE_INTEGER,
@@ -495,8 +507,11 @@ const SideBar: FC = () => {
         >
           <div className={scss.mobileSheetTop}>
             <div className={scss.mobileSheetTitle}>
-              <Image src={filterImg} alt="filter" width={18} height={18} />
-              <h4>ФИЛЬТР</h4>
+              <Image src={filterImg} alt="Фильтр" width={18} height={18} />
+              <div>
+                <h4>Фильтры</h4>
+                <p>{activeFiltersCount > 0 ? `${activeFiltersCount} активных фильтра` : "Все товары"}</p>
+              </div>
             </div>
             <button
               type="button"
@@ -504,7 +519,7 @@ const SideBar: FC = () => {
               onClick={() => setIsMobileFilterOpen(false)}
               aria-label="Закрыть фильтры"
             >
-              ×
+              ?
             </button>
           </div>
 
@@ -518,3 +533,4 @@ const SideBar: FC = () => {
 };
 
 export default SideBar;
+

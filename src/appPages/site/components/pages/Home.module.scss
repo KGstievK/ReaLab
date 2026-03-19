@@ -1,0 +1,144 @@
+﻿// .Home {
+//   .promoStrip {
+//     margin-top: 18px;
+//   }
+
+//   .promoInner {
+//     display: grid;
+//     grid-template-columns: repeat(3, minmax(0, 1fr));
+//     gap: 12px;
+
+//     span {
+//       min-height: 48px;
+//       padding: 0 16px;
+//       border-radius: var(--radius-pill);
+//       border: 1px solid var(--color-line);
+//       background: var(--color-surface-muted);
+//       color: var(--color-text);
+//       display: inline-flex;
+//       align-items: center;
+//       justify-content: center;
+//       text-align: center;
+//       font-family: var(--font-ui);
+//       font-size: 13px;
+//       font-weight: 700;
+//       line-height: 1.4;
+//       letter-spacing: 0.06em;
+//       text-transform: uppercase;
+//     }
+//   }
+
+//   .trustSection {
+//     margin-top: 120px;
+//   }
+
+//   .trustHeader {
+//     display: flex;
+//     flex-direction: column;
+//     gap: 14px;
+//     max-width: 760px;
+
+//     span {
+//       color: var(--color-brand);
+//       font-family: var(--font-ui);
+//       font-size: 12px;
+//       font-weight: 700;
+//       line-height: 1;
+//       letter-spacing: 0.12em;
+//       text-transform: uppercase;
+//     }
+
+//     h2 {
+//       margin: 0;
+//       color: var(--color-text);
+//       font-family: var(--font-display);
+//       font-size: clamp(34px, 4vw, 52px);
+//       font-weight: 600;
+//       line-height: 1.08;
+//     }
+//   }
+
+//   .trustGrid {
+//     margin-top: 28px;
+//     display: grid;
+//     grid-template-columns: repeat(3, minmax(0, 1fr));
+//     gap: 16px;
+//   }
+
+//   .trustCard {
+//     min-height: 220px;
+//     padding: 24px;
+//     border-radius: 24px;
+//     border: 1px solid var(--color-line);
+//     background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 231, 222, 0.88) 100%);
+
+//     h3 {
+//       margin: 0 0 12px;
+//       color: var(--color-text);
+//       font-family: var(--font-ui);
+//       font-size: 18px;
+//       font-weight: 700;
+//       line-height: 1.35;
+//     }
+
+//     p {
+//       margin: 0;
+//       color: var(--color-subtext);
+//       font-family: var(--font-ui);
+//       font-size: 15px;
+//       line-height: 1.7;
+//     }
+//   }
+// }
+
+// @media (max-width: 960px) {
+//   .Home {
+//     .promoInner,
+//     .trustGrid {
+//       grid-template-columns: 1fr;
+//     }
+
+//     .trustCard {
+//       min-height: 0;
+//     }
+//   }
+// }
+
+// @media (max-width: 750px) {
+//   .Home {
+//     .promoStrip {
+//       margin-top: 8px;
+//     }
+
+//     .promoInner {
+//       gap: 8px;
+
+//       span {
+//         min-height: 44px;
+//         font-size: 12px;
+//       }
+//     }
+
+//     .trustSection {
+//       margin-top: 72px;
+//     }
+
+//     .trustHeader {
+//       gap: 10px;
+
+//       h2 {
+//         font-size: clamp(30px, 10vw, 40px);
+//       }
+//     }
+
+//     .trustGrid {
+//       margin-top: 18px;
+//       gap: 12px;
+//     }
+
+//     .trustCard {
+//       padding: 18px;
+//       border-radius: 18px;
+//     }
+//   }
+// }

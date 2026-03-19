@@ -1,18 +1,24 @@
 :root {
-  --color-brand: #6e4b47;
-  --color-accent: #b28b76;
-  --color-text: #201a19;
-  --color-subtext: #6f625e;
-  --color-line: #d8cac0;
-  --color-page: #f6f1eb;
-  --color-surface: #ffffff;
-  --color-section: #f1e7de;
-  --color-success: #5f7b67;
-  --color-warning: #a07a46;
-  --color-error: #9a4e4a;
+  --color-brand: #ff9a93;
+  --color-brand-hover: #ff8880;
+  --color-brand-active: #f4746d;
+  --color-accent: #9eb7c8;
+  --color-accent-hover: #8fabbf;
+  --color-text: #415166;
+  --color-subtext: #7b8596;
+  --color-line: #e2e7ed;
+  --color-page: #f1f3f6;
+  --color-surface: #f5f7fa;
+  --color-surface-muted: #fbfcfd;
+  --color-surface-strong: #edf1f5;
+  --color-section: #eff2f6;
+  --color-success: #6f9684;
+  --color-warning: #b79558;
+  --color-error: #c96d6b;
+  --color-overlay: rgba(65, 81, 102, 0.1);
 
-  --font-display: "Cormorant Garamond", "Playfair Display", serif;
-  --font-ui: "Manrope", "Outfit", "Inter", sans-serif;
+  --font-display: var(--font-geist-sans), "Segoe UI", sans-serif;
+  --font-ui: var(--font-geist-sans), "Segoe UI", sans-serif;
 
   --space-1: 4px;
   --space-2: 8px;
@@ -24,18 +30,40 @@
   --space-8: 64px;
   --space-9: 96px;
 
-  --radius-sm: 12px;
-  --radius-md: 16px;
+  --radius-xs: 14px;
+  --radius-sm: 22px;
+  --radius-md: 30px;
+  --radius-lg: 42px;
   --radius-pill: 999px;
 
-  --content-max: 1360px;
-  --shadow-soft: 0 10px 30px rgba(32, 26, 25, 0.06);
+  --content-max: 1380px;
+  --shadow-soft: 18px 18px 38px rgba(201, 208, 216, 0.54), -18px -18px 36px rgba(255, 255, 255, 0.96);
+  --shadow-soft-sm: 10px 10px 24px rgba(203, 209, 217, 0.42), -10px -10px 22px rgba(255, 255, 255, 0.92);
+  --shadow-pressed: inset 8px 8px 18px rgba(203, 210, 219, 0.52), inset -8px -8px 18px rgba(255, 255, 255, 0.96);
+  --shadow-card: 24px 24px 54px rgba(202, 208, 216, 0.56), -24px -24px 44px rgba(255, 255, 255, 0.98);
+  --shadow-inset-soft: inset 1px 1px 0 rgba(255, 255, 255, 0.92), inset -10px -10px 24px rgba(255, 255, 255, 0.58),
+    inset 10px 10px 22px rgba(219, 224, 231, 0.42);
+  --shadow-coral: 0 16px 36px rgba(255, 154, 147, 0.22);
+  --surface-gradient: linear-gradient(145deg, #fbfcfd, #edf1f5);
+  --surface-panel: linear-gradient(145deg, rgba(252, 253, 254, 0.96), rgba(238, 242, 246, 0.94));
+  --surface-glass: rgba(247, 249, 252, 0.82);
+  --transition-base: 180ms ease;
+  --transition-slow: 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  --focus-ring: rgba(255, 154, 147, 0.28);
 
-  /* Compatibility aliases for the current codebase. */
+  --font-size-display: clamp(2.8rem, 5vw, 5.4rem);
+  --font-size-h1: clamp(2.2rem, 4vw, 4.2rem);
+  --font-size-h2: clamp(1.7rem, 2.4vw, 2.8rem);
+  --font-size-h3: clamp(1.2rem, 1.7vw, 1.6rem);
+  --font-size-body: 16px;
+  --line-height-heading: 1.04;
+  --line-height-body: 1.65;
+  --line-height-compact: 1.35;
+
   --background: var(--color-surface);
   --active: var(--color-brand);
   --main-color: var(--color-brand);
   --footer: var(--color-text);
-  --silver: rgba(111, 98, 94, 0.45);
-  --input: rgba(241, 231, 222, 0.8);
+  --silver: rgba(122, 135, 151, 0.45);
+  --input: rgba(247, 249, 252, 0.92);
 }

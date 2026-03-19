@@ -16,15 +16,18 @@ const Sizes: FC<{
         const isSelected = selectedSize === size;
 
         return (
-          <span
+          <button
             key={size}
+            type="button"
             className={`${scss.size} ${
               isAvailable ? scss.available : scss.unavailable
             } ${isSelected ? scss.selected : ""}`}
             onClick={() => isAvailable && onClick(size)}
+            disabled={!isAvailable}
+            aria-pressed={isSelected}
           >
             {size}
-          </span>
+          </button>
         );
       })}
     </div>
