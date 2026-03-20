@@ -16,10 +16,10 @@ const LayoutProfile: FC<LayoutProfileProps> = ({ children }) => {
       return "Профиль";
     }
     if (pathname === "/profile/history") {
-      return "Мои покупки";
+      return "Мои заявки";
     }
     if (pathname === "/profile/favorite") {
-      return "Избранные";
+      return "Сохраненные позиции";
     }
     return "Профиль";
   }, [pathname]);

@@ -2,10 +2,11 @@
 import { useEffect, useMemo, useState } from "react";
 import scss from "./Header.relab.module.scss";
 import Link from "next/link";
-import { FiMenu, FiShoppingCart, FiUser } from "react-icons/fi";
+import { FiMenu, FiShoppingCart, FiShuffle, FiUser } from "react-icons/fi";
 import BurgeMenu from "../../ui/BurgeMenu/BurgeMenu";
 import { getStoredAccessToken } from "../../../../../utils/authStorage";
 import { useGetCartQuery } from "../../../../../redux/api/product";
+import { useEquipmentCompare } from "../../../../../utils/useEquipmentCompare";
 
 interface HeaderProps {
   isMobileHidden?: boolean;
@@ -32,7 +33,8 @@ const Header = ({ isMobileHidden = false }: HeaderProps) => {
     `/auth/sign-in?next=${encodeURIComponent(nextPath)}&from=${encodeURIComponent(safeFromPath)}`;
 
   const profileHref = isAuthenticated ? "/profile" : buildSignInHref("/profile");
-  const cartHref = isAuthenticated ? "/cart" : buildSignInHref("/cart");
+  const cartHref = isAuthenticated ? "/cart" : "/cart/checkout";
+  const compareHref = "/compare";
 
   const { data: cartData } = useGetCartQuery(undefined, {
     skip: !isAuthenticated,
@@ -47,6 +49,7 @@ const Header = ({ isMobileHidden = false }: HeaderProps) => {
     () => cartItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0),
     [cartItems],
   );
+  const { count: compareCount } = useEquipmentCompare();
 
   useEffect(() => {
     const syncAuth = () => {
@@ -107,7 +110,12 @@ const Header = ({ isMobileHidden = false }: HeaderProps) => {
               <FiUser />
             </Link>
 
-            <Link href={cartHref} aria-label="Корзина" className={scss.iconLink}>
+            <Link href={compareHref} aria-label="Сравнение оборудования" className={scss.iconLink}>
+              <FiShuffle />
+              {compareCount > 0 ? <span className={scss.compareBadge}>{compareCount}</span> : null}
+            </Link>
+
+            <Link href={cartHref} aria-label="Список запроса" className={scss.iconLink}>
               <FiShoppingCart />
               {cartCount > 0 ? <span className={scss.cartBadge}>{cartCount}</span> : null}
             </Link>

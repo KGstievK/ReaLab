@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { FiArrowRight, FiHeart, FiSearch, FiSliders } from "react-icons/fi";
+import { FiArrowRight, FiHeart, FiSearch, FiShuffle, FiSliders } from "react-icons/fi";
 import {
   useDeleteFavoriteMutation,
   useGetAllCategoryQuery,
@@ -18,6 +18,7 @@ import { queueFavoriteIntent } from "../../../../utils/authIntent";
 import scss from "./CatalogReaLab.module.scss";
 import { resolveMediaUrl } from "@/utils/media";
 import { buildProductHref } from "@/utils/productRoute";
+import { useEquipmentCompare } from "@/utils/useEquipmentCompare";
 
 type CatalogMode = "catalog" | "new" | "popular" | "sale";
 
@@ -91,6 +92,26 @@ const PAGE_SIZE = 9;
 const formatPrice = (value: number) =>
   `${new Intl.NumberFormat("ru-RU").format(Math.round(value))} KGS`;
 
+const buildCompareItemFromCatalog = (item: AllClothes) => {
+  const stockQuantity = Number(
+    (item as AllClothes & { quantities?: number | string }).quantities || 0,
+  );
+
+  return {
+    id: item.id,
+    href: buildProductHref(item),
+    name: item.clothes_name,
+    categoryName: item.category_name || "Каталог",
+    imageUrl: item.clothes_img?.[0]?.photo || "",
+    price: Number(item.price || 0),
+    discountPrice: Number(item.discount_price || 0),
+    defaultSize: item.size?.[0] || "Base",
+    defaultColorId: item.clothes_img?.[0]?.id ?? null,
+    defaultColorLabel: item.clothes_img?.[0]?.color || "Стандартный финиш",
+    availabilityLabel: stockQuantity > 0 ? `В наличии ${stockQuantity} шт.` : "Под заказ",
+  };
+};
+
 const isDiscounted = (item: AllClothes) =>
   Number(item.discount_price) > 0 && Number(item.discount_price) < Number(item.price);
 
@@ -154,6 +175,8 @@ const CatalogReaLabPage = ({ mode = "catalog" }: { mode?: CatalogMode }) => {
   const [size, setSize] = useState(searchParams.get("size")?.trim() || "");
   const [sort, setSort] = useState(normalizeSortValue(searchParams.get("sort")));
   const [page, setPage] = useState(Math.max(1, Number(searchParams.get("page") || "1") || 1));
+  const [compareNotice, setCompareNotice] = useState("");
+  const { compareIds, toggleItem: toggleCompareItem, count: compareCount } = useEquipmentCompare();
 
   useEffect(() => {
     setSearch(searchParams.get("search")?.trim() || "");
@@ -295,6 +318,27 @@ const CatalogReaLabPage = ({ mode = "catalog" }: { mode?: CatalogMode }) => {
     setPage(1);
   };
 
+  const handleCompareClick = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    item: AllClothes,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const nextState = toggleCompareItem(buildCompareItemFromCatalog(item));
+
+    if (nextState === "full") {
+      setCompareNotice("В сравнении уже 4 позиции. Откройте compare layer, чтобы освободить слот.");
+      return;
+    }
+
+    setCompareNotice(
+      nextState === "added"
+        ? `Позиция «${item.clothes_name}» добавлена в сравнение.`
+        : `Позиция «${item.clothes_name}» удалена из сравнения.`,
+    );
+  };
+
   return (
     <section className={scss.page}>
       <div className="container">
@@ -431,10 +475,16 @@ const CatalogReaLabPage = ({ mode = "catalog" }: { mode?: CatalogMode }) => {
           <div className={scss.metaCopy}>
             <p>{isFetching ? "Подбираем оборудование..." : `Найдено позиций: ${totalItems}`}</p>
             <strong>Активных фильтров: {activeFiltersCount}</strong>
+            {compareNotice ? <small>{compareNotice}</small> : <small>В сравнении: {compareCount}</small>}
           </div>
-          <button type="button" onClick={resetFilters}>
-            Сбросить фильтры
-          </button>
+          <div className={scss.metaActions}>
+            <Link href="/compare" className={scss.compareLink}>
+              Сравнение ({compareCount})
+            </Link>
+            <button type="button" onClick={resetFilters}>
+              Сбросить фильтры
+            </button>
+          </div>
         </div>
 
         {items.length === 0 && !isFetching ? (
@@ -462,14 +512,28 @@ const CatalogReaLabPage = ({ mode = "catalog" }: { mode?: CatalogMode }) => {
                 <Link key={item.id} href={buildProductHref(item)} className={scss.card}>
                   <div className={scss.cardVisual}>
                     {badge ? <span className={scss.badge}>{badge}</span> : null}
-                    <button
-                      type="button"
-                      className={scss.favoriteButton}
-                      onClick={(event) => void handleFavoriteClick(event, item)}
-                      aria-label={isFavorite ? "Убрать из избранного" : "Добавить в избранное"}
-                    >
-                      <FiHeart fill={isFavorite ? "currentColor" : "none"} />
-                    </button>
+                    <div className={scss.cardActionRail}>
+                      <button
+                        type="button"
+                        className={scss.compareButton}
+                        onClick={(event) => handleCompareClick(event, item)}
+                        aria-label={
+                          compareIds.has(item.id)
+                            ? "Убрать из сравнения"
+                            : "Добавить в сравнение"
+                        }
+                      >
+                        <FiShuffle />
+                      </button>
+                      <button
+                        type="button"
+                        className={scss.favoriteButton}
+                        onClick={(event) => void handleFavoriteClick(event, item)}
+                        aria-label={isFavorite ? "Убрать из избранного" : "Добавить в избранное"}
+                      >
+                        <FiHeart fill={isFavorite ? "currentColor" : "none"} />
+                      </button>
+                    </div>
                     {image ? (
                       <Image
                         src={resolveMediaUrl(image)}
@@ -493,7 +557,7 @@ const CatalogReaLabPage = ({ mode = "catalog" }: { mode?: CatalogMode }) => {
                     </div>
                     <div className={scss.cardFooter}>
                       <small>{availabilityLabel}</small>
-                      <span>{badge || "Clinical view"}</span>
+                      <span>{compareIds.has(item.id) ? "В сравнении" : badge || "Clinical view"}</span>
                     </div>
                   </div>
                 </Link>

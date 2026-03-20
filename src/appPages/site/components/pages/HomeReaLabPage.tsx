@@ -154,6 +154,7 @@ const HomeReaLabPage = () => {
   return (
     <div className={scss.homePage}>
       <section className={scss.hero}>
+        
         <div className={scss.heroCopy}>
           <span className={scss.eyebrow}>{heroEyebrow}</span>
           <h1>

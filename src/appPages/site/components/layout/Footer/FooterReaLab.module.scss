@@ -10,6 +10,7 @@
   box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.9);
   position: relative;
   overflow: hidden;
+  isolation: isolate;
 }
 
 .content::before {
@@ -17,9 +18,19 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 15% 12%, rgba(255, 154, 147, 0.12), transparent 24%),
-    radial-gradient(circle at 88% 18%, rgba(158, 183, 200, 0.12), transparent 22%);
+    radial-gradient(circle at 15% 12%, rgba(255, 255, 255, 0.42), transparent 24%),
+    radial-gradient(circle at 88% 18%, rgba(141, 184, 199, 0.1), transparent 22%);
   pointer-events: none;
+  z-index: 0;
+}
+
+.surfaceMesh {
+  z-index: 0;
+}
+
+.content > :not(.surfaceMesh) {
+  position: relative;
+  z-index: 1;
 }
 
 .top {
@@ -54,9 +65,9 @@
 .brandMark span {
   width: 24px;
   height: 24px;
-  background: linear-gradient(145deg, var(--color-brand), #ffc2bc);
+  background: linear-gradient(145deg, rgba(141, 184, 199, 0.96), rgba(104, 164, 184, 0.92));
   clip-path: polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0 50%);
-  box-shadow: var(--shadow-coral);
+  box-shadow: 0 10px 22px rgba(130, 167, 183, 0.24);
 }
 
 .brandLockup strong {
@@ -85,8 +96,9 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-pill);
-  background: linear-gradient(145deg, rgba(255, 154, 147, 0.18), rgba(158, 183, 200, 0.12));
-  box-shadow: var(--shadow-soft-sm), var(--shadow-coral);
+  border: 1px solid rgba(255, 255, 255, 0.96);
+  background: linear-gradient(145deg, rgba(243, 248, 250, 0.98), rgba(233, 241, 245, 0.94));
+  box-shadow: var(--shadow-soft-sm), var(--shadow-inset-soft);
 }
 
 .linksGrid {

@@ -1,12 +1,12 @@
-import React from 'react'
-import FavoritSection from './FavoritSections/FavoritSection'
+import React from "react";
+import ShortlistSection from "./FavoritSections/ShortlistReaLabSection";
 
 const Favorit = () => {
   return (
     <div>
-      <FavoritSection/>
+      <ShortlistSection />
     </div>
-  )
-}
+  );
+};
 
-export default Favorit
+export default Favorit;

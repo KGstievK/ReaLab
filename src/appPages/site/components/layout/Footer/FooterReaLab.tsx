@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
+import HexMeshLayer from "@/components/background/HexMeshLayer";
 import { useGetContactInfoQuery } from "../../../../../redux/api/category";
 import { useGetPayQuery } from "../../../../../redux/api/product";
 import scss from "./FooterReaLab.module.scss";
@@ -16,7 +17,7 @@ const menuLinks = [
 ];
 
 const helpItems = [
-  "B2B и procurement-ready checkout",
+  "RFQ-first сценарий для закупки",
   "Коммерческие предложения под отделение",
   "Поддержка по внедрению и сервису",
   "Спокойная витрина для сложной медтехники",
@@ -52,6 +53,13 @@ const FooterReaLab = () => {
     <footer className={scss.footer}>
       <div className="container">
         <div className={scss.content}>
+          <HexMeshLayer
+            className={scss.surfaceMesh}
+            variant="ambient"
+            density="relaxed"
+            interactive={false}
+          />
+
           <div className={scss.top}>
             <div className={scss.brandColumn}>
               <div className={scss.brandLockup}>
@@ -153,8 +161,8 @@ const FooterReaLab = () => {
           </div>
 
           <div className={scss.bottom}>
-            <p>© ReaLab. Demo storefront for medical equipment.</p>
-            <p>White-neumorphic interface for precise procurement workflows.</p>
+            <p>© ReaLab. Коммерческая платформа медицинского оборудования.</p>
+            <p>RFQ, консультации и сопровождение закупки в едином интерфейсе.</p>
           </div>
         </div>
       </div>

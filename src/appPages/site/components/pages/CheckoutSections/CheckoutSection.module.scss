@@ -1,7 +1,7 @@
 ﻿.CheckoutSection {
   padding: 28px 0 60px;
   background:
-    radial-gradient(circle at top left, rgba(255, 154, 147, 0.08), transparent 24%),
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.34), transparent 24%),
     radial-gradient(circle at 100% 12%, rgba(158, 183, 200, 0.12), transparent 20%);
 }
 
@@ -165,6 +165,19 @@
   background: linear-gradient(145deg, rgba(252, 253, 254, 0.96), rgba(239, 243, 247, 0.94));
   box-shadow: var(--shadow-soft-sm);
   padding: 28px 24px;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.surfaceMesh {
+  z-index: 0;
+}
+
+.formBlock > :not(.surfaceMesh),
+.rightColumn > :not(.surfaceMesh) {
+  position: relative;
+  z-index: 1;
 }
 
 .section {
@@ -211,7 +224,8 @@
     }
 
     input,
-    select {
+    select,
+    textarea {
       width: 100%;
       height: 54px;
       border-radius: 18px;
@@ -226,7 +240,14 @@
       padding: 0 16px;
     }
 
-    input::placeholder {
+    textarea {
+      min-height: 132px;
+      resize: vertical;
+      padding: 16px;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
       color: #9aa4b2;
     }
   }
@@ -667,6 +688,8 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow: hidden;
+  isolation: isolate;
 
   h2 {
     margin: 0;

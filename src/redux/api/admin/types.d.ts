@@ -90,6 +90,24 @@ namespace IADMIN {
   };
   type PatchOrderStatusRes = AdminOrder;
 
+  type GetLeadRequestsReq = {
+    page?: number;
+    page_size?: number;
+    search?: string;
+    kind?: LeadRequestKind;
+    status?: LeadRequestStatus;
+    date_from?: string;
+    date_to?: string;
+  };
+  type GetLeadRequestsRes = AdminPaginatedResponse<AdminLeadRequest>;
+
+  type PatchLeadRequestStatusReq = {
+    id: number;
+    status: LeadRequestStatus;
+    manager_note?: string;
+  };
+  type PatchLeadRequestStatusRes = AdminLeadRequest;
+
   type GetUsersReq = {
     page?: number;
     page_size?: number;

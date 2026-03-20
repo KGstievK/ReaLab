@@ -11,6 +11,7 @@ import {
   FiCheckCircle,
   FiMinus,
   FiPlus,
+  FiShuffle,
   FiShield,
   FiTool,
 } from "react-icons/fi";
@@ -22,6 +23,7 @@ import {
 import { useGetClothesByIdQuery } from "@/redux/api/category";
 import { buildSignInHref } from "@/utils/authIntent";
 import { getStoredAccessToken } from "@/utils/authStorage";
+import { useEquipmentCompare } from "@/utils/useEquipmentCompare";
 import { resolveMediaUrl } from "@/utils/media";
 import ColorsClothes from "../ui/colors/Colors";
 import scss from "./ProductReaLabPage.module.scss";
@@ -95,6 +97,8 @@ const ProductReaLabPage = ({ productId }: { productId: number }) => {
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [compareNotice, setCompareNotice] = useState("");
+  const { compareIds, toggleItem: toggleCompareItem } = useEquipmentCompare();
 
   const normalizedCart = Array.isArray(cartData) ? cartData[0] : cartData;
 
@@ -164,6 +168,19 @@ const ProductReaLabPage = ({ productId }: { productId: number }) => {
         .filter(Boolean)
         .join(", ")
     : "Комплектация уточняется";
+  const compareItem = {
+    id: data.id,
+    href: pathname && pathname.startsWith("/") ? pathname : `/${data.id}`,
+    name: data.clothes_name,
+    categoryName: primaryCategory,
+    imageUrl: data.clothes_img?.[0]?.photo || "",
+    price: basePrice,
+    discountPrice: currentPrice,
+    defaultSize: selectedSize || availableSizes[0] || "Base",
+    defaultColorId: selectedColorId ?? data.clothes_img?.[0]?.id ?? null,
+    defaultColorLabel: selectedColorLabel || data.clothes_img?.[0]?.color || "Стандартный финиш",
+    availabilityLabel,
+  };
 
   const handleAddToCart = async () => {
     if (!selectedColorId || !selectedSize || isSubmitting) {
@@ -215,6 +232,21 @@ const ProductReaLabPage = ({ productId }: { productId: number }) => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleCompareToggle = () => {
+    const nextState = toggleCompareItem(compareItem);
+
+    if (nextState === "full") {
+      setCompareNotice("В сравнении уже 4 позиции. Откройте compare layer, чтобы освободить слот.");
+      return;
+    }
+
+    setCompareNotice(
+      nextState === "added"
+        ? "Позиция добавлена в compare layer."
+        : "Позиция удалена из compare layer.",
+    );
   };
 
   return (
@@ -400,21 +432,31 @@ const ProductReaLabPage = ({ productId }: { productId: number }) => {
                   onClick={() => void handleAddToCart()}
                   disabled={!isInStock || !selectedColorId || !selectedSize || isSubmitting}
                 >
-                  {isSubmitting ? "Добавляем..." : "В корзину"}
+                  {isSubmitting ? "Добавляем..." : "В список запроса"}
                 </button>
                 <Link href={supportHref} className={scss.secondaryCta}>
-                  Обсудить поставку <FiArrowRight />
+                  Получить консультацию <FiArrowRight />
                 </Link>
+                <button
+                  type="button"
+                  className={scss.secondaryCta}
+                  onClick={handleCompareToggle}
+                >
+                  <FiShuffle />
+                  {compareIds.has(data.id) ? "В сравнении" : "Сравнить"}
+                </button>
               </div>
+
+              {compareNotice ? <p className={scss.inlineNote}>{compareNotice}</p> : null}
 
               <div className={scss.notes}>
                 <div>
                   <FiCheckCircle />
-                  <span>Подходит для быстрого перехода к запросу КП и согласованию закупки.</span>
+                  <span>Подходит для быстрого перехода к RFQ, сравнению и согласованию закупки.</span>
                 </div>
                 <div>
                   <FiCheckCircle />
-                  <span>Конфигурация, доступность и сервисный слой видны прямо в карточке.</span>
+                  <span>Конфигурация, документы и сервисный контур видны прямо в карточке.</span>
                 </div>
               </div>
             </div>

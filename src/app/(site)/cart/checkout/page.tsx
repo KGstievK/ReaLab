@@ -2,8 +2,8 @@
 import { createNoIndexMetadata } from "@/utils/seo";
 
 export const metadata = createNoIndexMetadata(
-  "Checkout ReaLab",
-  "Оформление поставки и оплаты оборудования ReaLab.",
+  "RFQ ReaLab",
+  "Запрос коммерческого предложения и консультации по оборудованию ReaLab.",
   "/cart/checkout",
 );
 

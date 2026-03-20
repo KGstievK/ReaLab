@@ -256,6 +256,42 @@ const api = index.injectEndpoints({
       }),
     }),
 
+    postLeadRequest: build.mutation<PRODUCT.postLeadRequestRes, PRODUCT.postLeadRequestReq>({
+      query: (data) => ({
+        url: `/lead-requests/`,
+        method: "POST",
+        body: data,
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json",
+        },
+      }),
+    }),
+
+    postProfileLeadRequest: build.mutation<
+      PRODUCT.postProfileLeadRequestRes,
+      PRODUCT.postProfileLeadRequestReq
+    >({
+      query: (data) => ({
+        url: `/lead-requests/profile/`,
+        method: "POST",
+        body: data,
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json",
+        },
+      }),
+      invalidatesTags: ["product"],
+    }),
+
+    getMyLeadRequests: build.query<PRODUCT.getMyLeadRequestsRes, PRODUCT.getMyLeadRequestsReq>({
+      query: () => ({
+        url: `/lead-requests/me/`,
+        method: "GET",
+      }),
+      providesTags: ["product"],
+    }),
+
     getOrder: build.query<PRODUCT.getOrderRes, PRODUCT.getOrderReq>({
       query: () => ({
         url: `/order/check/`,
@@ -317,6 +353,9 @@ export const {
   useGetCartQuery,
   useGetAboutUsQuery,
   usePostOrderMutation,
+  usePostLeadRequestMutation,
+  usePostProfileLeadRequestMutation,
+  useGetMyLeadRequestsQuery,
   useGetOrderQuery,
   useGetPayQuery,
   useGetPaymentMethodsQuery,

@@ -434,6 +434,18 @@
     }
   }
 
+  .requestFilters {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+
+    input,
+    select,
+    button {
+      width: 100%;
+    }
+  }
+
   .userFilters {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -1364,6 +1376,64 @@
     gap: 12px;
   }
 
+  .requestDetailGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+    gap: 12px;
+    align-items: start;
+  }
+
+  .requestStatusCard {
+    border-radius: 20px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border: 1px solid var(--admin-border);
+    background: var(--admin-surface);
+    box-shadow: var(--shadow-soft-sm);
+  }
+
+  .requestMetaGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin: 0;
+  }
+
+  .requestMetaCard {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-radius: 18px;
+    padding: 12px;
+    border: 1px solid var(--admin-border);
+    background: var(--admin-surface-muted);
+    box-shadow: var(--shadow-soft-sm);
+
+    dt {
+      margin: 0;
+      color: var(--admin-subtext);
+      font-size: 12px;
+      line-height: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    dd {
+      margin: 0;
+      color: var(--admin-text);
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 20px;
+    }
+  }
+
+  .requestActions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
   .orderDetailCard {
     border-radius: 20px;
     padding: 14px;
@@ -1802,6 +1872,10 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .requestFilters {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .userFilters {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -1877,6 +1951,10 @@
       grid-template-columns: 1fr;
     }
 
+    .requestFilters {
+      grid-template-columns: 1fr;
+    }
+
     .userFilters {
       grid-template-columns: 1fr;
     }
@@ -1907,7 +1985,9 @@
     }
 
     .orderDetailsGrid,
-    .orderMetaList {
+    .orderMetaList,
+    .requestDetailGrid,
+    .requestMetaGrid {
       grid-template-columns: 1fr;
     }
 

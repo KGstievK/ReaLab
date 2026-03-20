@@ -3,6 +3,7 @@ export type AdminTab =
   | "products"
   | "discounts"
   | "orders"
+  | "requests"
   | "content"
   | "users"
   | "activity";

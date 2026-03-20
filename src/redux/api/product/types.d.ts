@@ -33,6 +33,15 @@
   type postOrderRes = IOrder;
   type postOrderReq = IOrderPost;
 
+  type postLeadRequestRes = LeadRequest;
+  type postLeadRequestReq = LeadRequestCreatePayload;
+
+  type postProfileLeadRequestRes = LeadRequest;
+  type postProfileLeadRequestReq = LeadRequestCreatePayload;
+
+  type getMyLeadRequestsRes = LeadRequest[];
+  type getMyLeadRequestsReq = void;
+
   type getOrderRes = IOrder[];
   type getOrderReq = void;
 

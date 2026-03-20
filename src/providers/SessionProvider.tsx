@@ -29,6 +29,10 @@ const isSafePath = (path?: string | null): path is string =>
 
 const isProtectedPath = (pathname: string): boolean => {
   const normalized = normalizePathname(pathname);
+  const isRfqPath =
+    normalized === "/checkout" ||
+    normalized === "/cart/checkout" ||
+    normalized.startsWith("/cart/checkout/");
   const isProfilePath =
     normalized.startsWith("/profile") || normalized.startsWith("/profil");
   const isFavorite =
@@ -37,7 +41,7 @@ const isProtectedPath = (pathname: string): boolean => {
   return (
     normalized.startsWith("/admin") ||
     isProfilePath ||
-    normalized.startsWith("/cart") ||
+    (normalized.startsWith("/cart") && !isRfqPath) ||
     isFavorite
   );
 };

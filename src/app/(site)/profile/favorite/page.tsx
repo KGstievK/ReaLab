@@ -2,8 +2,8 @@
 import { createNoIndexMetadata } from "@/utils/seo";
 
 export const metadata = createNoIndexMetadata(
-  "Избранное ReaLab",
-  "Избранные позиции и сохраненные решения пользователя ReaLab.",
+  "Сохраненные позиции ReaLab",
+  "Shortlist и сохраненные позиции пользователя ReaLab для RFQ и консультаций.",
   "/profile/favorite",
 );
 

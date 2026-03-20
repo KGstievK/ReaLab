@@ -202,6 +202,78 @@ type OrderStatus =
   | "Доставлен"
   | "Отменен";
 
+type LeadRequestKind = "rfq" | "consultation" | "demo" | "service" | "partner";
+type LeadRequestStatus =
+  | "new"
+  | "qualified"
+  | "quoted"
+  | "in_progress"
+  | "won"
+  | "lost"
+  | "closed";
+
+interface LeadRequestItem {
+  id: number;
+  product_id: number | null;
+  quantity: number;
+  configuration_label: string;
+  color_label: string;
+  product_name: string;
+  image_url: string;
+}
+
+interface LeadRequestCreatePayload {
+  kind?: LeadRequestKind;
+  name: string;
+  company?: string;
+  role_title?: string;
+  phone: string;
+  email: string;
+  city?: string;
+  country?: string;
+  organization_type?: string;
+  request_purpose?: string;
+  comment?: string;
+  source_path?: string;
+  items?: Array<{
+    product_id?: number;
+    quantity?: number;
+    configuration_label?: string;
+    color_label?: string;
+    product_name?: string;
+    image_url?: string;
+  }>;
+}
+
+interface LeadRequest {
+  id: number;
+  request_number: string;
+  kind: LeadRequestKind;
+  status: LeadRequestStatus;
+  name: string;
+  company: string;
+  role_title: string;
+  phone: string;
+  email: string;
+  city: string;
+  country: string;
+  organization_type: string;
+  request_purpose: string;
+  comment: string;
+  source_path: string;
+  manager_note: string;
+  created_at: string;
+  updated_at: string;
+  submitted_by_user: {
+    id: number;
+    name: string;
+    email: string;
+  } | null;
+  items: LeadRequestItem[];
+  items_count: number;
+  total_units: number;
+}
+
 interface IOrder {
   id: number;
   order_number?: string;
@@ -520,6 +592,8 @@ type AdminActivityType =
   | "product_deleted"
   | "order_created"
   | "order_status_changed"
+  | "lead_created"
+  | "lead_status_changed"
   | "content_updated"
   | "category_updated"
   | "price_changed"
@@ -863,7 +937,7 @@ interface AdminActivityActor {
 interface AdminActivityEvent {
   id: number;
   type: AdminActivityType;
-  entity: "product" | "order" | "category" | "content" | "user";
+  entity: "product" | "order" | "lead_request" | "category" | "content" | "user";
   entity_id: number;
   entity_label: string;
   message: string;
@@ -874,7 +948,7 @@ interface AdminActivityEvent {
 
 interface AdminAuditLog {
   id: number;
-  entity: "product" | "order" | "category" | "content" | "user";
+  entity: "product" | "order" | "lead_request" | "category" | "content" | "user";
   entity_id: number;
   entity_label: string;
   action: string;
@@ -893,5 +967,7 @@ interface AdminPaginatedResponse<T> {
   previous: string | null;
   results: T[];
 }
+
+type AdminLeadRequest = LeadRequest;
 
 

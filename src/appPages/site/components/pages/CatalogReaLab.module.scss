@@ -16,6 +16,14 @@
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   gap: 18px;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hero > * {
+  position: relative;
+  z-index: 1;
 }
 
 .heroMain,
@@ -214,6 +222,28 @@
   font-size: 0.92rem;
 }
 
+.metaCopy small {
+  color: var(--color-subtext);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.metaActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.compareLink {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: var(--shadow-soft-sm), var(--shadow-inset-soft);
+  color: var(--color-text);
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -237,7 +267,7 @@
 }
 
 .badge,
-.favoriteButton {
+.cardActionRail {
   position: absolute;
   z-index: 1;
   top: 14px;
@@ -249,16 +279,30 @@
   align-items: center;
 }
 
-.favoriteButton {
+.cardActionRail {
   right: 14px;
+  display: inline-flex;
+  gap: 8px;
+}
+
+.compareButton,
+.favoriteButton {
   width: 42px;
   min-width: 42px;
   height: 42px;
   min-height: 42px;
   padding: 0;
+}
+
+.compareButton {
+  color: var(--color-text);
+}
+
+.favoriteButton {
   color: var(--color-brand);
 }
 
+.compareButton svg,
 .favoriteButton svg {
   width: 18px;
   height: 18px;
@@ -373,5 +417,9 @@
   .cardFooter {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .metaActions {
+    width: 100%;
   }
 }

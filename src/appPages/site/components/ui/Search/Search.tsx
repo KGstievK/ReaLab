@@ -11,13 +11,14 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import { FiArrowRight, FiClock, FiSearch, FiTrendingUp, FiX } from "react-icons/fi";
 import searchIcon from "@/assets/icons/Search.svg";
+// import HexMeshLayer from "@/components/background/HexMeshLayer";
 import { resolveMediaUrl } from "@/utils/media";
 import { buildProductHref } from "@/utils/productRoute";
 import { extractApiErrorInfo, getRateLimitAwareMessage } from "@/utils/apiError";
 import { useSearchCatalogQuery } from "../../../../../redux/api/search";
 import scss from "./Search.module.scss";
 
-const SEARCH_PLACEHOLDER = "Поиск по оборудованию, категории или клиническому сценарию";
+const SEARCH_PLACEHOLDER = "Поиск по оборудованию, бренду или клиническому сценарию";
 const SEARCH_DEBOUNCE_MS = 250;
 const RECENT_SEARCHES_KEY = "realab-recent-searches";
 const MAX_RECENT_SEARCHES = 5;
@@ -288,7 +289,7 @@ const Search = () => {
 
       <div className={scss.Section}>
         <div className={scss.SectionHeader}>
-          <span className={scss.SectionTitle}>Популярные переходы</span>
+              <span className={scss.SectionTitle}>Быстрые переходы</span>
         </div>
         <div className={scss.TagList}>
           {popularSuggestions.map((item) => (
@@ -329,7 +330,7 @@ const Search = () => {
         {productResults.length > 0 && (
           <div className={scss.Section}>
             <div className={scss.SectionHeader}>
-              <span className={scss.SectionTitle}>Товары</span>
+              <span className={scss.SectionTitle}>Оборудование</span>
             </div>
             <div className={scss.ProductList}>
               {productResults.map((item) => (
@@ -385,7 +386,7 @@ const Search = () => {
         {collectionResults.length > 0 && (
           <div className={scss.Section}>
             <div className={scss.SectionHeader}>
-              <span className={scss.SectionTitle}>Коллекции</span>
+              <span className={scss.SectionTitle}>Подборки</span>
             </div>
             <div className={scss.TagList}>
               {collectionResults.map((collection) => (
@@ -432,59 +433,68 @@ const Search = () => {
             aria-modal={isMobileView ? "true" : undefined}
             aria-label="Поиск по каталогу"
           >
-            <div className={scss.PanelHeader}>
-              <form className={scss.SearchForm} onSubmit={handleSubmit} role="search">
-                <label htmlFor={searchInputId} className={scss.srOnly}>
-                  Поиск по каталогу
-                </label>
-                <FiSearch className={scss.SearchIcon} aria-hidden="true" />
-                <input
-                  id={searchInputId}
-                  ref={inputRef}
-                  type="text"
-                  value={query}
-                  onChange={handleQueryChange}
-                  placeholder={SEARCH_PLACEHOLDER}
-                  autoComplete="off"
-                  aria-describedby={hasTypedQuery ? `${searchPanelId}-status` : undefined}
-                />
-                {hasTypedQuery ? (
+            {/* <HexMeshLayer
+              className={scss.surfaceMesh}
+              variant="panel"
+              density="dense"
+              interactive={!isMobileView}
+            /> */}
+
+            <div className={scss.PanelInner}>
+              <div className={scss.PanelHeader}>
+                <form className={scss.SearchForm} onSubmit={handleSubmit} role="search">
+                  <label htmlFor={searchInputId} className={scss.srOnly}>
+                    Поиск по каталогу
+                  </label>
+                  <FiSearch className={scss.SearchIcon} aria-hidden="true" />
+                  <input
+                    id={searchInputId}
+                    ref={inputRef}
+                    type="text"
+                    value={query}
+                    onChange={handleQueryChange}
+                    placeholder={SEARCH_PLACEHOLDER}
+                    autoComplete="off"
+                    aria-describedby={hasTypedQuery ? `${searchPanelId}-status` : undefined}
+                  />
+                  {hasTypedQuery ? (
+                    <button
+                      className={scss.IconButton}
+                      type="button"
+                      onClick={() => setQuery("")}
+                      aria-label="Очистить поиск"
+                    >
+                      <FiX aria-hidden="true" />
+                    </button>
+                  ) : null}
+                </form>
+
+                {isMobileView ? (
                   <button
-                    className={scss.IconButton}
                     type="button"
-                    onClick={() => setQuery("")}
-                    aria-label="Очистить поиск"
+                    className={scss.CloseButton}
+                    onClick={() => closeSearch(true)}
                   >
-                    <FiX aria-hidden="true" />
+                    Закрыть
                   </button>
                 ) : null}
-              </form>
+              </div>
 
-              {isMobileView ? (
+              <div className={scss.PanelBody} id={`${searchPanelId}-status`}>
+                {hasTypedQuery ? renderResultsState() : renderDiscoveryState()}
+              </div>
+
+              {hasTypedQuery && !searchErrorMessage ? (
                 <button
                   type="button"
-                  className={scss.CloseButton}
-                  onClick={() => closeSearch(true)}
+                  className={scss.FooterAction}
+                  onClick={() => navigateToSearchResults(typedQuery)}
                 >
-                  Закрыть
+                  <span>Показать все результаты</span>
+                  <FiArrowRight aria-hidden="true" />
                 </button>
               ) : null}
             </div>
-
-            <div className={scss.PanelBody} id={`${searchPanelId}-status`}>
-              {hasTypedQuery ? renderResultsState() : renderDiscoveryState()}
-            </div>
-
-            {hasTypedQuery && !searchErrorMessage ? (
-              <button
-                type="button"
-                className={scss.FooterAction}
-                onClick={() => navigateToSearchResults(typedQuery)}
-              >
-                <span>Показать все результаты</span>
-                <FiArrowRight aria-hidden="true" />
-              </button>
-            ) : null}
           </div>
         </div>
       )}

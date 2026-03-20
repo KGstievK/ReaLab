@@ -1,16 +1,17 @@
 ﻿import History from "../../../../appPages/site/components/pages/user/components/pages/History/History";
 import { createNoIndexMetadata } from "@/utils/seo";
+import RequestHistory from "../../../../appPages/site/components/pages/user/components/pages/History/RequestHistory";
 
 export const metadata = createNoIndexMetadata(
-  "История заказов ReaLab",
-  "История заказов и поставок пользователя ReaLab.",
+  "История заявок ReaLab",
+  "История RFQ, консультаций и сервисных обращений пользователя ReaLab.",
   "/profile/history",
 );
 
 const page = () => {
   return (
     <div>
-      <History />
+      <RequestHistory />
     </div>
   );
 };

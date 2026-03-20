@@ -551,7 +551,7 @@ const ProfileSection: FC = () => {
 
         {(defaultAddress?.address || user.address || user.number) && (
           <div className={scss.savedAddress}>
-            <h3>Адрес по умолчанию для оформления</h3>
+            <h3>Адрес по умолчанию для запросов и поставки</h3>
             <p>
               {defaultAddress?.recipient_name ||
                 [user.first_name, user.last_name].filter(Boolean).join(" ").trim() ||
@@ -570,7 +570,7 @@ const ProfileSection: FC = () => {
           <div className={scss.addressBookHeader}>
             <div>
               <h2>Сохранённые адреса</h2>
-              <p>Используйте их для быстрого оформления заказа.</p>
+              <p>Используйте их для быстрого RFQ, консультаций и согласования поставки.</p>
             </div>
             <button type="button" className={scss.secondaryButton} onClick={resetAddressEditor}>
               Новый адрес

@@ -2,7 +2,8 @@ import { FC, ReactNode, useEffect, useRef, useState } from "react";
 import Footer from "./Footer/FooterReaLab";
 import Header from "./Header/Header";
 import scss from "./LayoutSite.module.scss";
-import Tabbar from "../ui/TabBar/TabbarReaLab";
+import Tabbar from "../ui/TabBar/TabbarReaLabClean";
+import HexMeshLayer from "@/components/background/HexMeshLayer";
 
 interface LayoutSiteProps {
   children: ReactNode;
@@ -73,6 +74,12 @@ const LayoutSite: FC<LayoutSiteProps> = ({ children }) => {
 
   return (
     <div className={scss.LayoutSite}>
+        <HexMeshLayer
+                  className={scss.surfaceMesh}
+                  variant="ambient"
+                  density="relaxed"
+                  interactive={false}
+                />
       <Header isMobileHidden={isMobileChromeHidden} />
       <main>{children}</main>
       <Footer />

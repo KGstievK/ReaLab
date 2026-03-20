@@ -40,15 +40,15 @@ const isSafePublicPath = (path?: string | null): path is string => {
 
 const desktopTabs: TabItem[] = [
   { label: "Профиль", path: "/profile" },
-  { label: "Мои покупки", path: "/profile/history" },
-  { label: "Избранные", path: "/profile/favorite" },
+  { label: "Мои заявки", path: "/profile/history" },
+  { label: "Сохраненные позиции", path: "/profile/favorite" },
   { label: "Выйти", path: null },
 ];
 
 const mobileTabs: TabItem[] = [
   { label: "Профиль", path: "/profile/my_office" },
-  { label: "Мои покупки", path: "/profile/history" },
-  { label: "Избранные", path: "/profile/favorite" },
+  { label: "Мои заявки", path: "/profile/history" },
+  { label: "Сохраненные позиции", path: "/profile/favorite" },
   { label: "Выйти", path: null },
 ];
 

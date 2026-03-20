@@ -19,6 +19,14 @@
   grid-template-columns: 1.02fr 0.98fr;
   gap: 20px;
   align-items: stretch;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hero > * {
+  position: relative;
+  z-index: 1;
 }
 
 .heroCopy,

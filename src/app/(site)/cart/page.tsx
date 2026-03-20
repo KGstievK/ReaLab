@@ -2,8 +2,8 @@
 import { createNoIndexMetadata } from "@/utils/seo";
 
 export const metadata = createNoIndexMetadata(
-  "Корзина ReaLab",
-  "Корзина ReaLab для оформления поставки медицинского оборудования.",
+  "Список запроса ReaLab",
+  "Request basket ReaLab для RFQ, консультации и подготовки коммерческого предложения.",
   "/cart",
 );
 

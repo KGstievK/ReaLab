@@ -1,0 +1,344 @@
+.page {
+  padding-bottom: 18px;
+}
+
+.hero,
+.toolbar,
+.emptyState,
+.compareCard {
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.96);
+  background: rgba(248, 250, 252, 0.94);
+  box-shadow: var(--shadow-soft-sm);
+}
+
+.hero,
+.toolbar,
+.emptyState {
+  margin-bottom: 18px;
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  gap: 18px;
+  padding: 24px;
+}
+
+.hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.heroMain {
+  display: grid;
+  gap: 14px;
+
+  > span,
+  h1,
+  p {
+    margin: 0;
+  }
+
+  > span {
+    display: inline-flex;
+    width: fit-content;
+    min-height: 36px;
+    padding: 0 14px;
+    align-items: center;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.78);
+    color: var(--color-subtext);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-size: clamp(42px, 5vw, 62px);
+    line-height: 0.94;
+    max-width: 10ch;
+  }
+
+  p {
+    max-width: 62ch;
+    color: var(--color-subtext);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+}
+
+.heroStats {
+  display: grid;
+  gap: 12px;
+}
+
+.heroStat {
+  border-radius: 24px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: var(--shadow-soft-sm);
+  display: grid;
+  gap: 8px;
+
+  span {
+    color: var(--color-subtext);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  strong {
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1;
+  }
+}
+
+.toolbar {
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.toolbarCopy {
+  display: grid;
+  gap: 6px;
+
+  p,
+  strong {
+    margin: 0;
+  }
+
+  p {
+    color: var(--color-subtext);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  strong {
+    color: var(--color-text);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+}
+
+.toolbarActions,
+.emptyActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.primaryAction,
+.secondaryAction,
+.primaryLink,
+.secondaryLink {
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.primaryAction,
+.primaryLink {
+  background: linear-gradient(135deg, rgba(141, 184, 199, 0.92), rgba(111, 168, 189, 0.96));
+  color: #fcfeff;
+}
+
+.secondaryAction,
+.secondaryLink {
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--color-text);
+  box-shadow: var(--shadow-soft-sm), var(--shadow-inset-soft);
+}
+
+.emptyState {
+  padding: 32px;
+  display: grid;
+  gap: 12px;
+
+  h2,
+  p {
+    margin: 0;
+  }
+
+  h2 {
+    font-size: clamp(32px, 4vw, 40px);
+    line-height: 1;
+  }
+
+  p {
+    color: var(--color-subtext);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 60ch;
+  }
+}
+
+.compareGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.compareCard {
+  overflow: hidden;
+}
+
+.cardVisual {
+  position: relative;
+  min-height: 280px;
+  background:
+    radial-gradient(circle at top right, rgba(141, 184, 199, 0.16), transparent 30%),
+    linear-gradient(180deg, rgba(252, 253, 254, 0.98), rgba(237, 242, 247, 0.96));
+}
+
+.mainImage {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+}
+
+.removeButton {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 1;
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  min-height: 42px;
+  padding: 0;
+  border-radius: 16px;
+  background: rgba(251, 252, 253, 0.92);
+  box-shadow: var(--shadow-soft-sm), var(--shadow-inset-soft);
+  color: var(--color-text);
+}
+
+.cardBody {
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  span,
+  a {
+    color: var(--color-subtext);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}
+
+.cardBody h2 {
+  margin: 0;
+  font-size: clamp(30px, 3vw, 38px);
+  line-height: 0.98;
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  strong {
+    color: var(--color-text);
+    font-size: 24px;
+    line-height: 1.2;
+  }
+
+  small {
+    color: var(--color-subtext);
+    font-size: 14px;
+    text-decoration: line-through;
+  }
+}
+
+.metricList {
+  display: grid;
+  gap: 10px;
+}
+
+.metricCard,
+.descriptionBlock {
+  border-radius: 22px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: var(--shadow-soft-sm), var(--shadow-inset-soft);
+  display: grid;
+  gap: 8px;
+}
+
+.metricCard span,
+.descriptionBlock span {
+  color: var(--color-subtext);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.metricCard strong {
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.descriptionBlock p {
+  margin: 0;
+  color: var(--color-subtext);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+@media (max-width: 1080px) {
+  .hero,
+  .compareGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .toolbar,
+  .toolbarActions,
+  .emptyActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .primaryAction,
+  .secondaryAction,
+  .primaryLink,
+  .secondaryLink {
+    width: 100%;
+  }
+
+  .cardBody h2 {
+    font-size: 28px;
+  }
+}

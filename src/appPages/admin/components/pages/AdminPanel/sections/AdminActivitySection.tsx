@@ -29,6 +29,7 @@ type AdminActivitySectionProps = {
 const ENTITY_LABELS: Record<AdminActivityEvent["entity"], string> = {
   product: "Товары",
   order: "Заказы",
+  lead_request: "Заявки",
   category: "Категории",
   content: "Контент",
   user: "Пользователи",

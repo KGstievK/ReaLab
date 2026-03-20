@@ -5,6 +5,7 @@ import {
   FiActivity,
   FiBarChart2,
   FiBox,
+  FiClipboard,
   FiFileText,
   FiPercent,
   FiPlus,
@@ -18,6 +19,7 @@ import { AdminDiscountsSection } from "./sections/AdminDiscountsSection";
 import { AdminInventorySection } from "./sections/AdminInventorySection";
 import { AdminOrdersSection } from "./sections/AdminOrdersSection";
 import { AdminProductsSection } from "./sections/AdminProductsSection";
+import { AdminRequestsSection } from "./sections/AdminRequestsSection";
 import { AdminUsersSection } from "./sections/AdminUsersSection";
 import { AdminOrderDetailsModal } from "./sections/AdminOrderDetailsModal";
 import { AdminProductModal } from "./sections/AdminProductModal";
@@ -52,6 +54,7 @@ import {
   useGetAdminHomeTitleQuery,
   useGetAdminInventoryMovementsQuery,
   useGetAdminInventoryQuery,
+  useGetAdminLeadRequestsQuery,
   useGetAdminOrdersQuery,
   useGetAdminPermissionsQuery,
   useGetAdminProductsQuery,
@@ -61,6 +64,7 @@ import {
   useDeleteAdminProductMutation,
   usePatchAdminAboutPageMutation,
   usePatchAdminHomeTitleMutation,
+  usePatchAdminLeadRequestStatusMutation,
   usePatchAdminProductMutation,
   usePatchAdminOrderStatusMutation,
   usePatchAdminRoleMutation,
@@ -219,6 +223,12 @@ const NAV_ITEMS: Array<{ key: AdminTab; label: string; icon: ReactNode; permissi
     permission: ADMIN_PERMISSIONS.ORDERS_VIEW,
   },
   {
+    key: "requests",
+    label: "Заявки",
+    icon: <FiClipboard />,
+    permission: ADMIN_PERMISSIONS.ORDERS_VIEW,
+  },
+  {
     key: "content",
     label: "Контент",
     icon: <FiBox />,
@@ -261,8 +271,18 @@ const DISCOUNT_SORT_OPTIONS = [
 ] as const;
 const ORDER_PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
 const ORDER_SORT_OPTIONS = ["newest", "oldest", "total_desc", "total_asc", "payment_status"] as const;
+const REQUEST_PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
 const USER_PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
 const USER_SORT_OPTIONS = ["newest", "oldest", "email_asc", "email_desc", "name_asc", "name_desc"] as const;
+const LEAD_REQUEST_STATUS_LABELS: Record<LeadRequestStatus, string> = {
+  new: "Новая",
+  qualified: "Квалификация",
+  quoted: "КП отправлено",
+  in_progress: "В работе",
+  won: "Успешно",
+  lost: "Потеряна",
+  closed: "Закрыта",
+};
 
 const MOCK_ORDERS: AdminOrder[] = [
   {
@@ -707,6 +727,15 @@ const AdminPanel = () => {
   >("all");
   const [orderDateFrom, setOrderDateFrom] = useState("");
   const [orderDateTo, setOrderDateTo] = useState("");
+  const [requestSearch, setRequestSearch] = useState("");
+  const [requestPage, setRequestPage] = useState(1);
+  const [requestPageSize, setRequestPageSize] = useState<
+    (typeof REQUEST_PAGE_SIZE_OPTIONS)[number]
+  >(20);
+  const [requestKindFilter, setRequestKindFilter] = useState<LeadRequestKind | "all">("all");
+  const [requestStatusFilter, setRequestStatusFilter] = useState<LeadRequestStatus | "all">("all");
+  const [requestDateFrom, setRequestDateFrom] = useState("");
+  const [requestDateTo, setRequestDateTo] = useState("");
   const [userSearch, setUserSearch] = useState("");
   const [userPage, setUserPage] = useState(1);
   const [userPageSize, setUserPageSize] = useState<(typeof USER_PAGE_SIZE_OPTIONS)[number]>(20);
@@ -741,6 +770,8 @@ const AdminPanel = () => {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<AdminProduct | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
+  const [selectedLeadRequest, setSelectedLeadRequest] = useState<AdminLeadRequest | null>(null);
+  const [leadManagerNoteDraft, setLeadManagerNoteDraft] = useState("");
   const [productForm, setProductForm] = useState<ProductFormState>(
     createEmptyProductForm(1),
   );
@@ -771,6 +802,7 @@ const AdminPanel = () => {
   const canDeleteProducts = hasPermission(currentPermissions, ADMIN_PERMISSIONS.PRODUCTS_DELETE);
   const canManageDiscounts = hasPermission(currentPermissions, ADMIN_PERMISSIONS.DISCOUNTS_MANAGE);
   const canManageOrders = hasPermission(currentPermissions, ADMIN_PERMISSIONS.ORDERS_MANAGE);
+  const canManageRequests = canManageOrders;
   const canManageContent = hasPermission(currentPermissions, ADMIN_PERMISSIONS.CONTENT_MANAGE);
   const canManageUsers = hasPermission(currentPermissions, ADMIN_PERMISSIONS.USERS_MANAGE);
   const visibleNavItems = currentUser
@@ -906,6 +938,44 @@ const AdminPanel = () => {
       setOrderPageSize(pageSizeParam as (typeof ORDER_PAGE_SIZE_OPTIONS)[number]);
     }
 
+    setRequestSearch(params.get("request_search") || "");
+
+    const requestKindParam = params.get("request_kind");
+    if (
+      requestKindParam &&
+      ["rfq", "consultation", "demo", "service", "partner"].includes(requestKindParam)
+    ) {
+      setRequestKindFilter(requestKindParam as LeadRequestKind);
+    }
+
+    const requestStatusParam = params.get("request_status");
+    if (
+      requestStatusParam &&
+      ["new", "qualified", "quoted", "in_progress", "won", "lost", "closed"].includes(
+        requestStatusParam,
+      )
+    ) {
+      setRequestStatusFilter(requestStatusParam as LeadRequestStatus);
+    }
+
+    setRequestDateFrom(params.get("request_date_from") || "");
+    setRequestDateTo(params.get("request_date_to") || "");
+
+    const requestPageParam = Number(params.get("request_page"));
+    if (Number.isFinite(requestPageParam) && requestPageParam > 0) {
+      setRequestPage(requestPageParam);
+    }
+
+    const requestPageSizeParam = Number(params.get("request_page_size"));
+    if (
+      Number.isFinite(requestPageSizeParam) &&
+      REQUEST_PAGE_SIZE_OPTIONS.includes(
+        requestPageSizeParam as (typeof REQUEST_PAGE_SIZE_OPTIONS)[number],
+      )
+    ) {
+      setRequestPageSize(requestPageSizeParam as (typeof REQUEST_PAGE_SIZE_OPTIONS)[number]);
+    }
+
     setUserSearch(params.get("user_search") || "");
 
     const userSortParam = params.get("user_sort");
@@ -1024,6 +1094,27 @@ const AdminPanel = () => {
     if (orderPageSize !== 20) params.set("order_page_size", String(orderPageSize));
     else params.delete("order_page_size");
 
+    if (requestSearch) params.set("request_search", requestSearch);
+    else params.delete("request_search");
+
+    if (requestKindFilter !== "all") params.set("request_kind", requestKindFilter);
+    else params.delete("request_kind");
+
+    if (requestStatusFilter !== "all") params.set("request_status", requestStatusFilter);
+    else params.delete("request_status");
+
+    if (requestDateFrom) params.set("request_date_from", requestDateFrom);
+    else params.delete("request_date_from");
+
+    if (requestDateTo) params.set("request_date_to", requestDateTo);
+    else params.delete("request_date_to");
+
+    if (requestPage > 1) params.set("request_page", String(requestPage));
+    else params.delete("request_page");
+
+    if (requestPageSize !== 20) params.set("request_page_size", String(requestPageSize));
+    else params.delete("request_page_size");
+
     if (userSearch) params.set("user_search", userSearch);
     else params.delete("user_search");
 
@@ -1068,6 +1159,13 @@ const AdminPanel = () => {
     orderDateTo,
     orderPage,
     orderPageSize,
+    requestSearch,
+    requestKindFilter,
+    requestStatusFilter,
+    requestDateFrom,
+    requestDateTo,
+    requestPage,
+    requestPageSize,
     userSearch,
     userSort,
     userRoleFilter,
@@ -1154,6 +1252,18 @@ const AdminPanel = () => {
     },
     { skip: activeTab !== "orders" },
   );
+  const leadRequestsQuery = useGetAdminLeadRequestsQuery(
+    {
+      page: requestPage,
+      page_size: requestPageSize,
+      search: requestSearch || undefined,
+      kind: requestKindFilter === "all" ? undefined : requestKindFilter,
+      status: requestStatusFilter === "all" ? undefined : requestStatusFilter,
+      date_from: requestDateFrom || undefined,
+      date_to: requestDateTo || undefined,
+    },
+    { skip: activeTab !== "requests" },
+  );
   const contentQuery = useGetAdminContentQuery(undefined, {
     skip: activeTab !== "content",
   });
@@ -1219,6 +1329,8 @@ const AdminPanel = () => {
     usePostAdminProductImagesMutation();
   const [patchAdminOrderStatusMutation, { isLoading: isUpdatingOrderStatus }] =
     usePatchAdminOrderStatusMutation();
+  const [patchAdminLeadRequestStatusMutation, { isLoading: isUpdatingLeadRequestStatus }] =
+    usePatchAdminLeadRequestStatusMutation();
   const [patchAdminHomeTitleMutation, { isLoading: isSavingHomeTitle }] =
     usePatchAdminHomeTitleMutation();
   const [patchAdminAboutPageMutation, { isLoading: isSavingAboutPage }] =
@@ -1287,6 +1399,12 @@ const AdminPanel = () => {
     results: [],
   };
   const orders = ordersQuery.data ?? {
+    count: 0,
+    next: null,
+    previous: null,
+    results: [],
+  };
+  const leadRequests = leadRequestsQuery.data ?? {
     count: 0,
     next: null,
     previous: null,
@@ -1362,6 +1480,24 @@ const AdminPanel = () => {
   }, [aboutPageQuery.data]);
 
   useEffect(() => {
+    if (!selectedLeadRequest) {
+      return;
+    }
+
+    const nextSelectedLeadRequest = leadRequests.results.find(
+      (item) => item.id === selectedLeadRequest.id,
+    );
+
+    if (!nextSelectedLeadRequest) {
+      setSelectedLeadRequest(null);
+      setLeadManagerNoteDraft("");
+      return;
+    }
+
+    setSelectedLeadRequest(nextSelectedLeadRequest);
+  }, [leadRequests.results, selectedLeadRequest]);
+
+  useEffect(() => {
     if (activeTab !== "discounts") {
       return;
     }
@@ -1382,6 +1518,8 @@ const AdminPanel = () => {
         ? productsQuery.error
         : activeTab === "orders"
           ? ordersQuery.error
+        : activeTab === "requests"
+          ? leadRequestsQuery.error
         : activeTab === "content"
             ? contentQuery.error ||
               homeTitleQuery.error ||
@@ -1418,6 +1556,8 @@ const AdminPanel = () => {
           ? productsQuery.isLoading || categoriesQuery.isLoading
           : activeTab === "orders"
             ? ordersQuery.isLoading
+            : activeTab === "requests"
+              ? leadRequestsQuery.isLoading
             : activeTab === "content"
               ? contentQuery.isLoading ||
                 homeTitleQuery.isLoading ||
@@ -1450,6 +1590,11 @@ const AdminPanel = () => {
 
     if (activeTab === "orders") {
       void ordersQuery.refetch();
+      return;
+    }
+
+    if (activeTab === "requests") {
+      void leadRequestsQuery.refetch();
       return;
     }
 
@@ -2173,6 +2318,40 @@ const AdminPanel = () => {
     }
   };
 
+  const handleLeadRequestSelect = (request: AdminLeadRequest) => {
+    setSelectedLeadRequest(request);
+    setLeadManagerNoteDraft(request.manager_note || "");
+  };
+
+  const handleLeadRequestStatusChange = async (
+    id: number,
+    status: LeadRequestStatus,
+  ) => {
+    if (!canManageRequests) {
+      return;
+    }
+
+    setMessage(null);
+    try {
+      const updatedLeadRequest = await patchAdminLeadRequestStatusMutation({
+        id,
+        status,
+        manager_note: leadManagerNoteDraft.trim() || undefined,
+      }).unwrap();
+
+      setSelectedLeadRequest(updatedLeadRequest);
+      setLeadManagerNoteDraft(updatedLeadRequest.manager_note || "");
+      setMessage({
+        type: "success",
+        text: `Заявка ${updatedLeadRequest.request_number} обновлена: ${
+          LEAD_REQUEST_STATUS_LABELS[updatedLeadRequest.status]
+        }.`,
+      });
+    } catch (error) {
+      setMessage(getApiUiMessage(error, "Не удалось обновить статус заявки."));
+    }
+  };
+
   const handleCreateRole = async (data: IADMIN.PostRoleReq) => {
     if (!canManageUsers) {
       return;
@@ -2568,6 +2747,65 @@ const AdminPanel = () => {
               onChangeOrderStatus={handleOrderStatusChange}
             />,
           )}
+
+          {renderTabPanel(
+            "requests",
+            <AdminRequestsSection
+              requests={leadRequests}
+              totalCount={leadRequests.count}
+              currentPage={requestPage}
+              pageSize={requestPageSize}
+              hasNextPage={Boolean(leadRequests.next)}
+              hasPreviousPage={Boolean(leadRequests.previous)}
+              search={requestSearch}
+              kindFilter={requestKindFilter}
+              statusFilter={requestStatusFilter}
+              dateFrom={requestDateFrom}
+              dateTo={requestDateTo}
+              selectedRequest={selectedLeadRequest}
+              managerNoteDraft={leadManagerNoteDraft}
+              canManageRequests={canManageRequests}
+              isUpdatingRequestStatus={isUpdatingLeadRequestStatus}
+              onSearchChange={(value) => {
+                setRequestSearch(value);
+                setRequestPage(1);
+              }}
+              onKindFilterChange={(value) => {
+                setRequestKindFilter(value);
+                setRequestPage(1);
+              }}
+              onStatusFilterChange={(value) => {
+                setRequestStatusFilter(value);
+                setRequestPage(1);
+              }}
+              onDateFromChange={(value) => {
+                setRequestDateFrom(value);
+                setRequestPage(1);
+              }}
+              onDateToChange={(value) => {
+                setRequestDateTo(value);
+                setRequestPage(1);
+              }}
+              onResetFilters={() => {
+                setRequestSearch("");
+                setRequestKindFilter("all");
+                setRequestStatusFilter("all");
+                setRequestDateFrom("");
+                setRequestDateTo("");
+                setRequestPage(1);
+                setRequestPageSize(20);
+              }}
+              onPageChange={setRequestPage}
+              onPageSizeChange={(value) => {
+                setRequestPageSize(value as (typeof REQUEST_PAGE_SIZE_OPTIONS)[number]);
+                setRequestPage(1);
+              }}
+              onSelectRequest={handleLeadRequestSelect}
+              onManagerNoteChange={setLeadManagerNoteDraft}
+              onChangeRequestStatus={handleLeadRequestStatusChange}
+            />,
+          )}
+
           {renderTabPanel(
             "content",
             <AdminContentSection

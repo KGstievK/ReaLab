@@ -122,7 +122,7 @@ const BurgeMenu = ({
                   <strong>{isAuthenticated ? "Профиль" : "Войти"}</strong>
                   <span>
                     {isAuthenticated
-                      ? "Заказы, адреса и закупочная история"
+                      ? "Заявки, документы и закупочная история"
                       : "Авторизуйтесь, чтобы сохранить коммерческие сценарии"}
                   </span>
                 </div>
@@ -131,8 +131,8 @@ const BurgeMenu = ({
 
               <Link href={cartHref} className={scss.actionCard} onClick={onClose}>
                 <div>
-                  <strong>Корзина</strong>
-                  <span>Перейти к выбранным позициям и оформлению поставки</span>
+                  <strong>RFQ / Запрос</strong>
+                  <span>Перейти к выбранным позициям и форме коммерческого запроса</span>
                 </div>
                 <FiShoppingBag aria-hidden="true" />
               </Link>

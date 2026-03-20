@@ -41,9 +41,6 @@ interface CartResponse {
   cart_items: CartItem[];
 }
 
-const DELIVERY_PRICE = 200;
-const DISCOUNT_PRICE = 0;
-
 const toNumber = (value: unknown) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -98,9 +95,9 @@ const CatrSection = () => {
       return;
     }
 
-    const apiError = extractApiErrorInfo(error, "Не удалось загрузить корзину");
+    const apiError = extractApiErrorInfo(error, "Не удалось загрузить список запроса");
     setCartNotice(
-      getRateLimitAwareMessage(apiError, "Не удалось загрузить корзину. Попробуйте позже."),
+      getRateLimitAwareMessage(apiError, "Не удалось загрузить список запроса. Попробуйте позже."),
     );
   }, [error, isError]);
 
@@ -162,9 +159,12 @@ const CatrSection = () => {
       void refetch();
     } catch (mutationError) {
       setBasketData(previousBasketData);
-      const apiError = extractApiErrorInfo(mutationError, "Не удалось обновить корзину");
+      const apiError = extractApiErrorInfo(mutationError, "Не удалось обновить список запроса");
       setCartNotice(
-        getRateLimitAwareMessage(apiError, "Не удалось обновить корзину. Попробуйте ещё раз."),
+        getRateLimitAwareMessage(
+          apiError,
+          "Не удалось обновить список запроса. Попробуйте ещё раз.",
+        ),
       );
     }
   };
@@ -176,9 +176,9 @@ const CatrSection = () => {
       await refetch();
       setBasketData((prev) => prev.filter((item) => item.id !== id));
     } catch (mutationError) {
-      const apiError = extractApiErrorInfo(mutationError, "Не удалось удалить товар");
+      const apiError = extractApiErrorInfo(mutationError, "Не удалось удалить позицию");
       setCartNotice(
-        getRateLimitAwareMessage(apiError, "Не удалось удалить товар. Попробуйте ещё раз."),
+        getRateLimitAwareMessage(apiError, "Не удалось удалить позицию. Попробуйте ещё раз."),
       );
     }
   };
@@ -197,7 +197,7 @@ const CatrSection = () => {
       localStorage.setItem("cartItems", JSON.stringify(basketData));
       router.push("/cart/checkout");
     } catch {
-      setCartNotice("Не удалось подготовить корзину к оформлению. Попробуйте ещё раз.");
+      setCartNotice("Не удалось подготовить список запроса к RFQ. Попробуйте ещё раз.");
     }
   };
 
@@ -207,9 +207,7 @@ const CatrSection = () => {
   );
   const subtotal =
     basketData.length > 0 ? calculatedSubtotal : toNumber(normalizedCart?.total_price);
-  const delivery = basketData.length > 0 ? DELIVERY_PRICE : 0;
-  const discount = basketData.length > 0 ? DISCOUNT_PRICE : 0;
-  const payableTotal = Math.max(subtotal + delivery - discount, 0);
+  const requestTotal = Math.max(subtotal, 0);
 
   return (
     <section className={scss.CatrSection}>
@@ -226,10 +224,10 @@ const CatrSection = () => {
             </button>
             <Link href="/">Главная</Link>
             <span>/</span>
-            <span className={scss.current}>Корзина</span>
+            <span className={scss.current}>Список запроса</span>
           </nav>
 
-          <h1 className={scss.pageTitle}>Корзина</h1>
+          <h1 className={scss.pageTitle}>Список запроса</h1>
 
           {cartNotice ? (
             <div className={`${scss.statusState} ${scss.statusStateError}`} role="alert">
@@ -241,10 +239,10 @@ const CatrSection = () => {
           ) : null}
 
           {isLoading && !normalizedCart ? (
-            <div className={scss.loadingState}>Загружаем корзину...</div>
+            <div className={scss.loadingState}>Загружаем список запроса...</div>
           ) : isError && !normalizedCart ? (
             <div className={`${scss.statusState} ${scss.statusStateError}`} role="alert">
-              <p>Не удалось загрузить корзину.</p>
+              <p>Не удалось загрузить список запроса.</p>
               <button type="button" onClick={() => void refetch()}>
                 Попробовать снова
               </button>
@@ -253,10 +251,10 @@ const CatrSection = () => {
             <div className={scss.cartLayout}>
               <div className={scss.itemsColumn}>
                 <div className={scss.tableHead}>
-                  <p>Оборудование</p>
-                  <p>Цена</p>
-                  <p>Количество</p>
-                  <p>Сумма</p>
+                  <p>Позиция</p>
+                  <p>Ориентир</p>
+                  <p>Единиц</p>
+                  <p>Итого</p>
                 </div>
 
                 <div className={scss.itemsList}>
@@ -330,7 +328,7 @@ const CatrSection = () => {
               </div>
 
               <aside className={scss.summaryCard}>
-                <h2>Сводка заказа</h2>
+                <h2>Сводка запроса</h2>
 
                 <div className={scss.summaryItems}>
                   {basketData.map((item) => {
@@ -360,20 +358,20 @@ const CatrSection = () => {
 
                 <div className={scss.summaryRows}>
                   <div className={scss.row}>
-                    <span>Оборудование</span>
+                    <span>Каталожная оценка</span>
                     <span>{formatPrice(subtotal)}</span>
                   </div>
                   <div className={scss.row}>
-                    <span>Доставка</span>
-                    <span>{formatPrice(delivery)}</span>
+                    <span>Логистика и ввод в работу</span>
+                    <span>Уточняется</span>
                   </div>
                   <div className={scss.row}>
-                    <span>Скидка</span>
-                    <span>-{formatPrice(discount)}</span>
+                    <span>Персональные условия</span>
+                    <span>После RFQ</span>
                   </div>
                   <div className={`${scss.row} ${scss.totalRow}`}>
-                    <span>Итого к оплате:</span>
-                    <span>{formatPrice(payableTotal)}</span>
+                    <span>Предварительный ориентир:</span>
+                    <span>{formatPrice(requestTotal)}</span>
                   </div>
                 </div>
 
@@ -384,21 +382,21 @@ const CatrSection = () => {
                   disabled={isMutating || isFetching || basketData.length === 0}
                 >
                   <span className={scss.desktopButtonLabel}>
-                    {isMutating ? "Обновляем корзину..." : "Перейти к оформлению"}
+                    {isMutating ? "Обновляем список..." : "Перейти к RFQ"}
                   </span>
                   <span className={scss.mobileButtonLabel}>
-                    {isMutating ? "Обновляем..." : "К checkout →"}
+                    {isMutating ? "Обновляем..." : "К RFQ →"}
                   </span>
                 </button>
               </aside>
             </div>
           ) : (
             <div className={scss.emptyState}>
-              <Image src={imgBasket} alt="Корзина пуста" />
-              <h2>Корзина пока пуста</h2>
+              <Image src={imgBasket} alt="Список запроса пуст" />
+              <h2>Список запроса пока пуст</h2>
               <p>
-                Вы еще не добавили оборудование в корзину. Перейдите в каталог,
-                чтобы собрать поставку или запрос на коммерческое предложение.
+                Вы еще не добавили оборудование в request basket. Перейдите в каталог,
+                чтобы собрать shortlist для консультации, КП или согласования поставки.
               </p>
               <button type="button" onClick={handleGoToCatalog}>
                 Перейти в каталог

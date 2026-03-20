@@ -109,6 +109,30 @@ const api = index.injectEndpoints({
       invalidatesTags: ["admin"],
     }),
 
+    getAdminLeadRequests: build.query<IADMIN.GetLeadRequestsRes, IADMIN.GetLeadRequestsReq>({
+      query: (params) => ({
+        url: "/admin/lead-requests/",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["admin"],
+    }),
+
+    patchAdminLeadRequestStatus: build.mutation<
+      IADMIN.PatchLeadRequestStatusRes,
+      IADMIN.PatchLeadRequestStatusReq
+    >({
+      query: ({ id, status, manager_note }) => ({
+        url: `/admin/lead-requests/${id}/status/`,
+        method: "PATCH",
+        body: {
+          status,
+          manager_note,
+        },
+      }),
+      invalidatesTags: ["admin"],
+    }),
+
     getAdminUsers: build.query<IADMIN.GetUsersRes, IADMIN.GetUsersReq>({
       query: (params) => ({
         url: "/admin/users/",
@@ -337,6 +361,8 @@ export const {
   usePostAdminProductImagesMutation,
   useGetAdminOrdersQuery,
   usePatchAdminOrderStatusMutation,
+  useGetAdminLeadRequestsQuery,
+  usePatchAdminLeadRequestStatusMutation,
   useGetAdminUsersQuery,
   useGetAdminInventoryQuery,
   useGetAdminInventoryMovementsQuery,
